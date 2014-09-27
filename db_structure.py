@@ -43,7 +43,14 @@ class CastVote(Base):
     id = Column(Integer, primary_key=True)
     member_id = Column(Integer, ForeignKey('members.id'))
     vote_id = Column(Integer, ForeignKey('votes.id'))
-    value = Column(String)
+    voting_option_id = Column(Integer, ForeignKey('voting_options.id'))
+    voting_option = relationship("VotingOption")
+
+
+class VotingOption(Base):
+    __tablename__ = "voting_options"
+    id = Column(Integer, primary_key=True)
+    name = Column(String(250))
 
 
 
@@ -52,12 +59,14 @@ if __name__ == '__main__':
 
     session = sessionmaker()
     session.configure(bind=engine)
+    Base.metadata.drop_all(engine)
     Base.metadata.create_all(engine)
 
     s = session()
     apa = Member(name='Arne Apa')
     bepa = Vote(name='Bepavotering')
-    bepa_yes = CastVote(value='Jo',member=apa,vote=bepa)
+    yes = VotingOption(name="yes")
+    bepa_yes = CastVote(voting_option=yes,member=apa,vote=bepa)
     kam = Unit(name='kam')
     start = datetime.datetime.strptime('2010-01-01', '%Y-%m-%d').date()
     end = datetime.datetime.strptime('2011-12-12', '%Y-%m-%d').date()
@@ -66,6 +75,7 @@ if __name__ == '__main__':
 
     s.add(apa)
     s.add(bepa)
+    s.add(yes)
     s.add(bepa_yes)
     s.add(kam)
     s.add(uppdrag)
