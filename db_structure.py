@@ -11,7 +11,7 @@ class Member(Base):
     __tablename__ = 'members'
     id = Column(Integer, primary_key=True)
     name = Column(String(250))
-    castvotes = relationship('CastVote', backref='member')
+    votes = relationship('Vote', backref='member')
     assignments = relationship('Assignment', backref='member')
 
 
@@ -31,24 +31,24 @@ class Unit(Base):
     assignments = relationship('Assignment', backref='unit')
 
 
+class Poll(Base):
+    __tablename__ = 'polls'
+    id = Column(Integer, primary_key=True)
+    name = Column(String(250))
+    votes = relationship('Vote', backref='poll')
+
+
 class Vote(Base):
     __tablename__ = 'votes'
     id = Column(Integer, primary_key=True)
-    name = Column(String(250))
-    castvotes = relationship('CastVote', backref='vote')
-
-
-class CastVote(Base):
-    __tablename__ = 'cast_votes'
-    id = Column(Integer, primary_key=True)
     member_id = Column(Integer, ForeignKey('members.id'))
-    vote_id = Column(Integer, ForeignKey('votes.id'))
-    voting_option_id = Column(Integer, ForeignKey('voting_options.id'))
-    voting_option = relationship("VotingOption")
+    poll_id = Column(Integer, ForeignKey('polls.id'))
+    vote_option_id = Column(Integer, ForeignKey('vote_options.id'))
+    vote_option = relationship("VoteOption")
 
 
-class VotingOption(Base):
-    __tablename__ = "voting_options"
+class VoteOption(Base):
+    __tablename__ = "vote_options"
     id = Column(Integer, primary_key=True)
     name = Column(String(250))
 
@@ -64,9 +64,9 @@ if __name__ == '__main__':
 
     s = session()
     apa = Member(name='Arne Apa')
-    bepa = Vote(name='Bepavotering')
-    yes = VotingOption(name="yes")
-    bepa_yes = CastVote(voting_option=yes,member=apa,vote=bepa)
+    bepa = Poll(name='Bepavotering')
+    yes = VoteOption(name="yes")
+    bepa_yes = Vote(member=apa,poll=bepa,vote_option=yes)
     kam = Unit(name='kam')
     start = datetime.datetime.strptime('2010-01-01', '%Y-%m-%d').date()
     end = datetime.datetime.strptime('2011-12-12', '%Y-%m-%d').date()
