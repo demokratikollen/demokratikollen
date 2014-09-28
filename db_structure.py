@@ -4,6 +4,8 @@ from sqlalchemy.types import Date
 from sqlalchemy.orm import relationship, backref, sessionmaker
 from sqlalchemy.ext.declarative import declarative_base
 import datetime
+import utils
+
 
 Base = declarative_base()
 
@@ -52,15 +54,16 @@ class VoteOption(Base):
     id = Column(Integer, primary_key=True)
     name = Column(String(250))
 
-
+def create_db_structure(engine):
+    if utils.yes_or_no("Do you really want to drop everything in the database?"):
+        utils.drop_everything(engine)
+    Base.metadata.create_all(engine)
 
 if __name__ == '__main__':
     engine = create_engine('postgresql+psycopg2://postgres:demokrati@localhost:5432/demokratikollen')
-
     session = sessionmaker()
     session.configure(bind=engine)
-    Base.metadata.drop_all(engine)
-    Base.metadata.create_all(engine)
+    create_db_structure(engine)
 
     s = session()
     apa = Member(name='Arne Apa')
