@@ -19,7 +19,7 @@ class Member(Base):
     appointments = relationship('Appointment', backref='member')
 
     def __repr__(self):
-        return '{}, {} ({})'.format(self.last_name,self.first_name,self.party.abbr)
+        return u'{}, {} ({})'.format(self.last_name,self.first_name,self.party.abbr)
 
 
 class Appointment(Base):
@@ -61,6 +61,9 @@ class Poll(Base):
     name = Column(String(250))
     votes = relationship('Vote', backref='poll')
 
+    def __repr__(self):
+        return self.name
+
 
 class Vote(Base):
     __tablename__ = 'votes'
@@ -70,11 +73,21 @@ class Vote(Base):
     vote_option_id = Column(Integer, ForeignKey('vote_options.id'))
     vote_option = relationship("VoteOption",uselist=False)
 
+    def __repr__(self):
+        return u'{}: {}'.format(self.member.__repr__(),self.vote_option.__repr__())
+        
+
+
+
 
 class VoteOption(Base):
     __tablename__ = "vote_options"
     id = Column(Integer, primary_key=True)
     name = Column(String(250))
+
+    def __repr__(self):
+        return self.name
+
 
 def create_db_structure(engine):
     if utils.yes_or_no("Do you really want to drop everything in the database?"):
@@ -89,24 +102,52 @@ if __name__ == '__main__':
     session.configure(bind=engine)
     s = session()
 
-    sossarna = Party(name='Socialdemokraterna',abbr='S')
+    vote_yes = VoteOption(name="Ja")
+    vote_no = VoteOption(name="Nej")
+    vote_abstain = VoteOption(name="Avstår")
+    vote_absent = VoteOption(name="Frånvarande")
 
-    apa = Member(first_name='Arne',last_name='Apa',party=sossarna)
-    bepa = Poll(name='Bepavotering')
-    yes = VoteOption(name="yes")
-    bepa_yes = Vote(member=apa,poll=bepa,vote_option=yes)
+    s.add(vote_yes)
+    s.add(vote_no)
+    s.add(vote_abstain)
+    s.add(vote_absent)
+
+    party_S = Party(name='Socialdemokraterna',abbr='S')
+    party_M = Party(name='Moderata samlingspartiet', abbr='M')
+    party_SD = Party(name='Sverigedemokraterna', abbr="SD")
+    party_V = Party(name='Vänsterpartiet',abbr='V')
+
+    s.add(party_S)
+    s.add(party_M)
+    s.add(party_SD)
+    s.add(party_V)
+
+    member1 = Member(first_name='Stefan',last_name='Löfvén',party=party_S)
+    member2 = Member(first_name='Jimmie',last_name='Åkesson',party=party_SD)
+    member3 = Member(first_name='Fredrik', last_name='Reinfeldt', party=party_M)
+    member4 = Member(first_name='Jonas', last_name='Sjöstedt', party=party_V)
+
+    s.add(member1)
+    s.add(member2)
+    s.add(member3)
+    s.add(member4)
+
+    poll1 = Poll(name='Ska Stefan få bli statsminister?')
+    s.add(poll1)
+    s.add(Vote(member=member1,poll=poll1,vote_option=vote_yes))
+    s.add(Vote(member=member2,poll=poll1,vote_option=vote_no))
+    s.add(Vote(member=member3,poll=poll1,vote_option=vote_abstain))
+    s.add(Vote(member=member4,poll=poll1,vote_option=vote_yes))
+
+    poll2 = Poll(name='Ska vi höja barnbidraget?')
+    s.add(poll2)
+    s.add(Vote(member=member1,poll=poll2,vote_option=vote_yes))
+    s.add(Vote(member=member2,poll=poll2,vote_option=vote_no))
+    s.add(Vote(member=member3,poll=poll2,vote_option=vote_no))
+    s.add(Vote(member=member4,poll=poll2,vote_option=vote_yes))    
+
     start = datetime.datetime.strptime('2010-01-01', '%Y-%m-%d').date()
     end = datetime.datetime.strptime('2011-12-12', '%Y-%m-%d').date()
-    uppdrag = Appointment(group=sossarna,member=apa,start_date=start,end_date=end)
-
-    print apa.party.name
-    print ','.join(map(str,sossarna.members))
-
-    s.add(sossarna)
-    s.add(apa)
-    s.add(bepa)
-    s.add(yes)
-    s.add(bepa_yes)
-    s.add(uppdrag)
+    s.add(Appointment(group=party_S,member=member1,start_date=start,end_date=end))
 
     s.commit()
