@@ -1,1 +1,10 @@
 *.db
+Lib/
+lib/
+Scripts/
+scripts/
+Include/
+include/
+build/
+bin/
+local/

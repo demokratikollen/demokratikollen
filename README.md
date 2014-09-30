@@ -10,3 +10,8 @@ demokratikollen
 In PG, 
 	1) set user 'postgres' password to "demokrati"
 	2) create database "demokratikollen"
+
+## Dependencies in Ubuntu (for development)
+
+- PostgreSQL `sudo apt-get install postgresql postgresql-contrib` and developer's tools `sudo apt-get install posgresql-server-dev-all`
+- Python dev tools `sudo apt-get install python-dev`
