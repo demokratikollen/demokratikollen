@@ -95,7 +95,7 @@ def create_db_structure(engine):
     Base.metadata.create_all(engine)
 
 if __name__ == '__main__':
-    engine = create_engine('postgresql+psycopg2://postgres:demokrati@localhost:5432/demokratikollen')
+    engine = create_engine(utils.engine_url())
     create_db_structure(engine)
 
     session = sessionmaker()

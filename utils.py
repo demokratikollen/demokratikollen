@@ -1,6 +1,7 @@
 from sqlalchemy.engine import reflection
 from sqlalchemy.schema import MetaData,Table,DropTable,ForeignKeyConstraint,DropConstraint
 import sys
+import os
 
 
 def drop_everything(engine):
@@ -39,8 +40,20 @@ def drop_everything(engine):
         conn.execute(DropTable(table))
     trans.commit()
 
+def database_url():
+    """returns database_url from env if it exists, otherwise default"""
+    
+    if 'DATABASE_URL' in os.environ:
+        return os.environ['DATABASE_URL']
+    else:
+        return 'postgresql://postgres:demokrati@localhost:5432/demokratikollen'
 
-
+def engine_url():
+    """Returns the engine url taken from the database_url, 
+    probably needs something more robust sooner or later"""
+    url_components = database_url().split("//")
+    return 'postgresql+psycopg2://' + url_components[1]
+    
 def yes_or_no(question, default=True):
     """Ask a yes/no question via raw_input() and return their answer.
 
