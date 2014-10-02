@@ -1,0 +1,32 @@
+- name: Install ubuntu packages
+  sudo: yes
+  apt: pkg={{ item }} state=installed update_cache=yes
+  with_items:
+      # Database
+      - postgresql
+      - libpq-dev # Required for Ansible to interact with postgres
+      - python-psycopg2 # resuired for ansible to interact with postgres
+
+      # Python Dev
+      - python-setuptools
+      - python-dev
+
+- name: Upgrade ubuntu packages
+  sudo: yes
+  apt: upgrade=yes
+
+- name: Install virtualenv
+  sudo: yes
+  easy_install: name=virtualenv
+
+- name: Create virtualenv directory 
+  shell: mkdir -p ~/.virtualenvs
+  changed_when: False
+
+- name: Create the virtualenv.
+  shell: virtualenv ~/.virtualenvs/{{app_name}}
+  changed_when: False
+
+- name: Choose correct virtualenv on logins 
+  lineinfile: dest=~/.bashrc state=present line='source ~/.virtualenvs/{{app_name}}/bin/activate'
+

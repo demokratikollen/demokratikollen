@@ -1,0 +1,3 @@
+- name: Install dependencies for demokratikollen
+  pip: requirements=~/app/requirements.txt virtualenv=~/.virtualenvs/{{app_name}}
+

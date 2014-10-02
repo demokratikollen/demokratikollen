@@ -8,3 +8,18 @@ include/
 build/
 bin/
 local/
+
+#python c files
+*.pyc
+
+
+# setup.py things
+*.egg-info
+*.egg
+*.zip
+
+# Vagrant stuff
+.vagrant/
+
+#autosave
+*~
