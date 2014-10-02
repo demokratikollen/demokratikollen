@@ -1,6 +1,8 @@
+# -*- coding: utf-8 -*-
 from sqlalchemy.engine import reflection
 from sqlalchemy.schema import MetaData,Table,DropTable,ForeignKeyConstraint,DropConstraint
 import sys
+import psycopg2
 import os
 
 
@@ -42,18 +44,18 @@ def drop_everything(engine):
 
 def database_url():
     """returns database_url from env if it exists, otherwise default"""
-    
+
     if 'DATABASE_URL' in os.environ:
         return os.environ['DATABASE_URL']
     else:
         return 'postgresql://postgres:demokrati@localhost:5432/demokratikollen'
 
 def engine_url():
-    """Returns the engine url taken from the database_url, 
+    """Returns the engine url taken from the database_url,
     probably needs something more robust sooner or later"""
     url_components = database_url().split("//")
     return 'postgresql+psycopg2://' + url_components[1]
-    
+
 def yes_or_no(question, default=True):
     """Ask a yes/no question via raw_input() and return their answer.
 
@@ -86,3 +88,16 @@ def yes_or_no(question, default=True):
         else:
             sys.stdout.write("Please respond with 'yes' or 'no' "\
                              "(or 'y' or 'n').\n")
+
+
+def run_sql(sql_file):
+    """Run SQL file in PostgreSQL."""
+    with open(sql_file,mode='U') as f:
+        qry = f.read()
+    conn = psycopg2.connect(database_url())
+    c = conn.cursor()
+    c.execute(qry)
+    conn.commit()
+    c.close()
+    conn.close()
+

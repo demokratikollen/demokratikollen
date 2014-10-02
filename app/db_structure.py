@@ -75,9 +75,6 @@ class Vote(Base):
 
     def __repr__(self):
         return '{}: {}'.format(self.member.__repr__(),self.vote_option.__repr__())
-        
-
-
 
 
 class VoteOption(Base):
@@ -144,7 +141,7 @@ if __name__ == '__main__':
     s.add(Vote(member=member1,poll=poll2,vote_option=vote_yes))
     s.add(Vote(member=member2,poll=poll2,vote_option=vote_no))
     s.add(Vote(member=member3,poll=poll2,vote_option=vote_no))
-    s.add(Vote(member=member4,poll=poll2,vote_option=vote_yes))    
+    s.add(Vote(member=member4,poll=poll2,vote_option=vote_yes))
 
     start = datetime.datetime.strptime('2010-01-01', '%Y-%m-%d').date()
     end = datetime.datetime.strptime('2011-12-12', '%Y-%m-%d').date()
