@@ -1,9 +1,3 @@
 - name: Install dependencies for demokratikollen
-  shell: source ~/.virtualenvs/demokratikollen/bin/activate && python setup.py develop
-  args:
-    chdir: /vagrant/setup
-    executable: /bin/bash
-  register: setup_result
-  changed_when: "setup_result.rc != 2"
-
+  pip: requirements=~/app/requirements.txt virtualenv=~/.virtualenvs/{{app_name}}
 
