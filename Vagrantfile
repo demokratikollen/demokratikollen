@@ -40,8 +40,8 @@ Vagrant.configure(VAGRANTFILE_API_VERSION) do |config|
   if is_windows
     # Provisioning configuration for shell script.
     config.vm.provision "shell" do |sh|
-      sh.path = "provision/JJG-Ansible-Windows/windows.sh"
-      sh.args = "provision/vagrant.yml"
+      sh.path = "provision/windows.sh"
+      sh.args = "provision/playbook.yml"
     end
   else
     # Provisioning configuration for Ansible (for Mac/Linux hosts).
