@@ -3,16 +3,17 @@ from db_structure import *
 from sqlalchemy import create_engine
 from sqlalchemy.orm import sessionmaker, aliased
 from itertools import combinations
+import utils
 
-engine = create_engine('postgresql+psycopg2://postgres:demokrati@localhost:5432/demokratikollen')
+engine = create_engine(utils.engine_url())
 
 session = sessionmaker(bind=engine)
 s = session()
 
 for poll in s.query(Poll):
-	print((poll.__repr__().encode('utf-8')))
+	print(poll)
 	for vote in poll.votes:
-		print((vote.__repr__().encode('utf-8')))
+		print(vote)
 
 vote1 = aliased(Vote)
 vote2 = aliased(Vote)
