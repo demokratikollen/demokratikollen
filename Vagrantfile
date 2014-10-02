@@ -18,9 +18,8 @@ Vagrant.configure(VAGRANTFILE_API_VERSION) do |config|
   config.vm.box_check_update = true
 
   # Create a forwarded port mapping which allows access to a specific port
-  # within the machine from a port on the host machine. In the example below,
-  # accessing "localhost:8080" will access port 80 on the guest machine.
-  config.vm.network "forwarded_port", guest: 8080, host: 8080
+  # Forward postgresql port
+  config.vm.network "forwarded_port", guest: 5432, host: 5433
 
   # If true, then any SSH connections made will enable agent forwarding.
   # Default value: false

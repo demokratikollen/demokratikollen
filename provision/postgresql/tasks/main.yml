@@ -1,13 +1,24 @@
-- name: Allow password authentication for local socket users
+- name: Copy postgresql config.
   sudo: yes
-  lineinfile: dest=/etc/postgresql/9.3/main/pg_hba.conf state=present line='local all all md5'
+  copy: src=postgresql.conf dest=/etc/postgresql/9.3/main/postgresql.conf 
   notify:
       - Restart Postgres
 
-- name: Create Database
+- name: Copy postgresql hostfile.
+  sudo: yes
+  copy: src=pg_hba.conf dest=/etc/postgresql/9.3/main/pg_hba.conf
+  notify:
+      - Restart Postgres
+
+- name: Create Nice Database
   sudo: yes
   sudo_user: postgres
   postgresql_db: name={{ db_name }}
+
+- name: Create riksdagen Database
+  sudo: yes
+  sudo_user: postgres
+  postgresql_db: name=riksdagen
 
 - name: Create User
   sudo: yes
@@ -18,6 +29,10 @@
   sudo: yes
   sudo_user: postgres
   postgresql_user: user={{ db_user }} db={{ db_name }} priv=ALL
+  postgresql_user: user={{ db_user }} db=riksdagen priv=ALL
 
-- name: Set the DB url ENV for the app
+- name: Set DATBASE_URL env
   lineinfile: dest=~/.bashrc state=present line='export DATABASE_URL="postgresql://{{db_user}}:{{db_password}}@localhost:5432/{{db_name}}"'
+
+- name: Set DATABASE_RIKSDAGEN_URL env
+  lineinfile: dest=~/.bashrc state=present line='export DATABASE_RIKSDAGEN_URL="postgresql://{{db_user}}:{{db_password}}@localhost:5432/riksdagen"'
