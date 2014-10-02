@@ -15,6 +15,9 @@
   sudo: yes
   apt: upgrade=yes
 
+- name: Copy bashrc
+  copy: src=.bashrc dest=~/.bashrc
+
 - name: Install virtualenv
   sudo: yes
   easy_install: name=virtualenv
@@ -30,3 +33,5 @@
 - name: Choose correct virtualenv on logins 
   lineinfile: dest=~/.bashrc state=present line='source ~/.virtualenvs/{{app_name}}/bin/activate'
 
+- name: Set base path for git repo
+  lineinfile: dest=~/.bashrc state=present line='export REPO_PATH="/vagrant"'
