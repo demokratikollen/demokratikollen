@@ -1,6 +1,16 @@
 demokratikollen
 ===============
 
+## Installation using Virtualbox, Vagrant and Ansible (Unix/Mac OS)
+
+Assumes you have cloned the repository.
+
+1. Install Virtualbox: 
+2. Install Vagrant: https://www.vagrantup.com/downloads.html using `sudo dpkg -i vagrant_x.x.x_x86_64.deb`
+3. Install Ansible: `sudo apt-get install ansible`
+4. In the root of the repository, run `vagrant up`
+5. Once completed, run `vagrant ssh` to login to the VM. The app code is residing in ~/app.
+
 ## Installation of development dependencies (Ubuntu)
 
 Assumes you have cloned the repository.
