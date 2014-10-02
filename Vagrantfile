@@ -42,6 +42,7 @@ Vagrant.configure(VAGRANTFILE_API_VERSION) do |config|
     config.vm.provision "shell" do |sh|
       sh.path = "provision/windows.sh"
       sh.args = "provision/playbook.yml"
+      sh.privileged = false
     end
   else
     # Provisioning configuration for Ansible (for Mac/Linux hosts).

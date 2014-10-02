@@ -21,21 +21,21 @@ if [ ! -f /vagrant/$ANSIBLE_PLAYBOOK ]; then
 fi
 
 # Install Ansible and its dependencies if it's not installed already.
-if [ ! -f /usr/bin/ansible ]; then
-  echo "Installing Ansible dependencies and Git."
-  apt-get install git python python-devel
+if [ ! -f /usr/local/bin/ansible ]; then
+  echo "Installing Ansible dependencies."
+  sudo apt-get -y install python python-dev
   echo "Installing pip via easy_install."
   wget http://peak.telecommunity.com/dist/ez_setup.py
-  python ez_setup.py && rm -f ez_setup.py
+  sudo python ez_setup.py && rm -f ez_setup.py
   easy_install pip
-  # Make sure setuptools are installed crrectly.
-  pip install setuptools --no-use-wheel --upgrade
+  # Make sure setuptools are installed correctly.
+  sudo pip install setuptools --no-use-wheel --upgrade
   echo "Installing required python modules."
-  pip install paramiko pyyaml jinja2 markupsafe
+  sudo pip install paramiko pyyaml jinja2 markupsafe
   echo "Installing Ansible."
-  pip install ansible
+  sudo pip install ansible
 fi
 
 echo "Running Ansible provisioner defined in Vagrantfile."
-ansible-playbook /vagrant/${ANSIBLE_PLAYBOOK} --extra-vars "is_windows=true" --connection=local
+ansible-playbook /vagrant/${ANSIBLE_PLAYBOOK} -i 'localhost,' --extra-vars "is_windows=true" --connection=local
 
