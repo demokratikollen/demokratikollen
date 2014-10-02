@@ -12,7 +12,7 @@ def run_sql(db_file,sql_file):
     conn.close()
 
 if __name__ == '__main__':
-    data_dir = u'D:/data/demokratikollen/Import från Riksdagen/'
+    data_dir = 'D:/data/demokratikollen/Import från Riksdagen/'
     db_file = os.path.join(data_dir,'riksdagen.db')
     # sql_file = os.path.join(data_dir,'create_tables.sql')
     # sql_file = os.path.join(data_dir,'votering-201011.sql')

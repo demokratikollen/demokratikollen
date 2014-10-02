@@ -19,7 +19,7 @@ class Member(Base):
     appointments = relationship('Appointment', backref='member')
 
     def __repr__(self):
-        return u'{}, {} ({})'.format(self.last_name,self.first_name,self.party.abbr)
+        return '{}, {} ({})'.format(self.last_name,self.first_name,self.party.abbr)
 
 
 class Appointment(Base):
@@ -74,7 +74,7 @@ class Vote(Base):
     vote_option = relationship("VoteOption",uselist=False)
 
     def __repr__(self):
-        return u'{}: {}'.format(self.member.__repr__(),self.vote_option.__repr__())
+        return '{}: {}'.format(self.member.__repr__(),self.vote_option.__repr__())
         
 
 

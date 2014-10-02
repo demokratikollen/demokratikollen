@@ -4,9 +4,9 @@ import sys
 from re import sub
 import codecs
 regexes = [
-(r"ö(?!(([^']*'){2})*([^']*'))",r"o"), #match ö not followed by odd number of ' (does not handle escaped ')
-(r"å(?!(([^']*'){2})*([^']*'))",r"a"),
-(r"ä(?!(([^']*'){2})*([^']*'))",r"a"),
+(r"Ã¶(?!(([^']*'){2})*([^']*'))",r"o"), #match Ã¶ not followed by odd number of ' (does not handle escaped ')
+(r"Ã¥(?!(([^']*'){2})*([^']*'))",r"a"),
+(r"Ã¤(?!(([^']*'){2})*([^']*'))",r"a"),
 (r'\[from\]', r'"from"')
 ]
 
@@ -19,7 +19,7 @@ def convert(s):
 
 def main():
 	if len(sys.argv) < 2:
-		print "Specify file on command line."
+		print("Specify file on command line.")
 		exit()
 
 	filename = sys.argv[1]

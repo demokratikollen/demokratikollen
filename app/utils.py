@@ -78,10 +78,10 @@ def yes_or_no(question, default=True):
 
     while 1:
         sys.stdout.write(question + prompt)
-        choice = raw_input().lower()
+        choice = input().lower()
         if default is not None and choice == '':
             return default
-        elif choice in valid.keys():
+        elif choice in list(valid.keys()):
             return valid[choice]
         else:
             sys.stdout.write("Please respond with 'yes' or 'no' "\

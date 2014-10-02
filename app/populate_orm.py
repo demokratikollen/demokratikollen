@@ -45,6 +45,6 @@ c.execute("SELECT COUNT(DISTINCT intressent_id) FROM person;")
 num_pers = c.fetchone()[0]
 c.execute("SELECT COUNT(DISTINCT votering_id) FROM votering;")
 num_votes = c.fetchone()[0]
-print "Databasen innehåller {} ledamöter och {} voteringar.".format(num_pers,num_votes)
+print(("Databasen innehåller {} ledamöter och {} voteringar.".format(num_pers,num_votes)))
 
 source_conn.close()
