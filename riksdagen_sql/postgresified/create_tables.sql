@@ -1,4 +1,5 @@
-﻿CREATE TABLE dokument (
+﻿
+CREATE TABLE dokument (
 hangar_id integer,
 dok_id varchar(255),
 rm varchar(255),
@@ -70,9 +71,9 @@ process varchar(255)
 );
 
  
-CREATE TABLE dokintegerressent (
+CREATE TABLE dokintressent (
 hangar_id integer,
-integerressent_id varchar(255),
+intressent_id varchar(255),
 namn varchar(255),
 partibet varchar(255),
 ordning integer,
@@ -143,7 +144,7 @@ anf_typ varchar(255),
 anf_text varchar(255),
 anf_beteckning varchar(255),
 anf_nummer varchar(255),
-integerressent_id varchar(255),
+intressent_id varchar(255),
 parti varchar(255),
 anf_rm varchar(255)
 );
@@ -157,7 +158,7 @@ hangar_id integer,
 votering_id varchar(255),
 punkt integer,
 namn varchar(255),
-integerressent_id varchar(255),
+intressent_id varchar(255),
 parti varchar(255),
 valkrets varchar(255),
 valkretsnummer integer,
@@ -192,13 +193,13 @@ talare varchar(250),
 rel_dok_id varchar(50),
 parti varchar(50),
 lydelse text,
-integerressent_id varchar(50),
-integerressent_hangar_id integer,
+intressent_id varchar(50),
+intressent_hangar_id integer,
 replik char(1),
 systemdatum timestamp,
 kalla varchar(50),
 anf_hangar_id integer,
-rel_dok_hangar_id integer
+rel_dok_hangar_id int
 );
 
 
@@ -206,7 +207,7 @@ rel_dok_hangar_id integer
 CREATE TABLE person (
 id integer,
 hangar_id integer,
-integerressent_id varchar(20),
+intressent_id varchar(20),
 kontrollsumma varchar(50),
 fodd_ar smallint,
 fodd timestamp,
@@ -225,8 +226,8 @@ status varchar(100),
 kalla varchar(20),
 kalla_id varchar(40),
 statsrad varchar(50),
-timestamp timestamp,
-personid integer
+"timestamp" timestamp,
+personid int
 );
 
 
@@ -236,7 +237,7 @@ CREATE TABLE personuppdrag (
 id integer,
 organ_kod varchar(20),
 hangar_id integer,
-integerressent_id varchar(20),
+intressent_id varchar(20),
 ordningsnummer integer,
 roll_kod varchar(40),
 status varchar(20),
@@ -253,7 +254,7 @@ uppgift varchar(500)
 CREATE TABLE personuppgift (
 id integer,
 hangar_id integer,
-integerressent_id varchar(50),
+intressent_id varchar(50),
 uppgift_kod varchar(50),
 uppgift text,
 kalla varchar(50),
@@ -272,7 +273,7 @@ dokserie_id char(2),
 subtyp varchar(40),
 bet varchar(40),
 tempbet varchar(40),
-integerressent varchar(80),
+intressent varchar(80),
 nummer integer,
 slutnummer integer,
 datum timestamp,
@@ -299,7 +300,7 @@ rel_id varchar(50),
 klockslag varchar(10),
 grupp varchar(20),
 format varchar(20),
-integerressent_id char(13),
+intressent_id char(13),
 mottagare_id char(13),
 mottagare varchar(80),
 hangar_id integer,
@@ -328,7 +329,7 @@ CREATE TABLE roll (
 pk integer,
 kod varchar(50),
 namn varchar(100),
-sort integer
+sort int
 );
 
 
