@@ -5,8 +5,8 @@ demokratikollen
 
 Assumes you have cloned the repository.
 
-1. Install Virtualbox: 
-2. Install Vagrant: https://www.vagrantup.com/downloads.html using `sudo dpkg -i vagrant_x.x.x_x86_64.deb`
+1. Download and install Virtualbox: https://www.virtualbox.org/wiki/Downloads
+2. Download and Install Vagrant: https://www.vagrantup.com/downloads.html 
 3. Install Ansible: `sudo apt-get install ansible`
 4. In the root of the repository, run `vagrant up`
 5. Once completed, run `vagrant ssh` to login to the VM. The app code is residing in ~/app.
