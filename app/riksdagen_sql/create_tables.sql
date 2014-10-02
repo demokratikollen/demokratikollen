@@ -1,4 +1,4 @@
-﻿
+
 CREATE TABLE dokument (
 hangar_id integer,
 dok_id varchar(255),
@@ -31,28 +31,30 @@ html text
 
  
 CREATE TABLE dokutskottsforslag (
+hangar_id integer,
 rm varchar(255),
 bet varchar(255),
 punkt integer,
 beteckning varchar(255),
 rubrik varchar(255),
-forslag varchar(255),
-forslag_del2 varchar(255),
+forslag text,
+forslag_del2 text,
 beslutstyp varchar(255),
 beslut varchar(255),
 motforslag_nummer integer,
 motforslag_partier varchar(255),
 votering_id varchar(255),
-votering_sammanfattning_html varchar(255),
+votering_sammanfattning_html text,
 votering_ledamot_url_xml varchar(255),
 vinnare varchar(255)
 );
 
  
 CREATE TABLE dokmotforslag (
+hangar_id integer,
 nummer integer,
-rubrik varchar(255),
-forslag varchar(255),
+rubrik varchar(500),
+forslag text,
 partier varchar(255),
 typ varchar(255),
 utskottsforslag_punkt integer,
@@ -85,8 +87,8 @@ CREATE TABLE dokforslag (
 hangar_id integer,
 nummer integer,
 beteckning varchar(255),
-lydelse varchar(255),
-lydelse2 varchar(255),
+lydelse text,
+lydelse2 text,
 utskottet varchar(255),
 kammaren varchar(255),
 behandlas_i varchar(255),
@@ -141,7 +143,7 @@ datumtid timestamp,
 talare varchar(255),
 anf_datum timestamp,
 anf_typ varchar(255),
-anf_text varchar(255),
+anf_text text,
 anf_beteckning varchar(255),
 anf_nummer varchar(255),
 intressent_id varchar(255),
