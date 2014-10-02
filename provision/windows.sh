@@ -28,7 +28,7 @@ if [ ! -f /usr/local/bin/ansible ]; then
   echo "Installing pip via easy_install."
   wget http://peak.telecommunity.com/dist/ez_setup.py
   sudo python ez_setup.py && rm -f ez_setup.py
-  easy_install pip
+  sudo easy_install pip
   # Make sure setuptools are installed correctly.
   sudo pip install setuptools --no-use-wheel --upgrade
   echo "Installing required python modules."
