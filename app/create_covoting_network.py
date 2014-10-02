@@ -4,7 +4,7 @@ from sqlalchemy import create_engine
 from sqlalchemy.orm import sessionmaker, aliased
 from itertools import combinations
 
-engine = create_engine('postgresql+psycopg2://postgres:demokrati@localhost:5432/demokratikollen')
+engine = create_engine(utils.engine_url())
 
 session = sessionmaker(bind=engine)
 s = session()
