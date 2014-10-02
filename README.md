@@ -17,7 +17,7 @@ Assumes you have cloned the repository.
 1. Download and install Virtualbox: https://www.virtualbox.org/wiki/Downloads
 2. Download and install Vagrant: https://www.vagrantup.com/downloads.html 
 3. Download and install Git (needed for cmd-line ssh): http://git-scm.com/
-4. In the root of the repository, run `vagrant up`
+4. In the root of the repository, run `vagrant up` (The Ansible step can take some time and will not output logs until finished)
 5. Once completed, run `vagrant ssh` to login to the VM. The app code is residing in ~/app. The ~/app folder on the guest machine is shared with the app folder in the repository on the host machine.
 
 ## Installation of development dependencies (Ubuntu)

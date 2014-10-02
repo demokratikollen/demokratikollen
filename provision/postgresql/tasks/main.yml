@@ -1,6 +1,6 @@
 - name: Allow password authentication for local socket users
   sudo: yes
-  lineinfile: dest=/etc/postgresql/9.1/main/pg_hba.conf state=present line='local all all md5'
+  lineinfile: dest=/etc/postgresql/9.3/main/pg_hba.conf state=present line='local all all md5'
   notify:
       - Restart Postgres
 

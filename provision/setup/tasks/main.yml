@@ -11,6 +11,9 @@
       - python-setuptools
       - python-dev
 
+- name: Upgrade ubuntu packages
+  sudo: yes
+  apt: upgrade=yes
 
 - name: Install virtualenv
   sudo: yes
