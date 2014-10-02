@@ -23,6 +23,7 @@ fi
 # Install Ansible and its dependencies if it's not installed already.
 if [ ! -f /usr/local/bin/ansible ]; then
   echo "Installing Ansible dependencies."
+  sudo apt-get update
   sudo apt-get -y install python python-dev
   echo "Installing pip via easy_install."
   wget http://peak.telecommunity.com/dist/ez_setup.py
