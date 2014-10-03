@@ -12,6 +12,9 @@
       - python-dev
       - python3.4-dev
 
+      # Utilities
+      - unzip
+
 - name: Upgrade ubuntu packages
   sudo: yes
   apt: upgrade=yes
