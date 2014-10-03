@@ -10,6 +10,7 @@
       # Python Dev
       - python-setuptools
       - python-dev
+      - python3.4-dev
 
 - name: Upgrade ubuntu packages
   sudo: yes
@@ -23,24 +24,24 @@
   easy_install: name=virtualenv
 
 - name: Create virtualenv directory 
-  shell: mkdir -p ~/.virtualenvs
+  shell: mkdir -p {{venv_dir}}
   changed_when: False
 
 - name: Create the 2.7 virtualenv.
-  shell: virtualenv ~/.virtualenvs/{{app_name}}2.7
+  shell: virtualenv {{venv_dir}}/python2.7
   changed_when: False
 
 - name: Create the 3.4 virtualenv.
-  shell: pyvenv-3.4 --without-pip ~/.virtualenvs/{{app_name}}3.4
+  shell: pyvenv-3.4 --without-pip {{venv_dir}}/python3.4
   changed_when: False
 
 - name: Do the Pip workaround
-  shell: source ~/.virtualenvs/{{app_name}}3.4/bin/activate && curl https://bootstrap.pypa.io/get-pip.py | python
+  shell: source {{venv_dir}}/python3.4/bin/activate && curl https://bootstrap.pypa.io/get-pip.py | python
   args:
     executable: /bin/bash
 
-- name: Choose the 3.7 virtualenv on logins 
-  lineinfile: dest=~/.bashrc state=present line='source ~/.virtualenvs/{{app_name}}3.4/bin/activate'
+- name: Choose the 3.4 virtualenv on logins 
+  lineinfile: dest=~/.bashrc state=present line='source {{venv_dir}}/python3.4/bin/activate'
 
 - name: Set base path for git repo
   lineinfile: dest=~/.bashrc state=present line='export REPO_PATH="/vagrant"'
