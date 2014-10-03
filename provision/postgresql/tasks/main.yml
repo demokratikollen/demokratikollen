@@ -1,6 +1,6 @@
 - name: Copy postgresql config.
   sudo: yes
-  copy: src=postgresql.conf dest=/etc/postgresql/9.3/main/postgresql.conf 
+  copy: src=postgresql.conf dest=/etc/postgresql/9.3/main/postgresql.conf
   notify:
       - Restart Postgres
 
@@ -31,8 +31,11 @@
   postgresql_user: user={{ db_user }} db={{ db_name }} priv=ALL
   postgresql_user: user={{ db_user }} db=riksdagen priv=ALL
 
-- name: Set DATBASE_URL env
-  lineinfile: dest=~/.bashrc state=present line='export DATABASE_URL="postgresql://{{db_user}}:{{db_password}}@localhost:5432/{{db_name}}"'
-
-- name: Set DATABASE_RIKSDAGEN_URL env
-  lineinfile: dest=~/.bashrc state=present line='export DATABASE_RIKSDAGEN_URL="postgresql://{{db_user}}:{{db_password}}@localhost:5432/riksdagen"'
+- name: Set DATABASE_USER in env
+  lineinfile: dest=~/.bashrc state=present line='export {{ item.key }}="{{ item.value }}"'
+  with_items:
+    - {key: 'DATABASE_USER', value: '{{ db_user }}'}
+    - {key: 'DATABASE_PWD', value: '{{ db_password }}'}
+    - {key: 'DATABASE_URL', value: 'postgresql://{{db_user}}:{{db_password}}@localhost:5432/{{db_name}}'}
+    - {key: 'DATABASE_NAME', value: '{{ db_name }}'}
+    - {key: 'DATABASE_RIKSDAGEN_URL', value: 'postgresql://{{db_user}}:{{db_password}}@localhost:5432/riksdagen'}

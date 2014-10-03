@@ -89,15 +89,15 @@ def yes_or_no(question, default=True):
             sys.stdout.write("Please respond with 'yes' or 'no' "\
                              "(or 'y' or 'n').\n")
 
+def execute_sql(qry,conn):
+    c = conn.cursor()
+    c.execute(qry)
+    c.close()
+    conn.commit()
 
-def run_sql(sql_file):
+def run_sql(sql_file,conn):
     """Run SQL file in PostgreSQL."""
     with open(sql_file,mode='U') as f:
         qry = f.read()
-    conn = psycopg2.connect(database_url())
-    c = conn.cursor()
-    c.execute(qry)
-    conn.commit()
-    c.close()
-    conn.close()
+    execute_sql(qry,conn)
 
