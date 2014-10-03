@@ -1,6 +1,7 @@
 import sys
 from re import sub
 import codecs
+import string
 
 regexes = [
 (r"ö(?!(([^']*'){2})*([^']*'))",r"o"), #match ö not followed by odd number of ' (does not handle escaped ')
@@ -14,6 +15,8 @@ def convert(s):
 	for (rx, rep) in regexes:
 		t = sub(rx, rep, t)
 
+	t = t.replace('\r\n', '\n')
+	t = t.replace('\r', '\n')
 	return t
 
 def main():
