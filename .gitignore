@@ -26,3 +26,5 @@ local/
 
 # Data
 data/
+*.sql
+!app/riksdagen_sql/create_tables.sql
