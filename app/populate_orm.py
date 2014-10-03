@@ -1,34 +1,94 @@
 # -*- coding: utf-8 -*-
-import db_structure
+from db_structure import *
 from sqlalchemy import create_engine
 from sqlalchemy.orm import sessionmaker
+from sqlalchemy.orm.exc import NoResultFound
 import utils
+import os
+import psycopg2 as pg
+from progress_bar import InitBar
 
 # Connection to postgres source
-# import psycopg2
-# conn_string = "host='localhost' dbname='riksdagen' user='postgres' password='demokrati'"
-# conn = pg.connect(conn_string)
-
-# Connection to mysql source
-# import mysql.connector
-# source_conn = mysql.connector.connect(user='root', password='demokrati',
-#                               host='localhost',
-#                               database='riksdagen')
+source_conn = pg.connect(os.environ['DATABASE_RIKSDAGEN_URL'])
 
 # Connect to SQLAlchemy db and create structure
 engine = create_engine(utils.engine_url())
-db_structure.create_db_structure(engine)
+create_db_structure(engine)
 
 session = sessionmaker()
 session.configure(bind=engine)
 s = session()
 
+parties = [
+            "Vänsterpartiet",
+            "Socialdemokraterna",
+            "Miljöpartiet de gröna",
+            "Sverigedemokraterna",
+            "Centerpartiet",
+            "Folkpartiet liberalerna",
+            "Kristdemokraterna",
+            "Moderaterna"
+        ]
 
 c = source_conn.cursor()
-c.execute("SELECT COUNT(DISTINCT intressent_id) FROM person;")
-num_pers = c.fetchone()[0]
-c.execute("SELECT COUNT(DISTINCT votering_id) FROM votering;")
-num_votes = c.fetchone()[0]
-print(("Databasen innehåller {} ledamöter och {} voteringar.".format(num_pers,num_votes)))
+members = {}
 
+
+# Select all unique combinations of 'organ_kod' and 'uppgift', but exclude 'kam' since these are replacements
+# that have names and dates as 'uppgift'
+c.execute("SELECT organ_kod,uppgift FROM personuppdrag WHERE organ_kod != 'kam' GROUP BY organ_kod,uppgift")
+for abbr,name in c:
+    if name in parties:
+        s.add(Party(name=name,abbr=abbr))
+        group_or_party = "party"
+    else:
+        s.add(Group(name=name,abbr=abbr))
+        group_or_party = "group"
+    print("Created {} ({}) as a {}.".format(name,abbr,group_or_party))
+
+# Manually add 'Kammaren', and parties not in 'personuppdrag'
+s.add(Group(name="Kammaren",abbr="kam"))
+s.add(Party(name="Partiobunden",abbr="-"))
+s.add(Party(name="Piratpartiet",abbr="PP"))
+s.add(Party(name="Ny demokrati",abbr="NYD"))
+
+print("Adding members.")
+c.execute("SELECT fodd_ar,tilltalsnamn,efternamn,kon,parti,intressent_id FROM person")
+for birth_year,first_name,last_name,gender,party_abbr,intressent_id in c:
+    if not party_abbr:
+        party_abbr = "-"
+    try:
+        party = s.query(Party).filter(Party.abbr==party_abbr).one()
+    except NoResultFound:
+        print("No result was found for abbr {}.".format(party_abbr))
+        print(party.name)
+        raise
+    members[intressent_id] = Member(first_name=first_name,last_name=last_name,birth_year=birth_year,gender=gender,party=party)
+    s.add(members[intressent_id])
+
+print("Adding vote options.")
+c.execute("SELECT DISTINCT rost FROM votering")
+vote_options = {}
+for (rost,) in c:
+    vo = VoteOption(name=rost)
+    s.add(vo)
+    vote_options[rost] = vo
+s.commit()
+
+pbar = InitBar(title="")
+c.execute("SELECT votering_id,intressent_id,beteckning,rm,rost,datum FROM votering WHERE avser='sakfrågan' ORDER BY votering_id")
+last_vot_id = None
+for i,(votering_id,intressent_id,beteckning,rm,rost,datum) in enumerate(c):
+    if last_vot_id!=votering_id:
+        date = datum.date()
+        poll = Poll(name="{}:{}".format(rm,beteckning),date=date)
+        s.add(poll)
+        s.commit()
+        last_vot_id = votering_id
+        pbar(100*i/252327)
+    s.add(Vote(member=members[intressent_id],vote_option=vote_options[rost],poll=poll))
+
+del pbar
+print("Committing.")
+s.commit()
 source_conn.close()

@@ -14,6 +14,8 @@ class Member(Base):
     id = Column(Integer, primary_key=True)
     first_name = Column(String(250))
     last_name = Column(String(250))
+    birth_year = Column(Integer)
+    gender = Column(String(10))
     party_id = Column(Integer, ForeignKey('parties.id'))
     votes = relationship('Vote', backref='member')
     appointments = relationship('Appointment', backref='member')
@@ -59,6 +61,7 @@ class Poll(Base):
     __tablename__ = 'polls'
     id = Column(Integer, primary_key=True)
     name = Column(String(250))
+    date = Column(Date)
     votes = relationship('Vote', backref='poll')
 
     def __repr__(self):
