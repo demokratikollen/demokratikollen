@@ -11,7 +11,11 @@ regexes = [
 ]
 
 def convert(s):
-	t = s
+	t = s.strip()
+
+	if not t.startswith('(') and not t.startswith('INSERT') and not t.startswith('VALUES'):
+		return None
+
 	for (rx, rep) in regexes:
 		t = sub(rx, rep, t)
 
@@ -32,7 +36,9 @@ def main():
 	f_out.write('BEGIN;\n')
 	for line in f_in:
 		converted = convert(line)
-		f_out.write(converted)
+		if not converted is None:
+			f_out.write(converted)
+			f_out.write('\n')
 	f_out.write('COMMIT;\n')
 
 
