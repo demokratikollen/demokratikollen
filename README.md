@@ -25,3 +25,6 @@ Assumes you have cloned the repository.
 2. Download the data: `python get_data.py`
 3. Clear database: `./clear_db.sh`
 4. Initialize database: `./init_db.sh`
+
+## Import of data to ORM database
+First initialize database according to instructions above. Then run `python ~/app/populate_orm.py`.
