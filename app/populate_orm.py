@@ -37,20 +37,23 @@ members = {}
 # Select all unique combinations of 'organ_kod' and 'uppgift', but exclude 'kam' since these are replacements
 # that have names and dates as 'uppgift'
 c.execute("SELECT organ_kod,uppgift FROM personuppdrag WHERE organ_kod != 'kam' GROUP BY organ_kod,uppgift")
+groups = {}
 for abbr,name in c:
     if name in parties:
-        s.add(Party(name=name,abbr=abbr))
+        g = Party(name=name,abbr=abbr)
         group_or_party = "party"
     else:
-        s.add(Group(name=name,abbr=abbr))
+        g = Group(name=name,abbr=abbr)
         group_or_party = "group"
+    groups[(abbr,name)] = g
     print("Created {} ({}) as a {}.".format(name,abbr,group_or_party))
 
 # Manually add 'Kammaren', and parties not in 'personuppdrag'
-s.add(Group(name="Kammaren",abbr="kam"))
-s.add(Party(name="Partiobunden",abbr="-"))
-s.add(Party(name="Piratpartiet",abbr="PP"))
-s.add(Party(name="Ny demokrati",abbr="NYD"))
+groups['-'] = Party(name="Partiobunden",abbr="-")
+groups['PP'] = Party(name="Piratpartiet",abbr="PP")
+groups['NYD'] = Party(name="Ny demokrati",abbr="NYD")
+for g in groups.values():
+    s.add(g)
 
 print("Adding members.")
 c.execute("SELECT fodd_ar,tilltalsnamn,efternamn,kon,parti,intressent_id FROM person")
@@ -65,34 +68,41 @@ for birth_year,first_name,last_name,gender,party_abbr,intressent_id in c:
         raise
     members[intressent_id] = Member(first_name=first_name,last_name=last_name,birth_year=birth_year,gender=gender,party=party)
     s.add(members[intressent_id])
-
-print("Adding vote options.")
-c.execute("SELECT DISTINCT rost FROM votering")
-vote_options = {}
-for (rost,) in c:
-    vo = VoteOption(name=rost)
-    s.add(vo)
-    vote_options[rost] = vo
 s.commit()
 
-pbar = InitBar(title="Adding votes: ")
-pbar(0)
-c.execute("SELECT COUNT(*) FROM votering WHERE avser='sakfrågan'")
-num_votes = c.fetchone()[0]
-c.execute("SELECT votering_id,intressent_id,beteckning,rm,rost,datum FROM votering WHERE avser='sakfrågan' ORDER BY votering_id")
-last_vot_id = None
-for i,(votering_id,intressent_id,beteckning,rm,rost,datum) in enumerate(c):
-    if last_vot_id!=votering_id:
-        date = datum.date()
-        poll = Poll(name="{}:{}".format(rm,beteckning),date=date)
-        s.add(poll)
-        last_vot_id = votering_id
-        pbar(100*i/num_votes)
-    if i % 50000 == 0:
-        s.commit()
-    s.add(Vote(member=members[intressent_id],vote_option=vote_options[rost],poll=poll))
+# pbar = InitBar(title="Adding votes: ")
+# pbar(0)
+# c.execute("SELECT COUNT(*) FROM votering WHERE avser='sakfrågan'")
+# num_votes = c.fetchone()[0]
+# c.execute("SELECT intressent_id,beteckning,rm,rost,datum FROM votering WHERE avser='sakfrågan' ORDER BY votering_id")
+# last_vot_id = None
+# for i,(votering_id,intressent_id,beteckning,rm,rost,datum) in enumerate(c):
+#     if last_vot_id!=votering_id:
+#         date = datum.date()
+#         poll = Poll(name="{}:{}".format(rm,beteckning),date=date)
+#         s.add(poll)
+#         last_vot_id = votering_id
+#         pbar(100*i/num_votes)
+#     if i % 50000 == 0:
+#         s.commit()
+#     s.add(Vote(member=members[intressent_id],vote_option=rost,poll=poll))
 
-del pbar
+# del pbar
+
+# SELECT DISTINCT roll_kod FROM personuppdrag WHERE typ='kammaruppdrag' AND ordningsnummer!=0 AND roll_kod LIKE '%rsättare'
+# Add ersättare
+c.execute("""SELECT intressent_id,ordningsnummer,"from",tom,status,roll_kod FROM personuppdrag WHERE typ='kammaruppdrag' AND ordningsnummer!=0""")
+for intressent_id,ordningsnummer,fr,to,stat,roll in c:
+    role = "Ersättare" if "rsättare" in roll else "Riksdagsledamot"
+    status = "Ledig" if "Ledig" in stat else "Tjänstgörande"
+    s.add(ChamberAppointment(
+                member=members[intressent_id],
+                chair=ordningsnummer,
+                start_date=fr.date(),
+                end_date=to.date(),
+                status=status,
+                role=role))
+
 print("Committing.")
 s.commit()
 source_conn.close()

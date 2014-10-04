@@ -28,7 +28,6 @@ class Appointment(Base):
     __tablename__ = 'appointments'
     id = Column(Integer, primary_key=True)
     member_id = Column(Integer, ForeignKey('members.id'))
-    group_id = Column(Integer, ForeignKey('groups.id'))
     start_date = Column(Date)
     end_date = Column(Date)
     classtype = Column(String(50))
@@ -38,11 +37,21 @@ class Appointment(Base):
         'polymorphic_on':classtype
     }
 
+class GroupAppointment(Appointment):
+    __tablename__ = 'group_appointments'
+    id = Column(Integer, ForeignKey('appointments.id'), primary_key=True)
+    group_id = Column(Integer, ForeignKey('groups.id'))
+
+    __mapper_args__ = {
+        'polymorphic_identity':'group_appointment'
+    }
 
 class ChamberAppointment(Appointment):
     __tablename__ = 'chamber_appointments'
     id = Column(Integer, ForeignKey('appointments.id'), primary_key=True)
-    status = Column(Enum('Ledig','Tjänstgörande','Ersättare',name='chamber_appointment_statuses'))
+    status = Column(Enum('Ledig','Tjänstgörande',name='chamber_appointment_statuses'))
+    role = Column(Enum('Riksdagsledamot','Ersättare',name='chamber_appointment_roles'))
+    chair = Column(Integer)
 
     __mapper_args__ = {
         'polymorphic_identity':'chamber_appointment'
@@ -54,7 +63,7 @@ class Group(Base):
     id = Column(Integer, primary_key=True)
     name = Column(String(250))
     abbr = Column(String(100))
-    appointments = relationship('Appointment', backref='group')
+    appointments = relationship('GroupAppointment', backref='group')
     classtype = Column(String(50))
 
     __mapper_args__ = {
