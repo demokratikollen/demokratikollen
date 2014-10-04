@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 from sqlalchemy import Column, String, Integer, ForeignKey, create_engine
-from sqlalchemy.types import Date
+from sqlalchemy.types import Date, Enum
 from sqlalchemy.orm import relationship, backref, sessionmaker
 from sqlalchemy.ext.declarative import declarative_base
 import datetime
@@ -31,6 +31,22 @@ class Appointment(Base):
     group_id = Column(Integer, ForeignKey('groups.id'))
     start_date = Column(Date)
     end_date = Column(Date)
+    classtype = Column(String(50))
+
+    __mapper_args__ = {
+        'polymorphic_identity':'appointment',
+        'polymorphic_on':classtype
+    }
+
+
+class ChamberAppointment(Appointment):
+    __tablename__ = 'chamber_appointments'
+    id = Column(Integer, ForeignKey('appointments.id'), primary_key=True)
+    status = Column(Enum('Ledig','Tjänstgörande','Ersättare',name='chamber_appointment_statuses'))
+
+    __mapper_args__ = {
+        'polymorphic_identity':'chamber_appointment'
+    }
 
 
 class Group(Base):
@@ -73,26 +89,17 @@ class Vote(Base):
     id = Column(Integer, primary_key=True)
     member_id = Column(Integer, ForeignKey('members.id'))
     poll_id = Column(Integer, ForeignKey('polls.id'))
-    vote_option_id = Column(Integer, ForeignKey('vote_options.id'))
-    vote_option = relationship("VoteOption",uselist=False)
+    vote_option = Column(Enum('Ja','Nej','Avstår','Frånvarande',name='vote_options'))
 
     def __repr__(self):
         return '{}: {}'.format(self.member.__repr__(),self.vote_option.__repr__())
-
-
-class VoteOption(Base):
-    __tablename__ = "vote_options"
-    id = Column(Integer, primary_key=True)
-    name = Column(String(250))
-
-    def __repr__(self):
-        return self.name
 
 
 def create_db_structure(engine):
     if utils.yes_or_no("Do you really want to drop everything in the database?"):
         utils.drop_everything(engine)
     Base.metadata.create_all(engine)
+
 
 if __name__ == '__main__':
     engine = create_engine(utils.engine_url())
@@ -101,16 +108,6 @@ if __name__ == '__main__':
     session = sessionmaker()
     session.configure(bind=engine)
     s = session()
-
-    vote_yes = VoteOption(name="Ja")
-    vote_no = VoteOption(name="Nej")
-    vote_abstain = VoteOption(name="Avstår")
-    vote_absent = VoteOption(name="Frånvarande")
-
-    s.add(vote_yes)
-    s.add(vote_no)
-    s.add(vote_abstain)
-    s.add(vote_absent)
 
     party_S = Party(name='Socialdemokraterna',abbr='S')
     party_M = Party(name='Moderata samlingspartiet', abbr='M')
@@ -134,17 +131,17 @@ if __name__ == '__main__':
 
     poll1 = Poll(name='Ska Stefan få bli statsminister?')
     s.add(poll1)
-    s.add(Vote(member=member1,poll=poll1,vote_option=vote_yes))
-    s.add(Vote(member=member2,poll=poll1,vote_option=vote_no))
-    s.add(Vote(member=member3,poll=poll1,vote_option=vote_abstain))
-    s.add(Vote(member=member4,poll=poll1,vote_option=vote_yes))
+    s.add(Vote(member=member1,poll=poll1,vote_option='Ja'))
+    s.add(Vote(member=member2,poll=poll1,vote_option='Nej'))
+    s.add(Vote(member=member3,poll=poll1,vote_option='Avstår'))
+    s.add(Vote(member=member4,poll=poll1,vote_option='Frånvarande'))
 
     poll2 = Poll(name='Ska vi höja barnbidraget?')
     s.add(poll2)
-    s.add(Vote(member=member1,poll=poll2,vote_option=vote_yes))
-    s.add(Vote(member=member2,poll=poll2,vote_option=vote_no))
-    s.add(Vote(member=member3,poll=poll2,vote_option=vote_no))
-    s.add(Vote(member=member4,poll=poll2,vote_option=vote_yes))
+    s.add(Vote(member=member1,poll=poll2,vote_option='Ja'))
+    s.add(Vote(member=member2,poll=poll2,vote_option='Nej'))
+    s.add(Vote(member=member3,poll=poll2,vote_option='Nej'))
+    s.add(Vote(member=member4,poll=poll2,vote_option='Ja'))
 
     start = datetime.datetime.strptime('2010-01-01', '%Y-%m-%d').date()
     end = datetime.datetime.strptime('2011-12-12', '%Y-%m-%d').date()
