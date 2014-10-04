@@ -70,24 +70,24 @@ for birth_year,first_name,last_name,gender,party_abbr,intressent_id in c:
     s.add(members[intressent_id])
 s.commit()
 
-# pbar = InitBar(title="Adding votes: ")
-# pbar(0)
-# c.execute("SELECT COUNT(*) FROM votering WHERE avser='sakfrågan'")
-# num_votes = c.fetchone()[0]
-# c.execute("SELECT intressent_id,beteckning,rm,rost,datum FROM votering WHERE avser='sakfrågan' ORDER BY votering_id")
-# last_vot_id = None
-# for i,(votering_id,intressent_id,beteckning,rm,rost,datum) in enumerate(c):
-#     if last_vot_id!=votering_id:
-#         date = datum.date()
-#         poll = Poll(name="{}:{}".format(rm,beteckning),date=date)
-#         s.add(poll)
-#         last_vot_id = votering_id
-#         pbar(100*i/num_votes)
-#     if i % 50000 == 0:
-#         s.commit()
-#     s.add(Vote(member=members[intressent_id],vote_option=rost,poll=poll))
+pbar = InitBar(title="Adding votes: ")
+pbar(0)
+c.execute("SELECT COUNT(*) FROM votering WHERE avser='sakfrågan'")
+num_votes = c.fetchone()[0]
+c.execute("SELECT intressent_id,beteckning,rm,rost,datum FROM votering WHERE avser='sakfrågan' ORDER BY votering_id")
+last_vot_id = None
+for i,(votering_id,intressent_id,beteckning,rm,rost,datum) in enumerate(c):
+    if last_vot_id!=votering_id:
+        date = datum.date()
+        poll = Poll(name="{}:{}".format(rm,beteckning),date=date)
+        s.add(poll)
+        last_vot_id = votering_id
+        pbar(100*i/num_votes)
+    if i % 50000 == 0:
+        s.commit()
+    s.add(Vote(member=members[intressent_id],vote_option=rost,poll=poll))
 
-# del pbar
+del pbar
 
 # SELECT DISTINCT roll_kod FROM personuppdrag WHERE typ='kammaruppdrag' AND ordningsnummer!=0 AND roll_kod LIKE '%rsättare'
 # Add ersättare
