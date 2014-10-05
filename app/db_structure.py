@@ -57,6 +57,9 @@ class ChamberAppointment(Appointment):
         'polymorphic_identity':'chamber_appointment'
     }
 
+    def __repr__(self):
+        return 'Chair {}: {} {} {}-{}: {}'.format(self.chair,self.status,self.role,self.start_date,self.end_date,self.member)    
+
 
 class Group(Base):
     __tablename__ = 'groups'

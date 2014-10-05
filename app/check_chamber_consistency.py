@@ -6,27 +6,12 @@ from itertools import combinations
 import utils
 
 import datetime as dt
-import matplotlib.pyplot as plt
-import matplotlib.font_manager as font_manager
-import matplotlib.dates as mdates
-from matplotlib.patches import Rectangle
-fig, axes = plt.subplots(1,1, figsize=(29/2.5, 20/2.5))
-
-
-ax = axes
-
-ax.fmt_xdata = mdates.DateFormatter('%Y-%m-%d')
-
 engine = create_engine(utils.engine_url())
 
 session = sessionmaker(bind=engine)
 s = session()
 
-for x in s.query(ChamberAppointment).filter(ChamberAppointment.chair==1).all():
-	print(x)
-	ax.axvspan(x.start_date,x.end_date,0.1,0.2,fc='#ff00ff',ec='#0000ff',lw=1)
-
-ax.set_xlim(dt.date(2010,9,1),dt.date(2014,9,1))
-fig.autofmt_xdate()
-fig.savefig('check_chamber_consistency.png',dpi=72)
-plt.show()
+for chair in [1]:
+	q = s.query(ChamberAppointment).filter(ChamberAppointment.chair==1).order_by(ChamberAppointment.end_date)
+	for x in q.all():
+		print(x)
