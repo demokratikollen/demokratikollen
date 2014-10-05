@@ -1,2 +1,3 @@
 # Unix-style line endings for everything
 * text eol=lf
+*.png binary
