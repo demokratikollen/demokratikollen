@@ -1,2 +1,4 @@
 # Unix-style line endings for everything
-* text eol=lf
+*.* text eol=lf
+*.png binary
+*.bdata binary

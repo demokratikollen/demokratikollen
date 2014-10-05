@@ -54,11 +54,11 @@ def get_data(session,load=True, vote_cutoff=1):
     
     if load:
         #load matrix and membermap
-        with open('covoting_data/covoting_matrix', 'rb') as f:
+        with open('data/covoting_matrix.dat', 'rb') as f:
             covoting_matrix = pickle.load(f)
-        with open('covoting_data/member_map', 'rb') as f:
+        with open('data/member_map.dat', 'rb') as f:
             member_map = pickle.load(f)
-        with open('covoting_data/members', 'rb') as f:
+        with open('data/members.dat', 'rb') as f:
             members = pickle.load(f)
     else:
         print("Getting member list")
@@ -74,11 +74,11 @@ def get_data(session,load=True, vote_cutoff=1):
         covoting_matrix = create_covoting_matrix(session, member_map)
 
         #save matrix and membermap
-        with open('covoting_data/covoting_matrix', 'wb') as f:
+        with open('data/covoting_matrix.dat', 'wb') as f:
             pickle.dump(covoting_matrix, f)
-        with open('covoting_data/member_map', 'wb') as f:
+        with open('data/member_map.dat', 'wb') as f:
             pickle.dump(member_map, f)
-        with open('covoting_data/members', 'wb') as f:
+        with open('data/members.dat', 'wb') as f:
             pickle.dump(members,f)
             
     return members, member_map, covoting_matrix
