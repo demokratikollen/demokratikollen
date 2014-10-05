@@ -1,6 +1,7 @@
 from db_structure import *
 from sqlalchemy import create_engine, func, distinct
 from sqlalchemy.orm import sessionmaker, aliased
+from sqlalchemy.sql.expression import literal
 from itertools import combinations
 import utils
 
@@ -10,17 +11,26 @@ session = sessionmaker(bind=engine)
 s = session()
 
 
-absent_vote = s.query(VoteOption).filter(VoteOption.name=='Frånvarande').one()
+m1 = aliased(Member)
+m2 = aliased(Member)
+v1 = aliased(Vote)
+v2 = aliased(Vote)
+c = 0
+for x in s.query(m1,m2,func.count(v1.poll_id))\
+	.filter(m1.id == v1.member_id)\
+	.filter(m2.id == v2.member_id)\
+	.filter(m1.id < m2.id)\
+	.filter(v1.poll_id == v2.poll_id)\
+	.filter(v1.vote_option == v2.vote_option)\
+	.filter(v1.vote_option != 'Frånvarande')\
+	.filter(v2.vote_option != 'Frånvarande')\
+	.group_by(m1.id,m2.id):
 
-
-member1 = aliased(Member)
-member2 = aliased(Member)
-vote1 = aliased(Vote)
-vote2 = aliased(Vote)
-
+	c += 1
+	print(x)
+print (c)
 
 # MAKE THIS SQL
-
 # WITH pairs AS (SELECT m1.id AS p1, m2.id AS p2 FROM members AS m1 CROSS JOIN members AS m2 WHERE m1.id < m2.id)
 # SELECT pairs.p1, pairs.p2, count(v1.poll_id)
 # FROM (pairs INNER JOIN votes as v1 ON v1.member_id = p1) INNER JOIN votes as v2 ON v2.member_id=p2 AND v2.poll_id = v1.poll_id
@@ -29,26 +39,8 @@ vote2 = aliased(Vote)
 
 
 
-for pair in s.query(member1.id,member2.id, func.count(vote1.poll_id))\
-	.distinct(member1.id,member2.id) \
-	.filter(member1.id != member2.id) \
-	.filter(vote1.poll_id == vote2.poll_id) \
-	.filter(vote1.member_id == member1.id) \
-	.filter(vote2.member_id == member2.id) \
-	.filter(vote1.vote_option_id == vote2.vote_option_id) \
-	.filter(vote1.vote_option_id != absent_vote.id) \
-	.filter(vote2.vote_option_id != absent_vote.id) \
-	.group_by(vote1.poll_id) \
-	.limit(10):
-
-	print(pair)
-
-
-
+#below this exit() is the a simpler brute-force way
 exit()
-
-
-
 
 for (m1,m2) in combinations(s.query(Member), 2):
 	
