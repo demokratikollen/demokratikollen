@@ -1,57 +1,18 @@
+- name: Upgrade ubuntu packages
+  sudo: yes
+  apt: upgrade=yes
+
 - name: Install ubuntu packages
   sudo: yes
   apt: pkg={{ item }} state=installed update_cache=yes
   with_items:
-      # Database
-      - postgresql
-      - libpq-dev # Required for Ansible to interact with postgres
-      - python-psycopg2 # required for ansible to interact with postgres
-
-      # Python Dev
-      - python-setuptools
-      - python-dev
-      - python3.4-dev
-
-      # Utilities
       - unzip
-
-- name: Install build-deps for matplotlib
-  sudo: yes
-  shell: apt-get -y build-dep python3-matplotlib python3-numpy python-numpy python-matplotlib
-
-- name: Upgrade ubuntu packages
-  sudo: yes
-  apt: upgrade=yes
 
 - name: Copy bashrc
   copy: src=.bashrc dest=~/.bashrc
 
 - name: Copy .pgpass
   copy: src=.pgpass dest=~/.pgpass mode=0600
-
-- name: Install virtualenv
-  sudo: yes
-  easy_install: name=virtualenv
-
-- name: Create virtualenv directory 
-  shell: mkdir -p {{venv_dir}}
-  changed_when: False
-
-- name: Create the 2.7 virtualenv.
-  shell: virtualenv {{venv_dir}}/python2.7
-  changed_when: False
-
-- name: Create the 3.4 virtualenv.
-  shell: pyvenv-3.4 --without-pip {{venv_dir}}/python3.4
-  changed_when: False
-
-- name: Do the Pip workaround
-  shell: source {{venv_dir}}/python3.4/bin/activate && curl https://bootstrap.pypa.io/get-pip.py | python
-  args:
-    executable: /bin/bash
-
-- name: Choose the 3.4 virtualenv on logins 
-  lineinfile: dest=~/.bashrc state=present line='source {{venv_dir}}/python3.4/bin/activate'
 
 - name: Set base path for git repo
   lineinfile: dest=~/.bashrc state=present line='export REPO_PATH="/vagrant"'
