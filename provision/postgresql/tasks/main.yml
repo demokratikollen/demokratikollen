@@ -1,24 +1,19 @@
-- name: Copy postgresql config.
+- name: Copy posgresql configs.
   sudo: yes
-  copy: src=postgresql.conf dest=/etc/postgresql/9.3/main/postgresql.conf
+  copy: src={{item.file}} dest={{item.path}}  
+  with_items:
+    - {file: 'postgresql.conf', path: '/etc/postgresql/9.3/main/postgresql.conf'}
+    - {file: 'pg_hba.conf', path: '/etc/postgresql/9.3/main/pg_hba.conf'} 
   notify:
       - Restart Postgres
 
-- name: Copy postgresql hostfile.
-  sudo: yes
-  copy: src=pg_hba.conf dest=/etc/postgresql/9.3/main/pg_hba.conf
-  notify:
-      - Restart Postgres
-
-- name: Create Nice Database
+- name: Create Databases
   sudo: yes
   sudo_user: postgres
-  postgresql_db: name={{ db_name }}
-
-- name: Create riksdagen Database
-  sudo: yes
-  sudo_user: postgres
-  postgresql_db: name=riksdagen
+  postgresql_db: name={{ item }}
+  with_items:
+    - '{{ db_name }}'
+    - riksdagen
 
 - name: Create User
   sudo: yes
@@ -28,8 +23,10 @@
 - name: Provide user with DB permissions
   sudo: yes
   sudo_user: postgres
-  postgresql_user: user={{ db_user }} db={{ db_name }} priv=ALL
-  postgresql_user: user={{ db_user }} db=riksdagen priv=ALL
+  postgresql_user: user={{ db_user }} db={{ item }} priv=ALL
+  with_items:
+    - '{{ db_name }}'
+    - riksdagen
 
 - name: Set DATABASE_USER in env
   lineinfile: dest=~/.bashrc state=present line='export {{ item.key }}="{{ item.value }}"'

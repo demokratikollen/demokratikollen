@@ -11,11 +11,13 @@
       - python-setuptools
       - python-dev
       - python3.4-dev
-      - python3-numpy
-      - python3-matplotlib
 
       # Utilities
       - unzip
+
+- name: Install build-deps for matplotlib
+  sudo: yes
+  shell: apt-get -y build-dep python3-matplotlib python3-numpy python-numpy python-matplotlib
 
 - name: Upgrade ubuntu packages
   sudo: yes

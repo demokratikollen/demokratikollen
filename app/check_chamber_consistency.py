@@ -6,6 +6,8 @@ from itertools import combinations
 import utils
 
 import datetime as dt
+import matplotlib
+matplotlib.use('Agg')
 import matplotlib.pyplot as plt
 import matplotlib.font_manager as font_manager
 import matplotlib.dates as mdates
@@ -25,7 +27,7 @@ ax.fmt_xdata = mdates.DateFormatter('%Y-%m-%d')
 #for x in s.query(ChamberAppointment).filter(ChamberAppointment.chair==1).all():
 #	print(x)
 start_date = dt.date(2014,5,29)
-end_date = dt.date(2014,10,06)
+end_date = dt.date(2014,10,6)
 #
 
 ax.axvspan(start_date,end_date,0.1,0.2,fc='#ff00ff',ec='#0000ff',lw=1)
