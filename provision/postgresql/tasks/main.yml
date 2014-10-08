@@ -1,3 +1,11 @@
+- name: Install Postgresql ubuntu packages
+  sudo: yes
+  apt: pkg={{ item }} state=installed update_cache=yes
+  with_items:
+      - postgresql
+      - libpq-dev # Required for Ansible to interact with postgres
+      - python-psycopg2 # required for ansible to interact with postgres
+
 - name: Copy posgresql configs.
   sudo: yes
   copy: src={{item.file}} dest={{item.path}}  
