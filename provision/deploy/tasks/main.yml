@@ -1,5 +1,2 @@
-- name: Install dependencies for 2.7 demokratikollen
-  pip: requirements=~/app/requirements_dev.txt virtualenv={{venv_dir}}/python2.7
-
 - name: Install dependencies for 3.4 demokratikollen
-  pip: requirements=~/app/requirements_dev.txt virtualenv={{venv_dir}}/python3.4
+  pip: requirements=~/app/requirements/dev.txt virtualenv={{venv_dir}}/python3.4

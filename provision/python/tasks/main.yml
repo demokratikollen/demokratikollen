@@ -8,7 +8,7 @@
 
 - name: Install build-deps for matplotlib
   sudo: yes
-  shell: apt-get -y build-dep python3-matplotlib python3-numpy python-numpy python-matplotlib
+  shell: apt-get -y build-dep python3-matplotlib python3-numpy
 
 - name: Install virtualenv
   sudo: yes
@@ -16,10 +16,6 @@
 
 - name: Create virtualenv directory 
   shell: mkdir -p {{venv_dir}}
-  changed_when: False
-
-- name: Create the 2.7 virtualenv.
-  shell: virtualenv {{venv_dir}}/python2.7
   changed_when: False
 
 - name: Create the 3.4 virtualenv.
