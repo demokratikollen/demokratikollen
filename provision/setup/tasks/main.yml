@@ -8,11 +8,10 @@
   with_items:
       - unzip
 
-- name: Copy bashrc
-  copy: src=.bashrc dest=~/.bashrc
-
-- name: Copy .pgpass
-  copy: src=.pgpass dest=~/.pgpass mode=0600
+- name: Copy config files
+  copy: src={{item.file}} dest={{item.path}}
+  with_items:
+      - {file: '.bashrc', path: '~/.bashrc'}
 
 - name: Set base path for git repo
   lineinfile: dest=~/.bashrc state=present line='export REPO_PATH="/vagrant"'

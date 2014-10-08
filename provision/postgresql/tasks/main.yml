@@ -8,10 +8,11 @@
 
 - name: Copy posgresql configs.
   sudo: yes
-  copy: src={{item.file}} dest={{item.path}}  
+  copy: src={{item.file}} dest={{item.path}} 
   with_items:
     - {file: 'postgresql.conf', path: '/etc/postgresql/9.3/main/postgresql.conf'}
-    - {file: 'pg_hba.conf', path: '/etc/postgresql/9.3/main/pg_hba.conf'} 
+    - {file: 'pg_hba.conf', path: '/etc/postgresql/9.3/main/pg_hba.conf'}
+    - {file: '.pgpass', path: '~/.pgpass'}
   notify:
       - Restart Postgres
 

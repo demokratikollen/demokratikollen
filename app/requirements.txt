@@ -1,5 +1,1 @@
-SQLAlchemy==0.9.7
-progress-bar==6.0
-psycopg2==2.5.2
-numpy
-matplotlib
+-r requirements/prod.txt
