@@ -20,6 +20,8 @@ Vagrant.configure(VAGRANTFILE_API_VERSION) do |config|
   # Create a forwarded port mapping which allows access to a specific port
   # Forward postgresql port
   config.vm.network "forwarded_port", guest: 5432, host: 5433
+  # Forward flask app port
+  config.vm.network "forwarded_port", guest: 5000, host: 5000
 
   # If true, then any SSH connections made will enable agent forwarding.
   # Default value: false

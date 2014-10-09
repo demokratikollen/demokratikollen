@@ -58,3 +58,5 @@ for chair in range(1,350):
 				f_bad.write(overlap_msg)
 			else:
 				f_trivial.write(overlap_msg)
+
+
