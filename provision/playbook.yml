@@ -6,4 +6,5 @@
       - setup
       - postgresql
       - python
+      - web
       - deploy

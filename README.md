@@ -28,3 +28,9 @@ Assumes you have cloned the repository.
 
 ## Import of data to ORM database
 First initialize database according to instructions above. Then run `python ~/app/populate_orm.py`.
+
+## Running the Flask webapp
+Open an ssh to the VM and change dir to `~/app/www` and run `gunicorn_debug app:app`. The server can be accessed from the host machine by accessing http://127.0.0.1:5000.
+
+## Running tests for the webapp
+Open an ssh to the VM and change dir to `~/app/www` and run `behave`. If it seems to fail, it might be that the last webserver instance was not closed. If so, run `killall gunicorn` and try again.
