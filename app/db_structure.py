@@ -57,6 +57,8 @@ class ChamberAppointment(Appointment):
         'polymorphic_identity':'chamber_appointment'
     }
 
+    def title(self):
+        return '{} {} {}'.format(self.status,self.role,self.member)    
     def __repr__(self):
         return 'Chair {}: {} {} {}-{}: {}'.format(self.chair,self.status,self.role,self.start_date,self.end_date,self.member)    
 
