@@ -38,8 +38,8 @@ The Flask app is not served directly but goes through a proxy server. The gunico
 The structure of the webapp is loosely based on the tutorial from
 [Digital Ocean](https://www.digitalocean.com/community/tutorials/how-to-structure-large-flask-applications). 
 For general usages of Flask, the [quick start](http://flask.pocoo.org/docs/0.10/quickstart/) on their homepage 
-is a good source of information. Logically separated parts of the page are located in their own folders in the app
-dir. In each `controller.py` file, the code for the routes associated with the module are defined.
+is a good source of information. Logically separated parts of the app are located in their own folders in the app
+dir. In each `controller.py` file, the code for the routes associated with the module is defined.
 If needed, a `model.py` file can contain model-like behavior for the module. Each module is
 defined as a Flask Blueprint in the `controller.py` file and registered in the apps `__init__.py`
 file located in the root of the app dir. Templates for each module need to be located in a folder with the 
