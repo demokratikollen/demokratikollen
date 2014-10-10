@@ -29,8 +29,22 @@ Assumes you have cloned the repository.
 ## Import of data to ORM database
 First initialize database according to instructions above. Then run `python ~/app/populate_orm.py`.
 
-## Running the Flask webapp
-Open an ssh to the VM and change dir to `~/app/www` and run `gunicorn_debug app:app`. The server can be accessed from the host machine by accessing http://127.0.0.1:5000.
+## The Flask webapp
+In order to run the flask app, ssh to the VM and change dir to `~/app/www` and run `gunicorn_debug app:app`. The server can be accessed from the host machine by accessing http://127.0.0.1:5000. 
 
-## Running tests for the webapp
-Open an ssh to the VM and change dir to `~/app/www` and run `behave`. If it seems to fail, it might be that the last webserver instance was not closed. If so, run `killall gunicorn` and try again.
+The Flask app is not served directly but goes through a proxy server. The gunicorn instance listens for connections locally on port 8000 while an nginx instance listens to connections on port 5000 which is port forwarded to the host machine. The nginx instance serves static content and forwards other requests to the gunicorn instance.
+
+### Structure in the webapp 
+The structure of the webapp is loosely based on the tutorial from
+[Digital Ocean](https://www.digitalocean.com/community/tutorials/how-to-structure-large-flask-applications). 
+For general usages of Flask, the [quick start](http://flask.pocoo.org/docs/0.10/quickstart/) on their homepage 
+is a good source of information. Logically separated parts of the page are located in their own folders in the app
+dir. In each `controller.py` file, the code for the routes associated with the module are defined.
+If needed, a `model.py` file can contain model-like behavior for the module. Each module is
+defined as a Flask Blueprint in the `controller.py` file and registered in the apps `__init__.py`
+file located in the root of the app dir. Templates for each module need to be located in a folder with the 
+same name as the module in the templates folder. The master layout in `layout.html` defines should be used as 
+a parent for module templates.
+
+### Running tests for the webapp
+Open an ssh to the VM and change dir to `~/app/www` and run `behave`. If it seems to fail, it might be that the last web server instance was not closed. If so, run `killall gunicorn` and try again. Unit tests can be run by running `nosetests`. 
