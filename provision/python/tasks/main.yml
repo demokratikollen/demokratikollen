@@ -1,6 +1,6 @@
 - name: Install Python related ubuntu packages
   sudo: yes
-  apt: pkg={{ item }} state=installed update_cache=yes
+  apt: pkg={{ item }} state=installed
   with_items:
       - python-setuptools
       - python-dev
