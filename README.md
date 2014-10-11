@@ -48,3 +48,9 @@ a parent for module templates.
 
 ### Running tests for the webapp
 Open an ssh to the VM and change dir to `~/app/www` and run `behave`. If it seems to fail, it might be that the last web server instance was not closed. If so, run `killall gunicorn` and try again. Unit tests can be run by running `nosetests`. 
+
+## MongoDB Datastore
+To use the datastore add `from utils import MongoDBDatastore` and create a new datastore object as `ds = MongoDBDatastore()`. 
+In order to save an object in the datastore call the `store_object(object[any], identifier[string])` method which saves the object in the database. Subsequent calls with the same identifier should overwrite the object. Retrieve objects with the `get_object(identifier)` method. 
+
+The class should be able to store any python object. Storing sqlalchemy objects work but they loose the connection with the session so relationships do not work on retrieved objects. Perhaps there is a way to restore the connection, but for now serialize the data into a dictionary.
