@@ -1,4 +1,5 @@
 import sys
+import os.path
 from re import sub
 import codecs
 import string
