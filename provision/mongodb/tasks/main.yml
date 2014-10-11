@@ -1,11 +1,32 @@
 - name: Add the MongoDB GPG key to apt.
   sudo: yes
-  apt_key: url=http://docs.mongodb.org/10gen-gpg-key.asc state=present
+  apt_key: id=7F0CEB10 keyserver=hkp://keyserver.ubuntu.com:80 state=present
+  register: result
   
 - name: Add the MongoDB repository.
   sudo: yes
   apt_repository: repo='deb http://downloads-distro.mongodb.org/repo/ubuntu-upstart dist 10gen' state=present
 
-- name: Install MongoDB
+- name: Update apt if we added the repo.
   sudo: yes
-  apt: name=mongodb-org state=installed
+  apt: update_cache=yes
+  when: result|changed
+
+- name: Install MongoDB and pymongo for ansible adm.
+  sudo: yes
+  apt: name={{item}} state=installed
+  with_items:
+      - mongodb-org
+      - python-pymongo
+
+- name: Create the MongoDB database
+  sudo: yes
+  mongodb_user: database={{ db_name }} user={{ db_user }} password={{ db_password }} state=present
+  
+- name: Set MONOG_DATABASE envs
+  lineinfile: dest=~/.bashrc state=present line='export {{ item.key }}="{{ item.value }}"'
+  with_items:
+    - {key: 'MONGO_DATABASE_USER', value: '{{ db_user }}'}
+    - {key: 'MONGO_DATABASE_PWD', value: '{{ db_password }}'}
+    - {key: 'MONGO_DATABASE_URL', value: 'mongodb://{{db_user}}:{{db_password}}@localhost:27017/{{db_name}}'}
+    - {key: 'MONGO_DATABASE_NAME', value: '{{ db_name }}'}

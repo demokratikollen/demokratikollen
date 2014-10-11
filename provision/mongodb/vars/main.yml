@@ -1,0 +1,3 @@
+db_name: "{{app_name}}"
+db_user: vagrant
+db_password: "{{app_name}}"
