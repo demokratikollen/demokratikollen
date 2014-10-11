@@ -2,14 +2,14 @@
 from db_structure import *
 from sqlalchemy import create_engine, func, distinct
 from sqlalchemy.orm import sessionmaker, aliased, joinedload
-import utils
 import os
 import psycopg2 as pg
 from progress_bar import InitBar
 import pickle
-import PIL.Image as Image
+#import PIL.Image as Image
 import colorsys
 import math
+from utils import *
 
 def create_covoting_matrix(session, member_map):
     n_members = len(member_map)
@@ -85,13 +85,15 @@ def get_data(session,load=True, vote_cutoff=1):
 
 
 # Connect to SQLAlchemy db and create structure
-engine = create_engine(utils.engine_url())
+engine = create_engine(PostgresUtils.engine_url())
 
 session = sessionmaker()
 session.configure(bind=engine)
 s = session()
 
-if utils.yes_or_no("Do you want to get data from the database again?"):
+mongodb = MongoUtils.mongodb_connection()
+
+if MiscUtils.yes_or_no("Do you want to get data from the database again?"):
     members, member_map, covoting_matrix = get_data(s,False)
 else:
     members, member_map, covoting_matrix = get_data(s)
