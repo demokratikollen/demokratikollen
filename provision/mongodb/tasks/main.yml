@@ -19,14 +19,8 @@
       - mongodb-org
       - python-pymongo
 
-- name: Create the MongoDB database
-  sudo: yes
-  mongodb_user: database={{ db_name }} user={{ db_user }} password={{ db_password }} state=present
-  
 - name: Set MONOG_DATABASE envs
   lineinfile: dest=~/.bashrc state=present line='export {{ item.key }}="{{ item.value }}"'
   with_items:
-    - {key: 'MONGO_DATABASE_USER', value: '{{ db_user }}'}
-    - {key: 'MONGO_DATABASE_PWD', value: '{{ db_password }}'}
-    - {key: 'MONGO_DATABASE_URL', value: 'mongodb://{{db_user}}:{{db_password}}@localhost:27017/{{db_name}}'}
+    - {key: 'MONGO_DATABASE_URL', value: 'mongodb://localhost:27017/{{db_name}}'}
     - {key: 'MONGO_DATABASE_NAME', value: '{{ db_name }}'}
