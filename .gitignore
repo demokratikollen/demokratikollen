@@ -8,6 +8,7 @@ include/
 build/
 bin/
 local/
+app/www/ghostdriver.log
 
 #python c files
 *.pyc
