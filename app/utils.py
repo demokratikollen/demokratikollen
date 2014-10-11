@@ -4,10 +4,22 @@ from sqlalchemy.schema import MetaData,Table,DropTable,ForeignKeyConstraint,Drop
 import sys
 import psycopg2
 import os
-from pymongo import MongoClient
+from pymongo import MongoClient, ASCENDING
 from urllib.parse import urlparse
 
-class MongoUtils:
+class MongoDBDatastore:
+
+    def __init__(self):
+        self.dburl = MongoDBDatastore.database_url()
+        
+        url_comp = urlparse(self.dburl)
+        database = url_comp.path[1:]
+        
+        self.connection = MongoClient(self.dburl)
+        self.database = self.connection[database]
+        self.collection = self.database.datastore
+        self.collection.ensure_index([('identifier', ASCENDING)], unique=True)
+        
 
     @staticmethod
     def database_url():
@@ -18,16 +30,26 @@ class MongoUtils:
         else:
             return 'mongodb://localhost:27017/local'
 
-    @staticmethod
-    def mongodb_connection():
-        dburl = MongoUtils.database_url()
-        url_comp = urlparse(dburl)
-        database = url_comp.path[1:]
+    def get_mongodb_connection(self):
+        return self.connection
+       
+    def get_mongodb_database(self):
+        return self.database
     
-        conn = MongoClient(dburl)
-    
-        return conn[database]
-
+    def get_mongodb_collection(self):
+        return self.collection
+        
+    def store_object(self, object, identifier):
+        object_to_store = {"identifier": identifier, "object": object}
+        self.collection.update({"identifier": identifier}, object_to_store, upsert=True)
+        
+    def get_object(self, identifier):
+        object_from_store = self.collection.find_one({"identifier", identifier})
+        if object_from_store != None:
+            return object_from_store.object
+        else:
+            return None
+       
 class PostgresUtils:
     @staticmethod
     def drop_everything(engine):
