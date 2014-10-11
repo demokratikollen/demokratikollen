@@ -28,10 +28,12 @@ def main():
         print("Specify file on command line.")
         exit()
 
-    filename = sys.argv[1]
+    in_path = sys.argv[1]
+    dirname, filename = os.path.split(in_path)
+    out_path = os.path.join(dirname, 'psql_{}'.format(filename))
 
-    f_in = codecs.open(filename, 'r',encoding='utf-8')#open(filename, 'r')
-    f_out = codecs.open('psql_{}'.format(filename),'w', encoding='utf-8') #open('psql_{}'.format(filename),'w')
+    f_in = codecs.open(in_path, 'r', encoding='utf-8')#open(filename, 'r')
+    f_out = codecs.open(out_path,'w', encoding='utf-8') #open('psql_{}'.format(filename),'w')
 
     f_out.write('BEGIN;\n')
     for line in f_in:
