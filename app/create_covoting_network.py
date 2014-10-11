@@ -17,17 +17,17 @@ v1 = aliased(Vote)
 v2 = aliased(Vote)
 c = 0
 for x in s.query(m1,m2,func.count(v1.poll_id))\
-	.filter(m1.id == v1.member_id)\
-	.filter(m2.id == v2.member_id)\
-	.filter(m1.id < m2.id)\
-	.filter(v1.poll_id == v2.poll_id)\
-	.filter(v1.vote_option == v2.vote_option)\
-	.filter(v1.vote_option != 'Frånvarande')\
-	.filter(v2.vote_option != 'Frånvarande')\
-	.group_by(m1.id,m2.id):
+    .filter(m1.id == v1.member_id)\
+    .filter(m2.id == v2.member_id)\
+    .filter(m1.id < m2.id)\
+    .filter(v1.poll_id == v2.poll_id)\
+    .filter(v1.vote_option == v2.vote_option)\
+    .filter(v1.vote_option != 'Frånvarande')\
+    .filter(v2.vote_option != 'Frånvarande')\
+    .group_by(m1.id,m2.id):
 
-	c += 1
-	print(x)
+    c += 1
+    print(x)
 print (c)
 
 # MAKE THIS SQL
@@ -43,12 +43,12 @@ print (c)
 exit()
 
 for (m1,m2) in combinations(s.query(Member), 2):
-	
-	antal = s.query(vote1, vote2) \
-		.filter(vote1.member_id == m1.id) \
-		.filter(vote2.member_id == m2.id) \
-		.filter(vote1.vote_option_id == vote2.vote_option_id) \
-		.filter(vote1.vote_option_id != absent_vote.id) \
-		.filter(vote2.vote_option_id != absent_vote.id) \
-		.filter(vote1.poll_id == vote2.poll_id).count()
-	print(('{} och {}: {}'.format(m1.id,m2.id,antal)))
+    
+    antal = s.query(vote1, vote2) \
+        .filter(vote1.member_id == m1.id) \
+        .filter(vote2.member_id == m2.id) \
+        .filter(vote1.vote_option_id == vote2.vote_option_id) \
+        .filter(vote1.vote_option_id != absent_vote.id) \
+        .filter(vote2.vote_option_id != absent_vote.id) \
+        .filter(vote1.poll_id == vote2.poll_id).count()
+    print(('{} och {}: {}'.format(m1.id,m2.id,antal)))
