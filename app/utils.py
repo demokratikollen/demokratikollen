@@ -5,6 +5,7 @@ import sys
 import psycopg2
 import os
 from pymongo import MongoClient, ASCENDING
+import pickle
 from urllib.parse import urlparse
 
 class MongoDBDatastore:
@@ -40,13 +41,14 @@ class MongoDBDatastore:
         return self.collection
         
     def store_object(self, object, identifier):
-        object_to_store = {"identifier": identifier, "object": object}
+        obj_bytes = pickle.dumps(object)
+        object_to_store = {"identifier": identifier, "object": obj_bytes}
         self.collection.update({"identifier": identifier}, object_to_store, upsert=True)
         
     def get_object(self, identifier):
-        object_from_store = self.collection.find_one({"identifier", identifier})
+        object_from_store = self.collection.find_one({'identifier': identifier})
         if object_from_store != None:
-            return object_from_store.object
+            return pickle.loads(object_from_store['object'])
         else:
             return None
        
