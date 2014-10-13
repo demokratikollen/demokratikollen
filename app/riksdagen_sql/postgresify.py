@@ -17,15 +17,36 @@ INSERT_REGEX = (
 # SQL commands to look for in SQL files
 VALID_COMMANDS = ["INSERT"]
 
-# Corrections that should be applied only to table and column names
-NAME_CORRECTIONS = [
+# Replacements that should be applied only to table and column names
+NAME_REPLACEMENTS = (
     (r"ö(?!(([^']*'){2})*([^']*'))", r"o"), #match ö not followed by odd number of ' (does not handle escaped ')
     (r"å(?!(([^']*'){2})*([^']*'))", r"a"),
     (r"ä(?!(([^']*'){2})*([^']*'))", r"a"),
-    (r'\[from\]', r'"from"')
-]
+    (r'\[from\]', r'"from"'))
+
+
+REMOVE_COL_CORRECTIONS = (
+    (r"^\s*INSERT INTO dokument \(hangar_id,dok_id,rm,beteckning,doktyp,typ,subtyp,doktyp,", 7), #if string is matched, remove col 7
+    )
+
 
 def remove_from_list(identifier_list, col_index, filter_func):
+    """Remove an item from an ``sqlparse.sql.IdentifierList``.
+
+    The ``IdentifierList`` has a list of tokens. We call a token ``t`` "item" 
+    if ``filter_func(t) == True``.
+
+    With this definition of item, this function removes item number 
+    ``col_index`` from the identifier list. It also removes the next comma 
+    token, if there is any.
+
+    Args:
+        identifier_list (sqlparse.sql.IdentifierList): The list to modify.
+        col_index (int): The (zero-based) index of the column.
+        filter_func (callable): The function determining whether a token
+            is an item or not.
+    """
+
     num_cols_found = 0
     col_token_idx = None
     for i, token in enumerate(identifier_list.tokens):
@@ -46,14 +67,26 @@ def remove_from_list(identifier_list, col_index, filter_func):
             break
 
 
-def remove_col_in_insert(text, table_name, col_index):
-    '''Remove a column from an SQL INSERT statement
+def remove_col_in_insert(text, col_index):
+    '''Removes a column from an SQL INSERT statement.
+
+    Removes the column name and value from an SQL INSERT statement.
+
+
+    Args:
+        text (str): A text string with an SQL INSERT statement.
+        col_index (int): The (zero-based) index of the column to be removed.
+
+    Returns:
+        A new statement string with the column removed.
+
     '''
     stmt = sqlparse.parse(text)[0]
 
+    # PART 1: remove the column name
+
     # table_name (col0, col1, col2, col3)
     into_what = next(t for t in stmt.tokens if isinstance(t, sqlparse.sql.Function))
-    assert into_what.tokens[0].get_name() == table_name
 
     # (col0, col1, col2, col3)
     cols_in_parenthesis = into_what.tokens[-1]
@@ -65,6 +98,9 @@ def remove_col_in_insert(text, table_name, col_index):
 
     # Find and kill the identifier
     remove_from_list(cols, col_index, lambda t: isinstance(t, sqlparse.sql.Identifier))
+
+
+    # PART 2: remove the value
 
     # Find the last parenthesis -- this should be the values
     # (value0, value1, value2, value3)
@@ -82,28 +118,32 @@ def remove_col_in_insert(text, table_name, col_index):
 
 
 
-
 def starts_with_command(s):
     """Checks whether a string starts with an SQL command.
 
-    Returns True if `s.lstrip()` starts with one of the supported commands.
-
     Args:
         s (str): The string to search for valid commands.
+
+    Returns:
+        True iff `s.lstrip()` starts with one of the supported commands.
     """
     return any(s.lstrip().startswith(cmd) for cmd in VALID_COMMANDS)
 
 
 def statements(f):
-    """Returns an iterator over statements found in a file-like object.
+    """Returns a generator with statements found in a file-like object.
 
     Functionality builds on two important assumptions:
-     * The file `f` must contains only SQL statements, and only 
-    those supported by :func:`starts_with_command`.
-     * Each statement starts on a new line.
+
+    *   The file `f` must contains only SQL statements, and only 
+        those supported by :func:`starts_with_command`.
+    *   Each statement starts on a new line.
 
     Args:
-        f: a file-like object
+        f (file-like object): The source of statements.
+
+    Returns:
+        A generator object, yielding strings with statements.
     """
     in_stmt = False
     lines = []
@@ -123,7 +163,9 @@ def statements(f):
     if in_stmt:
         yield ''.join(lines)
 
-def convert_statement(s):
+def correct_stmt(s):
+    """Correct a statement so it (hopefully) works with postgresql"""
+
     # Make uniform line endings
     s = s.replace('\r\n', '\n')
     s = s.replace('\r', '\n')
@@ -137,13 +179,21 @@ def convert_statement(s):
     insert_match = re.fullmatch(INSERT_REGEX, s, re.DOTALL)
     if insert_match:
         cmd, names, values = insert_match.groups()
-        for (rx, rep) in NAME_CORRECTIONS:
+
+        # Correct name part of INSERT statement 
+        for (rx, rep) in NAME_REPLACEMENTS:
             names = re.sub(rx, rep, names)
 
-        return cmd + names + values
+        # Remove duplicate columns from INSERT statement
+        stmt = cmd + names + values
+        for (rx, col_index) in REMOVE_COL_CORRECTIONS:
+            if re.search(rx, stmt):
+                stmt = remove_col_in_insert(stmt, col_index)
+
+        return stmt
     
-    if not insert_match:
-        raise RuntimeError("No match in the string '" + s + "'")
+    else:
+        raise RuntimeError("No supported statement was found in the string '" + s + "'")
 
 
 def main():
@@ -155,12 +205,14 @@ def main():
     dirname, filename = os.path.split(in_path)
     out_path = os.path.join(dirname, 'psql_{}'.format(filename))
 
+
     f_in = codecs.open(in_path, 'r', encoding='utf-8')
     f_out = codecs.open(out_path,'w', encoding='utf-8')
 
     f_out.write('BEGIN;\n')
-    for i, s in enumerate(statements(f_in)):
-        f_out.write(convert_statement(s))
+    for stmt in statements(f_in):
+        corrected = correct_stmt(stmt)
+        f_out.write(corrected)
     f_out.write('COMMIT;\n')
 
 
