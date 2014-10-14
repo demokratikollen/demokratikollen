@@ -114,7 +114,7 @@ class Vote(Base):
 
 
 class PartyVote(Base):
-    __tablename__ = 'votes'
+    __tablename__ = 'party_votes'
     id = Column(Integer, primary_key=True)
     party_id = Column(Integer, ForeignKey('parties.id'))
     poll_id = Column(Integer, ForeignKey('polls.id'))
@@ -146,53 +146,9 @@ class PartyVote(Base):
 def create_db_structure(engine):
     if MiscUtils.yes_or_no("Do you really want to drop everything in the database?"):
         PostgresUtils.drop_everything(engine)
+
     Base.metadata.create_all(engine)
 
 
 if __name__ == '__main__':
-    engine = create_engine(PostgresUtils.engine_url())
-    create_db_structure(engine)
-
-    session = sessionmaker()
-    session.configure(bind=engine)
-    s = session()
-
-    party_S = Party(name='Socialdemokraterna',abbr='S')
-    party_M = Party(name='Moderata samlingspartiet', abbr='M')
-    party_SD = Party(name='Sverigedemokraterna', abbr="SD")
-    party_V = Party(name='Vänsterpartiet',abbr='V')
-
-    s.add(party_S)
-    s.add(party_M)
-    s.add(party_SD)
-    s.add(party_V)
-
-    member1 = Member(first_name='Stefan',last_name='Löfvén',party=party_S)
-    member2 = Member(first_name='Jimmie',last_name='Åkesson',party=party_SD)
-    member3 = Member(first_name='Fredrik', last_name='Reinfeldt', party=party_M)
-    member4 = Member(first_name='Jonas', last_name='Sjöstedt', party=party_V)
-
-    s.add(member1)
-    s.add(member2)
-    s.add(member3)
-    s.add(member4)
-
-    poll1 = Poll(name='Ska Stefan få bli statsminister?')
-    s.add(poll1)
-    s.add(Vote(member=member1,poll=poll1,vote_option='Ja'))
-    s.add(Vote(member=member2,poll=poll1,vote_option='Nej'))
-    s.add(Vote(member=member3,poll=poll1,vote_option='Avstår'))
-    s.add(Vote(member=member4,poll=poll1,vote_option='Frånvarande'))
-
-    poll2 = Poll(name='Ska vi höja barnbidraget?')
-    s.add(poll2)
-    s.add(Vote(member=member1,poll=poll2,vote_option='Ja'))
-    s.add(Vote(member=member2,poll=poll2,vote_option='Nej'))
-    s.add(Vote(member=member3,poll=poll2,vote_option='Nej'))
-    s.add(Vote(member=member4,poll=poll2,vote_option='Ja'))
-
-    start = datetime.datetime.strptime('2010-01-01', '%Y-%m-%d').date()
-    end = datetime.datetime.strptime('2011-12-12', '%Y-%m-%d').date()
-    s.add(Appointment(group=party_S,member=member1,start_date=start,end_date=end))
-
-    s.commit()
+    pass
