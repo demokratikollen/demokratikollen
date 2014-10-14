@@ -15,7 +15,7 @@
   sudo: yes
   easy_install: name=virtualenv
 
-- name: Create virtualenv directory 
+- name: Create virtualenv directory
   shell: mkdir -p {{venv_dir}}
   changed_when: False
 
@@ -24,7 +24,7 @@
   changed_when: False
 
 - name: Check if pip is installed
-  shell: source {{venv_dir}}/python3.4/bin/activate && pip
+  shell: '{{venv_dir}}/python3.4/bin/pip'
   register: result
   args:
     executable: /bin/bash
@@ -37,5 +37,5 @@
     executable: /bin/bash
   when: result|failed
 
-- name: Choose the 3.4 virtualenv on logins 
+- name: Choose the 3.4 virtualenv on logins
   lineinfile: dest=~/.bashrc state=present line='source {{venv_dir}}/python3.4/bin/activate'

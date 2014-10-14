@@ -1,4 +1,4 @@
-- name: Install nginx ubuntu packag
+- name: Install nginx ubuntu packages
   sudo: yes
   apt: pkg={{ item }} state=installed
   with_items:
@@ -7,6 +7,6 @@
 
 - name: Copy nginx config.
   sudo: yes
-  copy: src=nginx.conf dest=/etc/nginx/nginx.conf  
+  copy: src=nginx.conf dest=/etc/nginx/nginx.conf
   notify:
     - Restart Nginx

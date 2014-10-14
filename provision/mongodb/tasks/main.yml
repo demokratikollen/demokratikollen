@@ -2,7 +2,7 @@
   sudo: yes
   apt_key: id=7F0CEB10 keyserver=hkp://keyserver.ubuntu.com:80 state=present
   register: result
-  
+
 - name: Add the MongoDB repository.
   sudo: yes
   apt_repository: repo='deb http://downloads-distro.mongodb.org/repo/ubuntu-upstart dist 10gen' state=present
@@ -19,7 +19,7 @@
       - mongodb-org
       - python-pymongo
 
-- name: Set MONOG_DATABASE envs
+- name: Set MONGO_DATABASE envs
   lineinfile: dest=~/.bashrc state=present line='export {{ item.key }}="{{ item.value }}"'
   with_items:
     - {key: 'MONGO_DATABASE_URL', value: 'mongodb://localhost:27017/{{db_name}}'}
