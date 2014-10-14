@@ -116,7 +116,7 @@ def create_db_structure(engine):
 
 
 if __name__ == '__main__':
-    engine = create_engine(utils.engine_url())
+    engine = create_engine(PostgresUtils.engine_url())
     create_db_structure(engine)
 
     session = sessionmaker()

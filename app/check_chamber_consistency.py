@@ -3,10 +3,10 @@ from sqlalchemy import create_engine, func, distinct
 from sqlalchemy.orm import sessionmaker, aliased
 from sqlalchemy.sql.expression import literal
 from itertools import combinations
-import utils
+from utils import PostgresUtils
 import datetime as dt
 import codecs
-engine = create_engine(utils.engine_url())
+engine = create_engine(PostgresUtils.engine_url())
 
 session = sessionmaker(bind=engine)
 s = session()

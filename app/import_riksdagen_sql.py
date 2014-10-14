@@ -1,5 +1,5 @@
 # -*- coding: utf-8 -*-
-import utils
+from utils import MiscUtils, PostgresUtils
 import glob
 import psycopg2
 import os
@@ -16,10 +16,10 @@ def drop_all_riksdagen(conn):
 with psycopg2.connect(os.environ['DATABASE_RIKSDAGEN_URL']) as conn:
 
     # Create database
-    if utils.yes_or_no("Do you want to drop all tables and recreate the Riksdagen database?"):
+    if MiscUtils.yes_or_no("Do you want to drop all tables and recreate the Riksdagen database?"):
         drop_all_riksdagen(conn)
         print("Creating tables in database")
-        utils.run_sql('riksdagen_sql/create_tables.sql',conn)
+        PostgresUtils.run_sql('riksdagen_sql/create_tables.sql',conn)
 
     # for i,sql_file in enumerate(glob.glob('/vagrant/data/*.sql')):
     #     print("Running '{}'".format(sql_file))
