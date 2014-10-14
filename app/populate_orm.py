@@ -104,6 +104,12 @@ for intressent_id,ordningsnummer,fr,to,stat,roll in c:
                 status=status,
                 role=role))
 
+
+# Party votes
+print("Calculating party votes")
+for poll in s.query(Polls).all():
+    pass
+
 print("Committing.")
 s.commit()
 source_conn.close()

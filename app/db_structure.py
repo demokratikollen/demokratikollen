@@ -98,12 +98,46 @@ class Poll(Base):
         return self.name
 
 
+
+VoteOptionsType = Enum('Ja','Nej','Avstår','Frånvarande',name='vote_options')
+
 class Vote(Base):
     __tablename__ = 'votes'
     id = Column(Integer, primary_key=True)
     member_id = Column(Integer, ForeignKey('members.id'))
     poll_id = Column(Integer, ForeignKey('polls.id'))
-    vote_option = Column(Enum('Ja','Nej','Avstår','Frånvarande',name='vote_options'))
+    vote_option = Column(VoteOptionsType)
+
+    def __repr__(self):
+        return '{}: {}'.format(self.member.__repr__(),self.vote_option.__repr__())
+
+
+
+class PartyVote(Base):
+    __tablename__ = 'votes'
+    id = Column(Integer, primary_key=True)
+    party_id = Column(Integer, ForeignKey('parties.id'))
+    poll_id = Column(Integer, ForeignKey('polls.id'))
+    num_yes = Column(Integer)
+    num_no = Column(Integer)
+    num_abstain = Column(Integer)
+    num_absent = Column(Integer)
+
+    def sorted_votes(self):
+        votes = [   
+            ('Ja', self.num_yes),
+            ('Nej', self.num_no),
+            ('Avstår', self.num_abstain),
+            ('Frånvarande', self.num_absent)
+        ]
+        votes.sort(key=lambda t:t[1])
+        return votes
+
+    def vote_option(self):
+        return self.sorted_votes()[0][0]
+
+    def agreement(self):
+        return self.sorted_votes()[0][1]/(self.num_yes+self.num_no+self.num_abstain)
 
     def __repr__(self):
         return '{}: {}'.format(self.member.__repr__(),self.vote_option.__repr__())
