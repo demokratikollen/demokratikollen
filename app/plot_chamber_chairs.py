@@ -47,7 +47,7 @@ def main():
         colors = {'Riksdagsledamot': '#ff0000', 'Ersättare':'#aaaa22'}
 
 
-        fig = plt.figure(figsize=(100,len(rows)))
+        fig = plt.figure(0,figsize=(100,len(rows)))
         ax = fig.add_subplot(111)    
 
         y = 0
@@ -76,6 +76,6 @@ def main():
 
         fig.savefig('{}/{:03d}.png'.format(fig_dir,chair))
         
-
+        plt.clf()
 if __name__ == '__main__':
         main()  
