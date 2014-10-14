@@ -12,4 +12,4 @@ mod_members = Blueprint('members', __name__, url_prefix='/members')
 @mod_members.route('/', methods=['GET'])
 def member():
     
-    return render_template("/members/members.html", member=1)
+    return render_template("/members/members.html", member=1, header_members_class="active")

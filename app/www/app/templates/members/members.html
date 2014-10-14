@@ -1,147 +1,92 @@
 {% extends "layout.html" %}
 {% block title %}Hem{% endblock %}
 {% block head %}
-  {{ super() }}
-
   <link href="{{ url_for('static', filename='css/nv.d3.css') }}" rel="stylesheet">
-
   <script src="{{ url_for('static', filename='js/d3.min.js') }}"></script>
   <script src="{{ url_for('static', filename='js/nv.d3.min.js') }}"></script>
+
+  {{ super() }}
   <script type="text/javascript">
-    function Nvd3Graph ( ) {
-      var svg,
-          chart;
+    /*These lines are all chart setup.  Pick and choose which chart features you want to utilize. */
+    nv.addGraph(function() {
+      var chart = nv.models.lineChart()
+                    .margin({left: 100})  //Adjust chart margins to give the x-axis some breathing room.
+                    .useInteractiveGuideline(true)   //We want nice looking tooltips and a guideline!
+                    .transitionDuration(300)  //how fast do you want the lines to transition?
+                    .showLegend(true)       //Show the legend, allowing users to turn on/off line series.
+                    .showYAxis(true)        //Show the y-axis
+                    .showXAxis(true)        //Show the x-axis
+      ;
 
-      var initialize = function ( ) {
-        setupSvg();
-        setupChart();
-        renderChart();
-        addEvents();
-      };
+      chart.xAxis     //Chart x-axis settings
+          .axisLabel('Time (ms)')
+          .tickFormat(d3.format(',r'));
 
-      var generateData = function ( ) {
-        var numberOfPoints = 20,
-            graphData = [],
-            series,
-            i, j;
+      chart.yAxis     //Chart y-axis settings
+          .axisLabel('Voltage (v)')
+          .tickFormat(d3.format('.02f'));
 
-        for (i = 0; i < 3; i++) {
-          series = [];
-          for (var j = 0; j < numberOfPoints; j++) {
-            series.push({x: (j+1), y: ((i+1) * (j+1))});
-          }
-          graphData.push({ values: series})
+      /* Done setting the chart up? Time to render it!*/
+      var myData = sinAndCos();   //You need data...
+
+      d3.select('#chart svg')    //Select the <svg> element you want to render the chart in.   
+          .datum(myData)         //Populate the <svg> element with chart data...
+          .call(chart);          //Finally, render the chart!
+
+      //Update the chart when window resizes.
+      nv.utils.windowResize(function() { chart.update() });
+      return chart;
+    });
+    /**************************************
+     * Simple test data generator
+     */
+    function sinAndCos() {
+      var sin = [],sin2 = [],
+          cos = [];
+
+      //Data is represented as an array of {x,y} pairs.
+      for (var i = 0; i < 100; i++) {
+        sin.push({x: i, y: Math.sin(i/10)});
+        sin2.push({x: i, y: Math.sin(i/10) *0.25 + 0.5});
+        cos.push({x: i, y: .5 * Math.cos(i/10)});
+      }
+
+      //Line chart data should be sent as an array of series objects.
+      return [
+        {
+          values: sin,      //values - represents the array of {x,y} data points
+          key: 'Sine Wave', //key  - the name of the series.
+          color: '#ff7f0e'  //color - optional: choose your own line color.
+        },
+        {
+          values: cos,
+          key: 'Cosine Wave',
+          color: '#2ca02c'
+        },
+        {
+          values: sin2,
+          key: 'Another sine wave',
+          color: '#7777ff',
+          area: true      //area - set to true if you want this line to turn into a filled area chart.
         }
-
-        graphData[0].key = "First";
-        graphData[1].key = "Second";
-        graphData[2].key = "Third";
-
-        return graphData;
-      };
-
-      var setupSvg = function ( ) {
-        var svgAttributes = {
-          width: 600,
-          height: 300,
-          padding: 25,
-          margin : {
-            top: 5,
-            right: 10,
-            bottom: 5,
-            left: 10
-          }
-        };
-
-        svg = d3.select('#home svg');
-        svg.style({
-          'width': svgAttributes.width + svgAttributes.margin.left + svgAttributes.margin.right,
-          'height': svgAttributes.height + svgAttributes.margin.top + svgAttributes.margin.bottom,
-          'padding': svgAttributes.padding,
-          'margin': '0 auto'
-        });
-        svg.datum( generateData() );
-        svg.transition().duration(500);
-      };
-
-      var setupChart = function ( ) {
-        chart = nv.models.lineChart()
-        chart.options({
-          x: getX,
-          y: getY,
-          noData: "Not enough data to graph",
-          transitionDuration: 500,
-          showLegend: true,
-          showXAxis: true,
-          showYAxis: true,
-          rightAlignYAxis: false,
-        });
-
-        chart.xAxis
-          .tickFormat(xAxisFormatter)
-          .axisLabel("Days since it happened");
-        chart.yAxis
-          .tickFormat(yAxisFormatter)
-          .axisLabel("Calls per day");
-      };
-
-      var renderChart = function ( ) {
-        chart(svg);
-      };
-
-      var getX = function (point, index) {
-        return point.x;
-      };
-
-      var getY = function (point, index) {
-        return point.y;
-      };
-
-      var xAxisFormatter = function (xValue) {
-        return d3.format(',d')(xValue);
-      };
-
-      var yAxisFormatter = function (yValue) {
-        return yValue.toString();
-      };
-
-      var resizeCallback = function ( ) {
-        console.log("resize callback triggered");
-        chart.update();
-      };
-
-      var addEvents = function ( ) {
-        nv.utils.windowResize( resizeCallback );
-        chart.dispatch.on('stateChange', stateChangeCallback);
-        chart.legend.dispatch.on('legendMouseover', legendMouseoverCallback);
-      };
-
-      var stateChangeCallback = function ( ) {
-        console.log("state of the chart changed");
-        console.log(arguments)
-      };
-
-      var legendMouseoverCallback = function ( ) {
-        console.log("you moused over the legend");
-      };
-
-      return {
-        initialize : initialize
-      };
+      ];
     }
-
-    var myCallback = function ( ) {
-      console.log("addGraph callback triggered");
-    };
-
-    var graph = new Nvd3Graph
-    nv.addGraph(graph.initialize, myCallback)
   </script>
     
 {% endblock %}
 
 {% block content %}
     <div class="row">
-      <div class="span2" id="home"><svg /></div>
+      <div class="col-lg-8">
+        <div id="chart" style="position:static; height: 300px"><svg /></div>
+      </div>
+      <div class="col-lg-4">
+        <div class="panel panel-default">
+          <div class="panel-heading">Testing some charts!</div>
+          <div class="panel-body">
+            This is a test of some chart stuffz and some text on the same page.
+          </div>
+        </div>
+      </div>
     </div>
 {% endblock %}
