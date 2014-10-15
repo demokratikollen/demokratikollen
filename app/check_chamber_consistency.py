@@ -6,20 +6,11 @@ from itertools import combinations
 from utils import PostgresUtils
 import datetime as dt
 import codecs
-engine = create_engine(PostgresUtils.engine_url())
 
-session = sessionmaker(bind=engine)
-s = session()
+def compute_intervals(s, chair):
 
-one_day = dt.timedelta(days=1)
+    one_day = dt.timedelta(days=1)
 
-f_trivial = codecs.open('chamber_consistency_trivial_overlaps.txt','w', encoding='utf-8')
-f_bad = codecs.open('chamber_consistency_bad_overlaps.txt','w', encoding='utf-8')
-f_empty_slots = codecs.open('chamber_consistency_empty_slots.txt','w', encoding='utf-8')
-
-appointments = {app.id: app for app in s.query(ChamberAppointment)}
-
-for chair in range(1,350):
     q = s.query(ChamberAppointment) \
         .filter(ChamberAppointment.chair==chair)\
         .filter(ChamberAppointment.status != 'Ledig')\
@@ -49,14 +40,36 @@ for chair in range(1,350):
 
         last_date = date
 
-    for i in out_intervals[1:]:
-        if len(i[2]) == 0:
-            f_empty_slots.write('Chair #{}: {} - {}\n'.format(chair, i[0],i[1]))
-        if len(i[2]) > 1:
-            overlap_msg = 'Chair #{}: {} - {}: {}\n'.format(chair,i[0],i[1], list(map(lambda x:appointments[x].title(),i[2])) )
-            if i[1]-i[0] >= one_day:
-                f_bad.write(overlap_msg)
-            else:
-                f_trivial.write(overlap_msg)
+    return out_intervals
 
+def main():
+
+    engine = create_engine(PostgresUtils.engine_url())
+
+    session = sessionmaker(bind=engine)
+    s = session()
+    one_day = dt.timedelta(days=1)
+
+    f_trivial = codecs.open('chamber_consistency_trivial_overlaps.txt','w', encoding='utf-8')
+    f_bad = codecs.open('chamber_consistency_bad_overlaps.txt','w', encoding='utf-8')
+    f_empty_slots = codecs.open('chamber_consistency_empty_slots.txt','w', encoding='utf-8')
+
+    appointments = {app.id: app for app in s.query(ChamberAppointment)}
+
+    for chair in range(1,350):
+
+        out_intervals = compute_intervals(s, chair)
+
+        for i in out_intervals[1:]:
+            if len(i[2]) == 0:
+                f_empty_slots.write('Chair #{}: {} - {}\n'.format(chair, i[0],i[1]))
+            if len(i[2]) > 1:
+                overlap_msg = 'Chair #{}: {} - {}: {}\n'.format(chair,i[0],i[1], list(map(lambda x:appointments[x].title(),i[2])) )
+                if i[1]-i[0] >= one_day:
+                    f_bad.write(overlap_msg)
+                else:
+                    f_trivial.write(overlap_msg)
+
+if __name__ == '__main__':
+    main()
 
