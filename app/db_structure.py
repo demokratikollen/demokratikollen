@@ -98,12 +98,46 @@ class Poll(Base):
         return self.name
 
 
+
+VoteOptionsType = Enum('Ja','Nej','Avstår','Frånvarande',name='vote_options')
+
 class Vote(Base):
     __tablename__ = 'votes'
     id = Column(Integer, primary_key=True)
     member_id = Column(Integer, ForeignKey('members.id'))
     poll_id = Column(Integer, ForeignKey('polls.id'))
-    vote_option = Column(Enum('Ja','Nej','Avstår','Frånvarande',name='vote_options'))
+    vote_option = Column(VoteOptionsType)
+
+    def __repr__(self):
+        return '{}: {}'.format(self.member.__repr__(),self.vote_option.__repr__())
+
+
+
+class PartyVote(Base):
+    __tablename__ = 'party_votes'
+    id = Column(Integer, primary_key=True)
+    party_id = Column(Integer, ForeignKey('parties.id'))
+    poll_id = Column(Integer, ForeignKey('polls.id'))
+    num_yes = Column(Integer)
+    num_no = Column(Integer)
+    num_abstain = Column(Integer)
+    num_absent = Column(Integer)
+
+    def sorted_votes(self):
+        votes = [   
+            ('Ja', self.num_yes),
+            ('Nej', self.num_no),
+            ('Avstår', self.num_abstain),
+            ('Frånvarande', self.num_absent)
+        ]
+        votes.sort(key=lambda t:t[1])
+        return votes
+
+    def vote_option(self):
+        return self.sorted_votes()[0][0]
+
+    def agreement(self):
+        return self.sorted_votes()[0][1]/(self.num_yes+self.num_no+self.num_abstain)
 
     def __repr__(self):
         return '{}: {}'.format(self.member.__repr__(),self.vote_option.__repr__())
@@ -112,53 +146,9 @@ class Vote(Base):
 def create_db_structure(engine):
     if MiscUtils.yes_or_no("Do you really want to drop everything in the database?"):
         PostgresUtils.drop_everything(engine)
+
     Base.metadata.create_all(engine)
 
 
 if __name__ == '__main__':
-    engine = create_engine(PostgresUtils.engine_url())
-    create_db_structure(engine)
-
-    session = sessionmaker()
-    session.configure(bind=engine)
-    s = session()
-
-    party_S = Party(name='Socialdemokraterna',abbr='S')
-    party_M = Party(name='Moderata samlingspartiet', abbr='M')
-    party_SD = Party(name='Sverigedemokraterna', abbr="SD")
-    party_V = Party(name='Vänsterpartiet',abbr='V')
-
-    s.add(party_S)
-    s.add(party_M)
-    s.add(party_SD)
-    s.add(party_V)
-
-    member1 = Member(first_name='Stefan',last_name='Löfvén',party=party_S)
-    member2 = Member(first_name='Jimmie',last_name='Åkesson',party=party_SD)
-    member3 = Member(first_name='Fredrik', last_name='Reinfeldt', party=party_M)
-    member4 = Member(first_name='Jonas', last_name='Sjöstedt', party=party_V)
-
-    s.add(member1)
-    s.add(member2)
-    s.add(member3)
-    s.add(member4)
-
-    poll1 = Poll(name='Ska Stefan få bli statsminister?')
-    s.add(poll1)
-    s.add(Vote(member=member1,poll=poll1,vote_option='Ja'))
-    s.add(Vote(member=member2,poll=poll1,vote_option='Nej'))
-    s.add(Vote(member=member3,poll=poll1,vote_option='Avstår'))
-    s.add(Vote(member=member4,poll=poll1,vote_option='Frånvarande'))
-
-    poll2 = Poll(name='Ska vi höja barnbidraget?')
-    s.add(poll2)
-    s.add(Vote(member=member1,poll=poll2,vote_option='Ja'))
-    s.add(Vote(member=member2,poll=poll2,vote_option='Nej'))
-    s.add(Vote(member=member3,poll=poll2,vote_option='Nej'))
-    s.add(Vote(member=member4,poll=poll2,vote_option='Ja'))
-
-    start = datetime.datetime.strptime('2010-01-01', '%Y-%m-%d').date()
-    end = datetime.datetime.strptime('2011-12-12', '%Y-%m-%d').date()
-    s.add(Appointment(group=party_S,member=member1,start_date=start,end_date=end))
-
-    s.commit()
+    pass

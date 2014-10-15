@@ -89,6 +89,7 @@ for i,(votering_id,intressent_id,beteckning,rm,rost,datum) in enumerate(c):
     s.add(Vote(member=members[intressent_id],vote_option=rost,poll=poll))
 
 del pbar
+s.commit()
 
 # Add kammaruppdrag
 print("Adding chamber appointments.")
@@ -104,6 +105,49 @@ for intressent_id,ordningsnummer,fr,to,stat,roll in c:
                 status=status,
                 role=role))
 
-print("Committing.")
+
+# Party votes
+num_party_votes = 0
+num_polls = s.query(Poll).count()
+pbar = InitBar(title="Computing party votes")
+pbar(0)
+n=0
+for poll in s.query(Poll).all():
+    n = n+1
+    if n % 10 == 0:
+        pbar(100*n/num_polls)
+
+
+    votes = s.query(Vote).join(Member).join(Party) \
+        .filter(Vote.poll_id == poll.id) \
+        .order_by(Party.id)
+
+    party_vote = None
+    for vote in votes:
+        if not party_vote or party_vote.party_id != vote.member.party_id:
+            if party_vote:
+                s.add(party_vote)
+                num_party_votes += 1
+            party_vote = PartyVote(
+                party_id = vote.member.party_id,
+                num_yes = 0,
+                num_no = 0,
+                num_abstain = 0,
+                num_absent = 0
+                )
+        
+        if vote.vote_option == 'Ja':
+            party_vote.num_yes += 1
+        elif vote.vote_option == 'Nej':
+            party_vote.num_no += 1
+        elif vote.vote_option == 'Avstår':
+            party_vote.num_abstain += 1
+        elif vote.vote_option == 'Frånvarande':
+            party_vote.num_absent += 1
+        else:
+            raise('Illegal vote {}'.format(vote.vote_option))
+del pbar
 s.commit()
+print('{} party votes registered.'.format(num_party_votes))
+
 source_conn.close()
