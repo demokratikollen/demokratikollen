@@ -4,6 +4,7 @@ from flask import Blueprint, request, render_template, \
 
 # Import the database object from the main app module
 from app import db
+fomr app import Member
 
 # Define the blueprint: 'auth', set its url prefix: app.url/auth
 mod_static = Blueprint('static', __name__, url_prefix='/')
