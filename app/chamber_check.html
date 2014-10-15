@@ -1,0 +1,47 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8">
+    <title>Angående fel i data rörande kammaruppdrag</title>
+  </head>
+  <body>
+<h2>Angående fel i data rörande kammaruppdrag</h2>
+
+<p>
+Vi hittar följande typer av fel:
+<ul>
+ <li>Luckor då ingen sitter på en viss stol i kammaren, se <a href="empty_slots.txt" download>empty_slots.txt</a></li>
+ <li>Perioder då två personer sitter på samma stol i kammaren</li>
+ <li>
+ 	<ul>
+ 	   <li>Ibland är felet 'trivialt': exempelvis Under en dag 2014-09-29 sitter både Eberstein, Susanne (S) och Billström, Tobias (M) på stol #1. Detta för att Tobias sitter _till och med_ och Susanne sitter _från och med_. Denna typ av fel uppträder ofta, men inte alltid (data är lite inkonsekvent) och det är inte så allvarligt. Se <a href="trivial_overlaps.txt" download>trivial_overlaps.txt</a></li>
+   <li>I 41 fall är felet allvarligt i meningen att flera ledamöter är tilldelade samma stol under en längre tid. Exempelvis sitter på stol #96 från och med 2010-10-04 till och med 2012-09-30 Riksdagsledamot Brodén, Anne Marie (M) och Riksdagsledamot Ertsborn, Jan (FP). Se <a href="bad_overlaps.txt" download>bad_overlaps.txt</a>
+   </li>
+ 	</ul>
+ </li>
+     </ul>
+</p>
+<h2>Visualisering</h2>
+<p>Vi har visualiserat felen per stol och figurerna nås på <a href="096.pdf">http://bror.einarsson.net/riksdagen/stol/096.pdf</a> , där 096 är numret på stolen från 001 till 349. Alla 349 figurerna finns i en .zip-fil <a href="alla.zip">här (7MB)</a>.
+</p>
+<p>I figurerna indikerar röd ordinarie ledamot, gul indikerar ersättare. Kryssmönster indikerar status ledig.</p>
+<h2>Hur kollar vi?</h2>
+
+<p>Vi läser in</p>
+
+<p>SELECT intressent_id,ordningsnummer,"from",tom,status,roll_kod FROM personuppdrag WHERE typ='kammaruppdrag' AND ordningsnummer!=0</p>
+
+<p>
+Vi tittar på
+<ul> 
+    <li>role = "Ersättare" eller "Riksdagsledamot" (från 'roll_kod')</li>
+    <li>status = "Ledig" eller "Tjänstgörande" (från 'status')</li>
+    <li>chair = 'ordningsnummer'</li>
+    </ul>
+</p>
+<p>På så vis ser vi vem som suttit när och på vilken stol i kammaren.
+</p>
+
+  </body>
+</html>
+

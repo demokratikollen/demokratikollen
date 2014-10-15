@@ -89,11 +89,11 @@ def main():
             if len(i[2]) > 1:
                 if i[1]-i[0] >= one_day:
                     ax.axvspan(i[0],i[1]+one_day, facecolor='#ff0000', alpha=0.5, linewidth=0)
-                    ax.text(i[1]+one_day, y, 'Overlap {}-{}'.format(i[0],i[1]),rotation=0)
+                    ax.text(i[1]+one_day, y, 'n={}: Overlap {}-{}'.format(len(i[2]),i[0],i[1]),rotation=0)
 
                 else:
                     ax.axvspan(i[0],i[1]+one_day, facecolor='#ffff00', alpha=0.5, linewidth=0)
-                    ax.text(i[1]+one_day, y, 'One day overlap {}'.format(i[0]),rotation=0)
+                    ax.text(i[1]+one_day, y, 'n={}: One day overlap {}'.format(len(i[2]),i[0]),rotation=0)
 
         ax.set_ylim(0,y+1)
         ax.yaxis.grid()
