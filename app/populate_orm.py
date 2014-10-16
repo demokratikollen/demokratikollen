@@ -122,32 +122,36 @@ for poll in s.query(Poll).all():
         .filter(Vote.poll_id == poll.id) \
         .order_by(Party.id)
 
-    party_vote = None
+    current_party_id = 0
     for vote in votes:
-        if not party_vote or party_vote.party_id != vote.member.party_id:
-            if party_vote:
-                s.add(party_vote)
-                num_party_votes += 1
-            party_vote = PartyVote(
-                party_id = vote.member.party_id,
-                num_yes = 0,
-                num_no = 0,
-                num_abstain = 0,
-                num_absent = 0
-                )
-        
-        if vote.vote_option == 'Ja':
-            party_vote.num_yes += 1
-        elif vote.vote_option == 'Nej':
-            party_vote.num_no += 1
-        elif vote.vote_option == 'Avstår':
-            party_vote.num_abstain += 1
-        elif vote.vote_option == 'Frånvarande':
-            party_vote.num_absent += 1
-        else:
-            raise('Illegal vote {}'.format(vote.vote_option))
+        if current_party_id != vote.member.party_id:
+            if not current_party_id == 0:
+                s.add(PartyVote(party_id = current_party_id,
+                                poll_id = poll.id,
+                                num_yes = party_votes['Ja']                             ,
+                                num_no = party_votes['Nej'],
+                                num_abstain = party_votes['Avstår'],
+                                num_absent = party_votes['Frånvarande']))
+
+            current_party_id = vote.member.party_id
+            party_votes = {
+                'Ja': 0,
+                'Nej': 0,
+                'Avstår': 0,
+                'Frånvarande': 0
+            }
+
+        party_votes[vote.vote_option] += 1
+
+    s.add(PartyVote(party_id = current_party_id,
+                    poll_id = poll.id,
+                    num_yes = party_votes['Ja']                             ,
+                    num_no = party_votes['Nej'],
+                    num_abstain = party_votes['Avstår'],
+                    num_absent = party_votes['Frånvarande']))
+
+
 del pbar
 s.commit()
-print('{} party votes registered.'.format(num_party_votes))
 
 source_conn.close()

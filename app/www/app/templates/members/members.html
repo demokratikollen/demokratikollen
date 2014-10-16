@@ -1,0 +1,27 @@
+{% extends "layout.html" %}
+{% block title %}Hem{% endblock %}
+{% block head %}
+  <link href="{{ url_for('static', filename='css/nv.d3.css') }}" rel="stylesheet">
+  <script src="{{ url_for('static', filename='js/d3.min.js') }}"></script>
+  <script src="{{ url_for('static', filename='js/nv.d3.min.js') }}"></script>
+
+  {{ super() }}
+  <script src="{{ url_for('static', filename='js/members/members.js') }}"></script>
+
+{% endblock %}
+
+{% block content %}
+    <div class="row">
+      <div class="col-lg-8">
+        <div id="chart" style="position:static; height: 300px"><svg /></div>
+      </div>
+      <div class="col-lg-4">
+        <div class="panel panel-default">
+          <div class="panel-heading">Testing some charts!</div>
+          <div class="panel-body">
+            This is a test of some chart stuffz and some text on the same page.
+          </div>
+        </div>
+      </div>
+    </div>
+{% endblock %}

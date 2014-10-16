@@ -85,6 +85,8 @@ class Party(Group):
     __mapper_args__ = {
         'polymorphic_identity':'party',
     }
+    def __repr__(self):
+        return 'Party {}: {} ({})'.format(self.id,self.name,self.abbr)    
 
 
 class Poll(Base):
@@ -122,22 +124,6 @@ class PartyVote(Base):
     num_no = Column(Integer)
     num_abstain = Column(Integer)
     num_absent = Column(Integer)
-
-    def sorted_votes(self):
-        votes = [   
-            ('Ja', self.num_yes),
-            ('Nej', self.num_no),
-            ('Avstår', self.num_abstain),
-            ('Frånvarande', self.num_absent)
-        ]
-        votes.sort(key=lambda t:t[1])
-        return votes
-
-    def vote_option(self):
-        return self.sorted_votes()[0][0]
-
-    def agreement(self):
-        return self.sorted_votes()[0][1]/(self.num_yes+self.num_no+self.num_abstain)
 
     def __repr__(self):
         return '{}: {}'.format(self.member.__repr__(),self.vote_option.__repr__())
