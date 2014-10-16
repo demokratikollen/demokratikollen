@@ -1,0 +1,60 @@
+{% extends "layout.html" %}
+{% block title %}Hem{% endblock %}
+{% block head %}
+  <link href="{{ url_for('static', filename='css/nv.d3.css') }}" rel="stylesheet">
+  <script src="{{ url_for('static', filename='js/d3.min.js') }}"></script>
+  <script src="{{ url_for('static', filename='js/nv.d3.min.js') }}"></script>
+
+  {{ super() }}
+  <script type="text/javascript">
+    var d = 0;
+    d3.json("/members/{{ member.id }}/absence",function(error,data) {
+      d = data.d;
+
+      nv.addGraph(function() {
+          var chart = nv.models.multiBarChart()
+            .transitionDuration(350)
+            .x(function(d,i) { return d.x })
+            .reduceXTicks(true)   //If 'false', every single x-axis tick label will be rendered.
+            .rotateLabels(0)      //Angle to rotate x-axis labels.
+            .showControls(true)   //Allow user to switch between 'Grouped' and 'Stacked' mode.
+            .groupSpacing(0.1)    //Distance between each group of bars.
+          ;
+
+          chart.xAxis
+              .tickFormat(d3.format(',f'));
+
+          chart.yAxis
+              .tickFormat(d3.format(',.1f'));
+
+          d3.select('#chart svg')
+              .datum(d)
+              .call(chart);
+
+          nv.utils.windowResize(chart.update);
+
+          return chart;
+      });
+    });
+  </script>
+
+{% endblock %}
+
+{% block content %}
+    <div class="row">
+      <div class="col-lg-4">
+        <div class="panel panel-default">
+          <div class="panel-heading" id="mpanel_title">
+            <h3 class="panel-title">{{ member.first_name }} {{ member.last_name }}</h3>
+          </div>
+          <div class="panel-body">
+            <b>Född:</b> {{ member.birth_year }} </br>
+            <b>Kön:</b> {{ member.gender|capitalize }}
+          </div>
+        </div>
+      </div>
+      <div class="col-lg-8">
+        <div id="chart" style="position:static; height: 300px"><svg /></div>
+      </div>
+    </div>
+{% endblock %}

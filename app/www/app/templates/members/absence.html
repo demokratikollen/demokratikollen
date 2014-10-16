@@ -7,8 +7,9 @@
 
   {{ super() }}
   <script type="text/javascript">
-    d3.json('/members/{{member_id}}.json', function(error,json) {
-      console.log(json)
+    var member_id = {{member.id}};
+    d3.json('/members/'+member_id+'.json', function(error,json) {
+      d3.select('#mpanel_title').text(json['first_name']+' '+json['last_name']);
     });
   </script>
   <script src="{{ url_for('static', filename='js/members/members.js') }}"></script>
@@ -22,7 +23,9 @@
       </div>
       <div class="col-lg-4">
         <div class="panel panel-default">
-          <div class="panel-heading">Testing some charts!</div>
+          <div class="panel-heading" id="mpanel_title">
+            {{ member.first_name }} {{ member.last_name }}
+          </div>
           <div class="panel-body">
             This is a test of some chart stuffz and some text on the same page.
           </div>
