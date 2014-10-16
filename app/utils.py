@@ -39,7 +39,20 @@ class MongoDBDatastore:
     
     def get_mongodb_collection(self):
         return self.collection
-        
+    
+
+
+    def store_string(self, json, identifier):
+        object_to_store = {"identifier": identifier, "object": json}
+        self.collection.update({"identifier": identifier}, object_to_store, upsert=True)
+
+    def get_string(self, identifier):
+        object_from_store = self.collection.find_one({'identifier': identifier})
+        if object_from_store != None:
+            return object_from_store['object']
+        else:
+            return None
+
     def store_object(self, object, identifier):
         obj_bytes = pickle.dumps(object)
         object_to_store = {"identifier": identifier, "object": obj_bytes}
