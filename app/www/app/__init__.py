@@ -27,9 +27,10 @@ def not_found(error):
 # Import a module / component using its blueprint handler variable (mod_auth)
 from app.mod_static.controllers import mod_static as static_module
 from app.mod_members.controllers import mod_members as members_module
+from app.mod_figures.controllers import mod_figures as figures_module
 
 # Register blueprint(s)
 app.register_blueprint(static_module)
 app.register_blueprint(members_module)
-# app.register_blueprint(xyz_module)
+app.register_blueprint(figures_module)
 # ..
