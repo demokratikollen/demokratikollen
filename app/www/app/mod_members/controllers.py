@@ -87,11 +87,7 @@ def get_member(member_id):
     }
 
     for y,rd_y in res_dict.items():
-        print(y)
-        print(rd_y)
         for m,rd_ym in rd_y.items():
-            print(m)
-            print(rd_ym)
             try:
                 nvd3_data["d"][0]["values"] \
                     .append({
