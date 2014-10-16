@@ -27,8 +27,10 @@ nv.addGraph(function() {
       .axisLabelDistance(30)
       .tickFormat(d3.format('.02f'));
   
+  var data = [{{ data | tojson | safe }}];
+
   d3.select('#chart svg')
-      .datum(getData())
+      .datum(data)
       .call(chart);
 
   nv.utils.windowResize(chart.update);
@@ -36,11 +38,6 @@ nv.addGraph(function() {
   return chart;
 });
 
-function getData(){
-
-  return  [{{ data | tojson | safe }}];
-
-}
 
   </script>
 
