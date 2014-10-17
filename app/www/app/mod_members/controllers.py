@@ -6,6 +6,7 @@ from flask import Blueprint, request, render_template, \
 from sqlalchemy import func
 from sqlalchemy.orm import aliased
 from datetime import datetime,timedelta
+from wtforms import Form, TextField, validators
 
 # Import the database object from the main app module
 from app import db, Member, Vote, Poll
@@ -13,20 +14,47 @@ from app import db, Member, Vote, Poll
 # Define the blueprint: 'auth', set its url prefix: app.url/auth
 mod_members = Blueprint('members', __name__, url_prefix='/members')
 
+class SearchForm(Form):
+    first_name = TextField('Förnamn')
+    last_name = TextField('Efternamn')
+
+@mod_members.route('/')
+def members():
+    form = SearchForm()
+    return render_template("/members/members.html",form=form)
+
+
 # Set the route and accepted methods
-@mod_members.route('/find', methods=['GET'])
+@mod_members.route('/find', methods=['GET','POST'])
 def find_member():
-    fn = None if not 'fn' in request.args else request.args['fn']
-    ln = None if not 'ln' in request.args else request.args['ln']
+    form = SearchForm(request.form)
+    fn = form.first_name.data
+    ln = form.last_name.data
+
+    if not fn and not ln:
+        flash({
+                "class": "alert-danger",
+                "title": "Ingen indata:",
+                "text": "Du angav inget att söka på."
+            })
+        return redirect('/members')
 
     q = db.session.query(Member)
 
     if fn:
-        q = q.filter(func.lower(Member.first_name).like('%{}%'.format(fn)))
+        q = q.filter(func.lower(Member.first_name).like('%{}%'.format(fn.lower())))
     if ln:
-        q = q.filter(func.lower(Member.last_name).like('%{}%'.format(ln)))
+        q = q.filter(func.lower(Member.last_name).like('%{}%'.format(ln.lower())))
 
-    return render_template("/members/members.html",members=q.all())
+    members = q.all()
+    if len(members) == 0:
+        flash({
+                "class": "alert-warning",
+                "text": "Din sökning matchade inga ledamöter."
+            })
+        return redirect('/members')
+    else:
+        return render_template("/members/members.html",form=form,members=members)
 
 # Set the route and accepted methods
 @mod_members.route('/<int:member_id>', methods=['GET'])
@@ -37,12 +65,6 @@ def member(member_id):
         format = None
     m = db.session.query(Member).filter_by(id=member_id).first()
 
-    if format=='json':
-        member = {
-            "first_name": m.first_name,
-            "last_name": m.last_name
-        }
-        return json.jsonify(member)
     return render_template("/members/member.html",member=m)
 
 
