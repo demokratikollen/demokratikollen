@@ -6,6 +6,7 @@ from itertools import combinations
 from utils import PostgresUtils, MiscUtils,MongoDBDatastore
 import datetime as dt
 import codecs
+import json
 from flask.json import jsonify
 
 
@@ -36,10 +37,10 @@ def poll_freq():
 
 
     datastore = MongoDBDatastore() 
-    datastore.store_string(jsonify(weekday),'poll_frequency_weekday')
-    datastore.store_string(jsonify(month),'poll_frequency_month')
-    datastore.store_string(jsonify(day),'poll_frequency_day')
-    datastore.store_string(jsonify(exact),'poll_frequency_exact')
+    datastore.store_string(json.dumps(weekday),'poll_frequency_weekday')
+    datastore.store_string(json.dumps(month),'poll_frequency_month')
+    datastore.store_string(json.dumps(day),'poll_frequency_day')
+    datastore.store_string(json.dumps(exact),'poll_frequency_exact')
 
 def main():
     poll_freq()
