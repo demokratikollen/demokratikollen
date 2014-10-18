@@ -115,7 +115,7 @@ fi
 
 gunicorn_debug() {
     #do things with parameters like $1 such as
-    gunicorn --reload --debug --log-file=- $1
+    gunicorn --reload --debug --log-file=- demokratikollen.www.app:app
 }
 
 
