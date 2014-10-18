@@ -8,6 +8,12 @@ import datetime as dt
 import codecs
 from flask.json import jsonify
 
+import numpy as np
+import matplotlib
+matplotlib.use('Agg')
+from datetime import date
+import matplotlib.pyplot as plt
+import matplotlib.dates as mdates
 
 
 def poll_freq():
@@ -15,6 +21,7 @@ def poll_freq():
     engine = create_engine(PostgresUtils.engine_url())
     session = sessionmaker(bind=engine)
     s = session()
+
 
 
 
@@ -40,6 +47,15 @@ def poll_freq():
     datastore.store_string(jsonify(month),'poll_frequency_month')
     datastore.store_string(jsonify(day),'poll_frequency_day')
     datastore.store_string(jsonify(exact),'poll_frequency_exact')
+
+
+    fig = plt.figure(0, figsize=(10,10))
+    ax = fig.add_subplot(111)
+
+    ax.hist(weekday)
+
+    fig.savefig('pollfreq_weekday.png')
+
 
 def main():
     poll_freq()

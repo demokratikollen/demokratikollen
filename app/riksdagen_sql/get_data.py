@@ -5,7 +5,7 @@ from subprocess import call
 
 urllist = [
     'http://data.riksdagen.se/dataset/person/person.sql.zip',
-    'http://data.riksdagen.se/dataset/votering/votering-201314.sql.zip',
+    'http://data.riksdagen.se/dataset/votering/votering-201213.sql.zip',
     'http://data.riksdagen.se/dataset/dokument/bet-2010-2013.sql.zip'
 ]
 
