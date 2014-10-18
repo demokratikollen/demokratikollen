@@ -39,3 +39,6 @@
 
 - name: Choose the 3.4 virtualenv on logins
   lineinfile: dest=~/.bashrc state=present line='source {{venv_dir}}/python3.4/bin/activate'
+
+- name: Add the package to PYTHONPATH
+  lineinfile: dest=~/.bashrc state=present line='export PYTHONPATH=/home/vagrant'
