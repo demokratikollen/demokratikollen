@@ -3,7 +3,7 @@ from flask import Blueprint, request, render_template, \
                   flash, g, session, redirect, url_for, \
                   json
 
-from app import db, PartyVote, Poll, Party, Member, ChamberAppointment
+from demokratikollen.www.app import db, PartyVote, Poll, Party, Member, ChamberAppointment
 
 import datetime as dt
 

@@ -3,7 +3,7 @@ from sqlalchemy import create_engine, func, distinct
 from sqlalchemy.orm import sessionmaker, aliased
 from sqlalchemy.sql.expression import literal
 from itertools import combinations
-from utils import PostgresUtils
+from demokratikollen.core.utils import PostgresUtils
 import datetime as dt
 import codecs
 

@@ -8,7 +8,7 @@ from sqlalchemy.orm import aliased
 from datetime import datetime,timedelta
 
 # Import the database object from the main app module
-from app import db, Member, Vote, Poll
+from demokratikollen.www.app import db, Member, Vote, Poll
 
 # Define the blueprint: 'auth', set its url prefix: app.url/auth
 mod_members = Blueprint('members', __name__, url_prefix='/members')

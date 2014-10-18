@@ -1,9 +1,9 @@
 # -*- coding: utf-8 -*-
-from db_structure import *
+from demokratikollen.core.db_structure import *
 from sqlalchemy import create_engine
 from sqlalchemy.orm import sessionmaker
 from sqlalchemy.orm.exc import NoResultFound
-from utils import PostgresUtils
+from demokratikollen.core.utils import PostgresUtils
 import os
 import psycopg2 as pg
 from progress_bar import InitBar

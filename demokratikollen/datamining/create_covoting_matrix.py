@@ -1,5 +1,5 @@
 # -*- coding: utf-8 -*-
-from db_structure import *
+from demokratikollen.core.db_structure import *
 from sqlalchemy import create_engine, func, distinct
 from sqlalchemy.orm import sessionmaker, aliased, joinedload
 import os
@@ -9,7 +9,7 @@ import pickle
 #import PIL.Image as Image
 import colorsys
 import math
-from utils import *
+from demokratikollen.core.utils import *
 
 def row2dict(row):
     d = {}

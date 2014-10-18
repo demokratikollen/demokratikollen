@@ -4,7 +4,7 @@ from sqlalchemy.types import Date, Enum
 from sqlalchemy.orm import relationship, backref, sessionmaker
 from sqlalchemy.ext.declarative import declarative_base
 import datetime
-from utils import PostgresUtils, MiscUtils
+from demokratikollen.core.utils import PostgresUtils, MiscUtils
 
 
 Base = declarative_base()

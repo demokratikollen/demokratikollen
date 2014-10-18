@@ -1,5 +1,5 @@
 # -*- coding: utf-8 -*-
-from utils import MiscUtils, PostgresUtils
+from demokratikollen.core.utils import MiscUtils, PostgresUtils
 import glob
 import psycopg2
 import os
