@@ -1,0 +1,71 @@
+{% extends "layout.html" %}
+{% block title %}Voteringsfrekvens{% endblock %}
+
+{% block head %}
+{{ super() }}
+
+<script type="text/javascript">
+
+VF = 
+{
+  Setup: function(){ 
+    nv.addGraph(function () {
+    var chart = nv.models.discreteBarChart()
+      .x(function(d) { return d.label})    //Specify the data accessors.
+      .y(function(d) { return d.value})
+      .staggerLabels(false)    //Too many bars and not enough room? Try staggering labels.
+      .tooltips(true)        //Don't show tooltips
+      .showValues(false)       //...instead, show the bar value right on top of each bar.
+      .transitionDuration(350)
+      .color(['#00cc00']);
+      //.yDomain([0,60]);
+  
+        //chart.margin({left:100});
+
+    chart.yAxis    
+      .axisLabel('Antal voteringar')
+      .axisLabelDistance(30);
+
+    nv.utils.windowResize(chart.update);
+
+    VF.chart = chart
+    return chart
+
+  }, VF.InitiateNewDataRequest)
+    
+  },
+  InitiateNewDataRequest: function() {
+    $.get('{{ url_for('figures.voteringsfrekvens', format='json') }}', VF.ParseReceivedData);
+  },
+  ParseReceivedData: function(json_data, textStatus, jqxhr) {
+    d3.select('#chart svg')
+    .datum([json_data])
+    .call(VF.chart);
+  },
+  chart: null
+}  
+
+$(VF.Setup);
+
+</script>
+
+
+
+
+{% endblock %}
+
+{% block content %}
+    <div class="row">
+      <div class="col-lg-8">
+        <div id="chart" style="position:static; height: 300px"><svg /></div>
+      </div>
+      <div class="col-lg-4">
+        <div class="panel panel-default">
+          <div class="panel-heading">Partipiskan</div>
+          <div class="panel-body">
+            Visar antal omröstning som funktion av tid.
+          </div>
+        </div>
+      </div>
+    </div>
+{% endblock %}

@@ -4,13 +4,32 @@ from flask import Blueprint, request, render_template, \
                   json
 
 from demokratikollen.www.app import db, PartyVote, Poll, Party, Member, ChamberAppointment
+from sqlalchemy import func
 
 import datetime as dt
+import calendar
 
 mod_figures = Blueprint('figures', __name__, url_prefix='/figures')
 
 ########
 # Routes
+
+@mod_figures.route('/voteringsfrekvens.<string:format>')
+def voteringsfrekvens(format):
+    if format == 'html':
+        return render_template('/figures/voteringsfrekvens.html')
+    if format == 'json':
+        poll_agg = db.session.query(func.date_trunc('week', Poll.date), func.count(Poll.id)) \
+                    .group_by(func.date_trunc('week', Poll.date))  \
+                    .order_by(func.date_trunc('week', Poll.date))
+
+        data = []
+        for poll in poll_agg:
+            data.append(dict(label=poll[0].strftime('%m-%d'), value=poll[1]))
+
+        return json.jsonify(key='voteringsfrekvens', values=data)
+    else:
+        return render_template('404.html'), 404
 
 @mod_figures.route('/partipiskan', methods=['GET'])
 def partipiskan():
