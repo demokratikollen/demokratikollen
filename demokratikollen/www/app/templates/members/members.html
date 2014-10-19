@@ -1,5 +1,6 @@
 {% extends "layout.html" %}
 {% set heading = "Sök ledamöter" %}
+{% set header_members_class = "active" %}
 {% block title %}{{ heading }}{% endblock %}
 
 {% block content %}
@@ -9,8 +10,7 @@
         {% from "members/_formhelpers.html" import render_field %}
         <form method="post" action="/members/find">
           <dl>
-            {{ render_field(form.first_name) }}
-            {{ render_field(form.last_name) }}
+            {{ render_field(form.terms) }}
           </dl>
           <p><input type="submit" value="Hitta ledamot">
         </form>
@@ -30,16 +30,16 @@
           <thead>
             <tr>
               <th>Id</th>
-              <th>Förnamn</th>
-              <th>Efternamn</th>
+              <th>Namn</th>
+              <th>Parti</th>
             </tr>
           </thead>
           <tbody>
             {% for m in members -%}
             <tr>
               <td><a href="/members/{{ m.id }}">{{ m.id }}</a></td>
-              <td>{{ m.first_name }}</td>
-              <td>{{ m.last_name }}</td>
+              <td>{{ m.first_name }} {{ m.last_name }}</td>
+              <td>{{ m.party.abbr }}</td>
             </tr>
             {%- endfor %}
           </tbody>

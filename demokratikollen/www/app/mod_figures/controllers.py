@@ -19,14 +19,32 @@ def voteringsfrekvens(format):
     if format == 'html':
         return render_template('/figures/voteringsfrekvens.html')
     if format == 'json':
-        poll_agg = db.session.query(func.date_trunc('week', Poll.date), func.count(Poll.id)) \
-                    .group_by(func.date_trunc('week', Poll.date))  \
-                    .order_by(func.date_trunc('week', Poll.date))
 
-        data = []
-        for poll in poll_agg:
-            data.append(dict(label=poll[0].strftime('%m-%d'), value=poll[1]))
+        if 'time' in request.args:
+            time_format = request.args['time']
+        else:
+            time_format = 'dow'
 
+        if time_format == 'dow':
+            # get polls grouped on day of week
+            poll_agg = db.session.query(func.date_part('dow', Poll.date), func.count(Poll.id)) \
+                    .group_by(func.date_part('dow', Poll.date))  \
+                    .order_by(func.date_part('dow', Poll.date))
+
+            weekdays = ['Söndag', 'Måndag', 'Tisdag', 'Onsdag', 'Torsdag', 'Fredag', 'Lördag']
+
+            data = []
+            for poll in poll_agg:
+                data.append(dict(label=weekdays[int(poll[0])], value=poll[1]))
+        if time_format == 'month':
+            poll_agg = db.session.query(func.date_part('month', Poll.date), func.count(Poll.id)) \
+                    .group_by(func.date_part('month', Poll.date))  \
+                    .order_by(func.date_part('month', Poll.date))
+
+            months = ['Jan.', 'Feb.', 'Mars', 'Apr.', 'Maj', 'Juni', 'Juli', 'Aug.', 'Sep.', 'Okt.', 'Nov.', 'Dec.']
+            data = []
+            for poll in poll_agg:
+                data.append(dict(label=months[int(poll[0])-1], value=poll[1]))
         return json.jsonify(key='voteringsfrekvens', values=data)
     else:
         return render_template('404.html'), 404
