@@ -118,5 +118,9 @@ gunicorn_debug() {
     gunicorn --reload --debug --log-file=- demokratikollen.www.app:app
 }
 
+werkzeug_debug() {
+    python /home/vagrant/demokratikollen/www/run.py
+}
+
 
 
