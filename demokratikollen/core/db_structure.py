@@ -16,6 +16,7 @@ class Member(Base):
     last_name = Column(String(250))
     birth_year = Column(Integer)
     gender = Column(String(10))
+    image_url = Column(String(250))
     party_id = Column(Integer, ForeignKey('parties.id'))
     votes = relationship('Vote', backref='member')
     appointments = relationship('Appointment', backref='member')

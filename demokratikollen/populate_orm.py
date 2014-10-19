@@ -66,7 +66,9 @@ for birth_year,first_name,last_name,gender,party_abbr,intressent_id in c:
         print("No result was found for abbr {}.".format(party_abbr))
         print(party.name)
         raise
-    members[intressent_id] = Member(first_name=first_name,last_name=last_name,birth_year=birth_year,gender=gender,party=party)
+    members[intressent_id] = Member(first_name=first_name,last_name=last_name,
+                                    birth_year=birth_year,gender=gender,party=party,
+                                    image_url="http://data.riksdagen.se/filarkiv/bilder/ledamot/{}_192.jpg".format(intressent_id))
     s.add(members[intressent_id])
 s.commit()
 
