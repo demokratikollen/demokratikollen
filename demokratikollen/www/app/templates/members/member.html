@@ -3,29 +3,51 @@
 {% block head %}
 
   {{ super() }}
+
+  <style type="text/css">
+    .nvtooltip {
+      font-size: 9pt;
+    }
+
+    .nvtooltip h3 {
+      font-size: 9pt;
+      font-weight: bold;
+    }
+  </style>
   <script type="text/javascript">
-    var d = 0;
     d3.json("/members/{{ member.id }}/absence",function(error,data) {
-      d = data.d;
+      nvd3_data = data.d;
+
+      var month = ["Jan", "Feb", "Mars", "Apr", "Maj", "Juni", "Juli", "Aug", "Sep", "Okt", "Nov", "Dec"];
 
       nv.addGraph(function() {
           var chart = nv.models.multiBarChart()
-            .transitionDuration(350)
-            .x(function(d,i) { return d.x })
-            .reduceXTicks(true)   //If 'false', every single x-axis tick label will be rendered.
-            .rotateLabels(0)      //Angle to rotate x-axis labels.
-            .showControls(true)   //Allow user to switch between 'Grouped' and 'Stacked' mode.
-            .groupSpacing(0.1)    //Distance between each group of bars.
+            .margin({bottom: 70})
+            .transitionDuration(200)
+            .rotateLabels(-45)      //Angle to rotate x-axis labels.
+            .groupSpacing(0.2)    //Distance between each group of bars.
+            .showControls(false)
+            .reduceXTicks(false)
+            .x(function(d,i) { 
+              return new Date(d.x*1000);
+            })
+            .tooltipContent(function(key, x, y, e, graph) {
+              return '<h3>' + key + '</h3>' +
+                     '<p>' +  y + ' i ' + x.toLowerCase() + '</p>'
+            })  
           ;
 
+          // chart.xAxis.tickValues(nvd3_data[0].values.map( function(d){ console.log(d);return new Date(d.x*1000); } ) );
           chart.xAxis
-              .tickFormat(d3.format(',f'));
+              .tickFormat(function(d) {
+                return month[d.getMonth()]+' '+d3.time.format('%Y')(d);
+              });
 
           chart.yAxis
-              .tickFormat(d3.format(',.1f'));
+              .tickFormat(d3.format(',f'));
 
           d3.select('#chart svg')
-              .datum(d)
+              .datum(nvd3_data)
               .call(chart);
 
           nv.utils.windowResize(chart.update);
@@ -39,7 +61,7 @@
 
 {% block content %}
     <div class="row">
-      <div class="col-lg-4">
+      <div class="col-lg-4 col-xs-6">
         <div class="panel panel-default">
           <div class="panel-heading" id="mpanel_title">
             <h3 class="panel-title">{{ member.first_name }} {{ member.last_name }}</h3>
@@ -50,7 +72,7 @@
           </div>
         </div>
       </div>
-      <div class="col-lg-8">
+      <div class="col-lg-8 col-xs-12">
         <div id="chart" style="position:static; height: 300px"><svg /></div>
       </div>
     </div>

@@ -81,19 +81,31 @@ def get_member(member_id):
                             .group_by(Vote.vote_option,'y','m') \
                             .order_by('y','m')
 
-    # Sort result into output format
-    res_dict = {}
+    def month_iter(start,end):
+        cur_y,cur_m = start
+        y2,m2 = end
+        while not (cur_y >= y2 and cur_m > m2):
+            yield cur_y,cur_m
+            cur_m += 1
+            if cur_m > 12:
+                cur_y += 1
+                cur_m = 1
+
+    results = q.all()
+    start = results[0][2:]
+    end = results[-1][2:]
+
+    tot = {}
+    absent = {}
+
     for vo,num,y,m in q:
-        if not y in res_dict:
-            res_dict[y] = {}
-        if not m in res_dict[y]:
-            res_dict[y][m] = {}
-        if not 'Totalt' in res_dict[y][m]:
-            res_dict[y][m]['Totalt'] = num
+        if not (y,m) in tot:
+            tot[(y,m)] = num
         else:
-            res_dict[y][m]['Totalt'] += num
+            tot[(y,m)] += num
         if vo == 'Frånvarande':
-            res_dict[y][m][vo] = num
+            absent[(y,m)] = num
+
 
     nvd3_data={
         "d": [
@@ -108,22 +120,18 @@ def get_member(member_id):
         ]
     }
 
-    for y,rd_y in res_dict.items():
-        for m,rd_ym in rd_y.items():
-            try:
-                nvd3_data["d"][0]["values"] \
-                    .append({
-                        "x": datetime(year=int(y),month=int(m),day=1).timestamp(),
-                        "y": rd_ym['Frånvarande']})
-            except KeyError:
-                pass
-            try:
-                nvd3_data["d"][1]["values"] \
-                    .append({
-                        "x": datetime(year=int(y),month=int(m),day=1).timestamp(),
-                        "y": rd_ym['Totalt']})
-            except KeyError:
-                pass
+    for y,m in month_iter(start,end):
+        absence = 0 if not (y,m) in absent else absent[(y,m)]
+        total = 0 if not (y,m) in tot else tot[(y,m)]
+
+        nvd3_data["d"][0]["values"] \
+            .append({
+                "x": datetime(year=int(y),month=int(m),day=1).timestamp(),
+                "y": absence})
+        nvd3_data["d"][1]["values"] \
+            .append({
+                "x": datetime(year=int(y),month=int(m),day=1).timestamp(),
+                "y": total})
 
     return json.jsonify(nvd3_data)
 
