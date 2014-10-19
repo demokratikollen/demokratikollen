@@ -15,7 +15,7 @@ from demokratikollen.www.app import db, Member, Vote, Poll
 mod_members = Blueprint('members', __name__, url_prefix='/members')
 
 class SearchForm(Form):
-    terms = TextField('Namn')
+    terms = TextField(label='Namn',description='Namn')
 
 @mod_members.route('/')
 def members():
