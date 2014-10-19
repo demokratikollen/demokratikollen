@@ -27,15 +27,15 @@ def members():
 @mod_members.route('/find', methods=['GET','POST'])
 def find_member():
     form = SearchForm(request.form)
-    s_words = [w.lower() for w in form.terms.data.split()]
-
-    if len(s_words)==0:
+    if not form.terms.data:
         flash({
                 "class": "alert-danger",
                 "title": "Ingen indata:",
                 "text": "Du angav inget att söka på."
             })
         return redirect('/members')
+        
+    s_words = [w.lower() for w in form.terms.data.split()]
 
     q = db.session.query(Member)
 
