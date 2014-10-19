@@ -3,7 +3,7 @@ from sqlalchemy import create_engine, func, distinct
 from sqlalchemy.orm import sessionmaker, aliased
 from sqlalchemy.sql.expression import literal, distinct
 from itertools import combinations
-from demokratikollen.core.utils import PostgresUtils
+from demokratikollen.core.utils import postgres as pg_utils
 import datetime as dt
 import codecs
 import numpy as np
@@ -25,7 +25,7 @@ def main():
     if not os.path.exists(fig_dir):
         os.makedirs(fig_dir)
 
-    engine = create_engine(PostgresUtils.engine_url()) 
+    engine = create_engine(pg_utils.engine_url()) 
     session = sessionmaker(bind=engine)
     s = session()
     one_day = dt.timedelta(days=1)

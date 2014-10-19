@@ -3,7 +3,7 @@ from sqlalchemy import create_engine, func, distinct
 from sqlalchemy.orm import sessionmaker, aliased
 from sqlalchemy.sql.expression import literal
 from itertools import combinations
-from demokratikollen.core.utils import PostgresUtils, MiscUtils,MongoDBDatastore
+from demokratikollen.core.utils import postgres as pg_utils, mongo_utils.Mongodb as mongo_utils.Mongo_utils
 import datetime as dt
 import codecs
 import json
@@ -19,7 +19,7 @@ import matplotlib.dates as mdates
 
 def poll_freq():
 
-    engine = create_engine(PostgresUtils.engine_url())
+    engine = create_engine(pg_utils.engine_url())
     session = sessionmaker(bind=engine)
     s = session()
 
@@ -45,7 +45,7 @@ def poll_freq():
             exact[timestamp] = 1
 
 
-    datastore = MongoDBDatastore() 
+    datastore = mongo_utils.MongoDBDatastore() 
     datastore.store_string(json.dumps(weekday),'poll_frequency_weekday')
     datastore.store_string(json.dumps(month),'poll_frequency_month')
     datastore.store_string(json.dumps(month),'poll_frequency_week')

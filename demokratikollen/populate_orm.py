@@ -3,7 +3,7 @@ from demokratikollen.core.db_structure import *
 from sqlalchemy import create_engine
 from sqlalchemy.orm import sessionmaker
 from sqlalchemy.orm.exc import NoResultFound
-from demokratikollen.core.utils import PostgresUtils
+from demokratikollen.core.utils import postgres as pg_utils
 import os
 import psycopg2 as pg
 from progress_bar import InitBar
@@ -12,7 +12,7 @@ from progress_bar import InitBar
 source_conn = pg.connect(os.environ['DATABASE_RIKSDAGEN_URL'])
 
 # Connect to SQLAlchemy db and create structure
-engine = create_engine(PostgresUtils.engine_url())
+engine = create_engine(pg_utils.engine_url())
 create_db_structure(engine)
 
 session = sessionmaker()
