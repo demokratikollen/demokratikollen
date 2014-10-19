@@ -3,7 +3,7 @@ from flask import Blueprint, request, render_template, \
                   flash, g, session, redirect, url_for, \
                   json
 
-from sqlalchemy import func
+from sqlalchemy import func,or_
 from sqlalchemy.orm import aliased
 from datetime import datetime,timedelta
 from wtforms import Form, TextField, validators
@@ -15,8 +15,7 @@ from demokratikollen.www.app import db, Member, Vote, Poll
 mod_members = Blueprint('members', __name__, url_prefix='/members')
 
 class SearchForm(Form):
-    first_name = TextField('Förnamn')
-    last_name = TextField('Efternamn')
+    terms = TextField('Namn')
 
 @mod_members.route('/')
 def members():
@@ -28,10 +27,9 @@ def members():
 @mod_members.route('/find', methods=['GET','POST'])
 def find_member():
     form = SearchForm(request.form)
-    fn = form.first_name.data
-    ln = form.last_name.data
+    s_words = [w.lower() for w in form.terms.data.split()]
 
-    if not fn and not ln:
+    if len(s_words)==0:
         flash({
                 "class": "alert-danger",
                 "title": "Ingen indata:",
@@ -41,10 +39,10 @@ def find_member():
 
     q = db.session.query(Member)
 
-    if fn:
-        q = q.filter(func.lower(Member.first_name).like('%{}%'.format(fn.lower())))
-    if ln:
-        q = q.filter(func.lower(Member.last_name).like('%{}%'.format(ln.lower())))
+    for w in s_words:
+        q = q.filter(or_(
+                    func.lower(Member.first_name).like('%{}%'.format(w)),
+                    func.lower(Member.last_name).like('%{}%'.format(w))))
 
     members = q.all()
     if len(members) == 0:
