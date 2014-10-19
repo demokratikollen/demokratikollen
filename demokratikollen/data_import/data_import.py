@@ -99,8 +99,7 @@ def clean(path_in, path_out, overwrite=None):
 def execute_statements(statements, conn):
     """Execute a list of statements with a database connection.
 
-    Executes all the SQL statements and then commits.
-
+    Executes all the SQL statements.
     Args:
         statements (iterable of str): The list of statements.
         conn (psycopg2.Connection): The postgresql connection to use.
@@ -112,8 +111,7 @@ def execute_statements(statements, conn):
             cur.execute(stmt)
             count += 1
 
-        logger.info('Executed {0} statement(s). Commiting.'.format(count))
-        conn.commit()
+        logger.info('Executed {0} statement(s).'.format(count))
 
 
 def statements(f):
