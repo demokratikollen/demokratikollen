@@ -16,8 +16,6 @@ import demokratikollen.core.utils.misc as misc_utils
 
 DEFAULT_CLEANED_PREFIX = 'cleaned_'
 
-DB_URL = 'postgresql://vagrant:demokratikollen@localhost:5432/riksdagen'
-
 logger = logging.getLogger(__name__)
 
 def main():
@@ -159,7 +157,7 @@ def dropall(conn):
 def setup_wipe_parser(parser):
 
     def wipe(args):
-        db_url = DB_URL
+        db_url = pg_utils.database_url(which='riksdagen')
         with psycopg2.connect(db_url) as conn:
 
             logger.info('Dropping all tables.')
@@ -185,7 +183,7 @@ def setup_psql_parser(parser):
         if len(paths) == 0:
             logger.info('No .sql files found at {0}.'.format(args.path))
 
-        db_url = DB_URL
+        db_url = pg_utils.database_url(which='riksdagen')
         with psycopg2.connect(db_url) as conn:
             for path_in in paths:
                 logger.info('Processing {0}.'.format(path_in))

@@ -39,13 +39,20 @@ def drop_everything(engine):
         conn.execute(DropTable(table))
     trans.commit()
 
-def database_url():
+def database_url(which='demokratikollen'):
     """returns database_url from env if it exists, otherwise default"""
 
-    if 'DATABASE_URL' in os.environ:
-        return os.environ['DATABASE_URL']
-    else:
-        return 'postgresql://postgres:demokrati@localhost:5432/demokratikollen'
+    if which == 'demokratikollen':
+        if 'DATABASE_URL' in os.environ:
+            return os.environ['DATABASE_URL']
+        else:
+            return 'postgresql://postgres:demokrati@localhost:5432/demokratikollen'
+
+    elif which == 'riksdagen':
+        if 'DATABASE_RIKSDAGEN_URL' in os.environ:
+            return os.environ['DATABASE_RIKSDAGEN_URL']
+        else:
+            return 'postgresql://vagrant:demokratikollen@localhost:5432/riksdagen'
 
 def engine_url():
     """Returns the engine url taken from the database_url,
