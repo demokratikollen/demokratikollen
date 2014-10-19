@@ -28,19 +28,33 @@ VF =
 
     nv.utils.windowResize(chart.update);
 
-    VF.chart = chart
+    VF.chart = chart;
     return chart
 
-  }, VF.InitiateNewDataRequest)
+    }, VF.ChangeToDoW)
     
-  },
-  InitiateNewDataRequest: function() {
-    $.get('{{ url_for('figures.voteringsfrekvens', format='json') }}', VF.ParseReceivedData);
+    $('#chart-nav').append('Visa voteringsfrekvens "binnad" på: ');
+    $('#chart-nav').append('<button id="dow-button" class="btn btn-default">Veckodagar</button>');
+    $('#chart-nav').append('<button id="month-button" class="btn btn-default">Månader</button>');
+
+    $('#dow-button').on('click', VF.ChangeToDoW);
+    $('#month-button').on('click', VF.changeToMonth);
+
   },
   ParseReceivedData: function(json_data, textStatus, jqxhr) {
     d3.select('#chart svg')
     .datum([json_data])
     .call(VF.chart);
+  },
+  ChangeToDoW: function () {
+    $('#dow-button').addClass('active');
+    $('#month-button').removeClass('active');
+    $.get('{{ url_for('figures.voteringsfrekvens', format='json') }}?time=dow', VF.ParseReceivedData);
+  },
+  changeToMonth: function() {
+    $('#month-button').addClass('active');
+    $('#dow-button').removeClass('active');
+    $.get('{{ url_for('figures.voteringsfrekvens', format='json') }}?time=month', VF.ParseReceivedData);
   },
   chart: null
 }  
@@ -58,10 +72,11 @@ $(VF.Setup);
     <div class="row">
       <div class="col-lg-8">
         <div id="chart" style="position:static; height: 300px"><svg /></div>
+        <div id="chart-nav"> </div>
       </div>
       <div class="col-lg-4">
         <div class="panel panel-default">
-          <div class="panel-heading">Partipiskan</div>
+          <div class="panel-heading">Voteringsfrekvens</div>
           <div class="panel-body">
             Visar antal omröstning som funktion av tid.
           </div>
