@@ -21,10 +21,38 @@ Assumes you have cloned the repository.
 5. Once completed, run `vagrant ssh` to login to the VM. The app code is residing in ~/app. The ~/app folder on the guest machine is shared with the app folder in the repository on the host machine.
 
 ## Initialization of riksdagen database
-1. Go to the riksdagen sql folder: `cd ~/app/riksdagen_sql`
-2. Download the data: `python get_data.py`
-3. Clear database: `./clear_db.sh`
-4. Initialize database: `./init_db.sh`
+1. Go to the application root: `cd ~/demokratikollen`
+2. Use the command line interface in import_data.py to do the rest:
+    * Clear any contents of the database and create tables:
+
+        python import_data.py wipe
+
+    * Download data from the parliament's website:
+
+        python import_data.py download data/urls.txt data/download
+
+    * Unpack all the zipped data files:
+
+        python import_data.py unpack data/download data/download
+
+    * Clean errors so files can be imported. The flag `--remove` removes the unpacked source files after successful cleanup.
+
+        python import_data.py clean data/download data/cleaned --remove
+
+    * Execute all INSERT statements found in the cleaned data files:
+
+        python import_data.py execute data/cleaned
+
+3. When/if you download more data and want to add it, you can of course work with single files:
+
+    * Just add the new url to `~/demokratikollen/data/urls.txt`. The download command by default skips downloading files that already exist.
+
+    * Then run something along those lines:
+
+        python import_data.py download data/download
+        python import_data.py unpack data/download/my_new_file_name.sql.zip
+        python import_data.py clean data/download/my_new_file_name.sql.zip data/cleaned
+        python import_data.py execute data/cleaned/cleaned_my_new_file_name.sql
 
 ## Import of data to ORM database
 First initialize database according to instructions above. Then run `python ~/app/populate_orm.py`.
