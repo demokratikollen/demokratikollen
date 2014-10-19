@@ -12,20 +12,23 @@ import psycopg2
 
 from demokratikollen.data_import import data_import
 import demokratikollen.core.utils.postgres as psql_utils
+import demokratikollen.core.utils.misc as misc_utils
 
 DEFAULT_CLEANED_PREFIX = 'cleaned_'
 
-DB_URL = 'postgresql://vagrant@localhost:5432/riksdagen'
+DB_URL = 'postgresql://vagrant:demokratikollen@localhost:5432/riksdagen'
 
 logger = logging.getLogger(__name__)
 
 def main():
     parser = argparse.ArgumentParser(prog='data')
-    subparsers = parser.add_subparsers()
+    subparsers = parser.add_subparsers(dest='subcommand')
+    subparsers.required = True
 
     setup_download_parser(subparsers.add_parser('download'))
     setup_unpack_parser(subparsers.add_parser('unpack'))
     setup_clean_parser(subparsers.add_parser('clean'))
+    setup_wipe_parser(subparsers.add_parser('wipe'))
     setup_psql_parser(subparsers.add_parser('psql'))
 
     args = parser.parse_args()
@@ -33,8 +36,12 @@ def main():
     try:
         logger.info('Running {0}.'.format(str(args.func.__name__)))
         args.func(args)
+    except psycopg2.ProgrammingError as e:
+        logger.error('Terminated because database query failed: {0}'.format(str(e).rstrip()))
+    except KeyboardInterrupt as e:
+        logger.info('Terminated because of user interrupt.')
     except Exception as e:
-        logger.error('Preprocessing was terminated because of an unhandled exception.')
+        logger.error('Terminated because of an unhandled exception.')
         logger.debug(e, exc_info=sys.exc_info())
 
 
@@ -66,14 +73,15 @@ def setup_unpack_parser(parser):
 
         for path in paths:
             if not zipfile.is_zipfile(path):
-                logger.debug('Skipping {0} because it is not a zipfile.')
+                logger.debug('Skipping {0} because it is not a zipfile.'.format(path))
                 continue
 
             outdir = args.outdir if args.outdir else os.path.dirname(path)
 
             with zipfile.ZipFile(path) as archive:
                 for member in archive.namelist():
-                    logger.info('Extracting from {0}: {1}'.format(path, os.path.join(outdir, member)))
+                    logger.info(
+                        'Extracting from {0}: {1}'.format(path, os.path.join(outdir, member)))
                     archive.extract(member, path=outdir)
 
             if args.remove:
@@ -140,6 +148,27 @@ def setup_clean_parser(parser):
     parser.set_defaults(func=clean)
 
 
+def dropall(conn):
+    with conn.cursor() as cur:
+        cur.execute("SELECT table_schema,table_name FROM information_schema.tables "
+            "WHERE table_schema = 'public' ORDER BY table_schema,table_name")
+        rows = cur.fetchall()
+        for row in rows:
+            cur.execute("drop table {} cascade".format(row[1]))
+
+def setup_wipe_parser(parser):
+
+    def wipe(args):
+        db_url = DB_URL
+        with psycopg2.connect(db_url) as conn:
+
+            logger.info('Dropping all tables.')
+            dropall(conn)
+            logger.info('Creating tables.')
+            psql_utils.run_sql('data/create_tables.sql', conn)
+        
+    parser.set_defaults(func=wipe)
+
 
 def setup_psql_parser(parser):
 
@@ -151,29 +180,17 @@ def setup_psql_parser(parser):
         else:
             paths = [args.path]
 
-        db_url = psql_utils.database_url('riksdagen')
-        logger.info('Connecting to {0}'.format(db_url))
-        conn = psycopg2.connect(db_url)        
-        cur = conn.cursor()
-
-        try:
-
+        db_url = DB_URL
+        with psycopg2.connect(db_url) as conn:
             for path_in in paths:
+                logger.info('Processing {0}.'.format(path_in))
+                f = open(path_in, encoding='utf-8')
 
-                logger.info('Executing statements...')
-                for stmt in data_import.statements(path_in):
-                    cur.execute(stmt)
-
-                logger.info('Commiting changes.')
-                conn.commit()
-
+                data_import.execute_statements(data_import.statements(f), conn)
+                
                 if args.remove:
                     logger.info('Removing {0}.'.format(path_in))
                     os.remove(path_in)
-
-        finally:
-            cur.close()
-            conn.close()
 
         
     parser.add_argument('path', type=str, help='Path to a file or directory of files to process.')

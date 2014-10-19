@@ -16,7 +16,7 @@ root_logger.addHandler(ch)
 logger = logging.getLogger(__name__)
 
 # SQL commands to look for in SQL files
-VALID_COMMANDS = ["INSERT"]
+VALID_COMMANDS = ['INSERT', 'CREATE']
 
 class CannotCleanException(Exception):
     """An exception for when a data file cannot be cleaned."""
@@ -76,6 +76,18 @@ def clean(path_in, path_out, overwrite=None):
             f_out.write(s + '\n')
 
         f_out.write('COMMIT;')
+
+
+def execute_statements(statements, conn):
+    
+    with conn.cursor() as cur:
+        count = 0
+        for stmt in statements:
+            cur.execute(stmt)
+            count += 1
+
+        logger.info('Executed {0} statement(s). Commiting.'.format(count))
+        conn.commit()
 
 
 def statements(f):

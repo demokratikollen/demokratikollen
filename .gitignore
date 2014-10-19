@@ -27,6 +27,6 @@ app/www/ghostdriver.log
 
 # Data
 data/
-demokratikollen/data/**
+demokratikollen/data/*
 *.sql
-!app/riksdagen_sql/create_tables.sql
+!demokratikollen/data/create_tables.sql
