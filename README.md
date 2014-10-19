@@ -22,6 +22,7 @@ Assumes you have cloned the repository.
 
 ## Initialization of riksdagen database
 1. Go to the application root: `cd ~/demokratikollen`
+
 2. Clear any contents of the database and create tables:
 
         python import_data.py wipe
