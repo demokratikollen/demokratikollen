@@ -89,14 +89,11 @@ def clean(path_in, path_out, overwrite=None):
     with open(path_in, 'r', encoding='utf-8') as f_in, \
             open(path_out, 'w', encoding='utf-8') as f_out:
         
-        f_out.write('BEGIN;\n')
         for s in statements(f_in):
             for func in chain:
                 s = func(s)
             
             f_out.write(s + '\n')
-
-        f_out.write('COMMIT;')
 
 
 def execute_statements(statements, conn):
