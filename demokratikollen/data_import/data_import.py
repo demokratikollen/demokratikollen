@@ -28,6 +28,14 @@ class CannotCleanException(Exception):
         return "The file '{0}' cannot be cleaned.".format(self.path)
 
 def download(urls, out_dir, overwrite=False):
+    """Download from URLs to a directory
+
+    Args:
+        urls (list of str): The URLs to download from.
+        out_dir (str): Path of the directory to download to.
+        overwrite (optional, bool): Whether to overwrite existing files.
+    """
+
     try:
         os.makedirs(out_dir)
     except FileExistsError as e:
@@ -47,6 +55,19 @@ def download(urls, out_dir, overwrite=False):
         urllib.request.urlretrieve(url, out_path)
 
 def clean(path_in, path_out, overwrite=None):
+    """Clean input file and save result to a new file
+
+    Runs a chain of cleaning transformations on all the SQL
+    statements found in the input file and saves the result to a new
+    file. The chain of transformations is chosen based on the
+    file name of the input file.
+
+    Args:
+        path_in (str): The path of the input file.
+        path_out (str): The path of the output file.
+        overwrite (optional, bool): Whether to overwrite existing files.
+
+    """
     path_in = os.path.abspath(path_in)
     dirname, filename_in = os.path.split(path_in)
 
@@ -79,6 +100,14 @@ def clean(path_in, path_out, overwrite=None):
 
 
 def execute_statements(statements, conn):
+    """Execute a list of statements with a database connection.
+
+    Executes all the SQL statements and then commits.
+
+    Args:
+        statements (iterable of str): The list of statements.
+        conn (psycopg2.Connection): The postgresql connection to use.
+    """
     
     with conn.cursor() as cur:
         count = 0
