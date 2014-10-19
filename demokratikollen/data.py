@@ -8,9 +8,14 @@ import os.path
 import zipfile
 import time
 
+import psycopg2
+
 from demokratikollen.data_import import data_import
+import demokratikollen.core.utils.postgres as psql_utils
 
 DEFAULT_CLEANED_PREFIX = 'cleaned_'
+
+DB_URL = 'postgresql://vagrant@localhost:5432/riksdagen'
 
 logger = logging.getLogger(__name__)
 
@@ -146,12 +151,30 @@ def setup_psql_parser(parser):
         else:
             paths = [args.path]
 
-        for path_in in paths:
-            raise NotImplementedError()            
+        db_url = psql_utils.database_url('riksdagen')
+        logger.info('Connecting to {0}'.format(db_url))
+        conn = psycopg2.connect(db_url)        
+        cur = conn.cursor()
 
-            if args.remove:
-                logger.info('Removing {0}.'.format(path_in))
-                os.remove(path_in)
+        try:
+
+            for path_in in paths:
+
+                logger.info('Executing statements...')
+                for stmt in data_import.statements(path_in):
+                    cur.execute(stmt)
+
+                logger.info('Commiting changes.')
+                conn.commit()
+
+                if args.remove:
+                    logger.info('Removing {0}.'.format(path_in))
+                    os.remove(path_in)
+
+        finally:
+            cur.close()
+            conn.close()
+
         
     parser.add_argument('path', type=str, help='Path to a file or directory of files to process.')
     parser.add_argument('--remove', '-r', action='store_true',
@@ -159,4 +182,4 @@ def setup_psql_parser(parser):
     parser.set_defaults(func=psql)
 
 if __name__ == '__main__':
-	main()
+    main()
