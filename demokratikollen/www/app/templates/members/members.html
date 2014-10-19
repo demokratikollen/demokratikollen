@@ -8,11 +8,11 @@
       <div class="col-md-5">
         <h1>{{ heading }}</h1>
         {% from "members/_formhelpers.html" import render_field %}
-        <form method="post" action="/members/find">
-          <dl>
-            {{ render_field(form.terms) }}
-          </dl>
-          <p><input type="submit" value="Hitta ledamot">
+        <form method="post" action="/members/find" role="form">
+          <div class="form-group">
+            {{ form.terms(class_="form-control",placeholder=form.terms.description)|safe }}
+          </div>
+          <p><button type="submit" class="btn btn-default">Hitta ledamöter</button>
         </form>
       </div>
       <div class="col-md-7">
