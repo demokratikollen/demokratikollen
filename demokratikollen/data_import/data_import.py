@@ -5,7 +5,7 @@ import logging
 import urllib.request
 import urllib.parse
 
-from data_import.chains import CHAINS
+from demokratikollen.data_import.chains import CHAINS
 
 root_logger = logging.getLogger()
 root_logger.setLevel(logging.DEBUG)

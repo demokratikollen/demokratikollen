@@ -1,7 +1,7 @@
 # -*- coding: utf-8 -*-
 
 from functools import partial
-import data_import.transformations as tr
+import demokratikollen.data_import.transformations as tr
 
 CHAINS = {
     'test.sql': (

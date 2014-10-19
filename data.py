@@ -8,7 +8,7 @@ import os.path
 import zipfile
 import time
 
-import data_import.data_import
+from demokratikollen.data_import import data_import
 
 DEFAULT_CLEANED_PREFIX = 'cleaned_'
 
