@@ -46,17 +46,22 @@ def download(urls, out_dir, overwrite=False):
         logger.info('Downloading {}.'.format(filename))
         urllib.request.urlretrieve(url, out_path)
 
-def clean(path_in, prefix_out, outdir=None):
+def clean(path_in, path_out, overwrite=None):
     path_in = os.path.abspath(path_in)
     dirname, filename_in = os.path.split(path_in)
 
     if filename_in not in CHAINS:
         raise CannotCleanException(filename_in)
 
-    if outdir is None:
-        outdir = dirname
-
-    path_out = os.path.join(outdir, prefix_out + filename_in)
+    if os.path.exists(path_out) and not overwrite:
+        raise FileExistsError(path_out)
+        
+    outdir = os.path.dirname(path_out)
+    
+    try:
+        os.makedirs(outdir)
+    except FileExistsError as e:
+        pass
     
     chain = CHAINS[filename_in]
 
@@ -66,7 +71,6 @@ def clean(path_in, prefix_out, outdir=None):
         f_out.write('BEGIN;\n')
         for s in statements(f_in):
             for func in chain:
-                #logger.debug('Running {0}'.format(func.__name__))
                 s = func(s)
             
             f_out.write(s + '\n')
