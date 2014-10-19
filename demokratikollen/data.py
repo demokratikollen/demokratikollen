@@ -11,7 +11,7 @@ import time
 import psycopg2
 
 from demokratikollen.data_import import data_import
-import demokratikollen.core.utils.postgres as psql_utils
+import demokratikollen.core.utils.postgres as pg_utils
 import demokratikollen.core.utils.misc as misc_utils
 
 DEFAULT_CLEANED_PREFIX = 'cleaned_'
@@ -165,7 +165,7 @@ def setup_wipe_parser(parser):
             logger.info('Dropping all tables.')
             dropall(conn)
             logger.info('Creating tables.')
-            psql_utils.run_sql('data/create_tables.sql', conn)
+            pg_ut  ils.run_sql('data/create_tables.sql', conn)
         
     parser.set_defaults(func=wipe)
 
