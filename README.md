@@ -47,7 +47,7 @@ same name as the module in the templates folder. The master layout in `layout.ht
 a parent for module templates.
 
 ## MongoDB Datastore
-To use the datastore add `from utils import MongoDBDatastore` and create a new datastore object as `ds = MongoDBDatastore()`. 
+To use the datastore add `from utils.mongodb import MongoDBDatastore` and create a new datastore object as `ds = MongoDBDatastore()`. 
 In order to save an object in the datastore call the `store_object(object[any], identifier[string])` method which saves the object in the database. Subsequent calls with the same identifier should overwrite the object. Retrieve objects with the `get_object(identifier)` method. 
 
 The class should be able to store any python object. Storing sqlalchemy objects work but they loose the connection with the session so relationships do not work on retrieved objects. Perhaps there is a way to restore the connection, but for now serialize the data into a dictionary.
