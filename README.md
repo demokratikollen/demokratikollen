@@ -30,7 +30,7 @@ Assumes you have cloned the repository.
 First initialize database according to instructions above. Then run `python ~/app/populate_orm.py`.
 
 ## The Flask webapp
-In order to run the flask app, ssh to the VM and change dir to `~/app/www` and run `gunicorn_debug app:app`. The server can be accessed from the host machine by accessing http://127.0.0.1:5000. 
+In order to run the flask app, ssh to the VM and run `gunicorn_debug`. The server can be accessed from the host machine by accessing http://127.0.0.1:5000. 
 
 The Flask app is not served directly but goes through a proxy server. The gunicorn instance listens for connections locally on port 8000 while an nginx instance listens to connections on port 5000 which is port forwarded to the host machine. The nginx instance serves static content and forwards other requests to the gunicorn instance.
 
@@ -45,9 +45,6 @@ defined as a Flask Blueprint in the `controller.py` file and registered in the a
 file located in the root of the app dir. Templates for each module need to be located in a folder with the 
 same name as the module in the templates folder. The master layout in `layout.html` defines should be used as 
 a parent for module templates.
-
-### Running tests for the webapp
-Open an ssh to the VM and change dir to `~/app/www` and run `behave`. If it seems to fail, it might be that the last web server instance was not closed. If so, run `killall gunicorn` and try again. Unit tests can be run by running `nosetests`. 
 
 ## MongoDB Datastore
 To use the datastore add `from utils import MongoDBDatastore` and create a new datastore object as `ds = MongoDBDatastore()`. 
