@@ -10,7 +10,7 @@ sys.path.insert(0,os.path.dirname(os.path.dirname(os.path.dirname(__file__))))
 from demokratikollen.core.db_structure import *
 
 # Define the WSGI application object
-app = Flask(__name__)
+app = Flask(__name__, static_url_path='/')
 
 # Configurations
 app.config.from_object('demokratikollen.www.config')
