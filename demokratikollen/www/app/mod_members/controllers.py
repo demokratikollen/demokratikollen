@@ -89,10 +89,6 @@ def get_member(member_id):
                 cur_y += 1
                 cur_m = 1
 
-    results = q.all()
-    start = results[0][2:]
-    end = results[-1][2:]
-
     tot = {}
     absent = {}
 
@@ -117,6 +113,12 @@ def get_member(member_id):
             }
         ]
     }
+
+    results = q.all()
+    if len(results)==0:
+        return json.jsonify(nvd3_data)
+    start = results[0][2:]
+    end = results[-1][2:]
 
     for y,m in month_iter(start,end):
         absence = 0 if not (y,m) in absent else absent[(y,m)]

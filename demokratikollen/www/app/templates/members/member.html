@@ -17,9 +17,9 @@
   </style>
   <script type="text/javascript">
     d3.json("/members/{{ member.id }}/absence",function(error,data) {
-      nvd3_data = data.d;
-
-      var month = ["Jan", "Feb", "Mars", "Apr", "Maj", "Juni", "Juli", "Aug", "Sep", "Okt", "Nov", "Dec"];
+      var nvd3_data = data.d;
+      var month = ["Jan", "Feb", "Mars", "Apr", "Maj", "Juni", 
+                    "Juli", "Aug", "Sep", "Okt", "Nov", "Dec"];
 
       nv.addGraph(function() {
           var chart = nv.models.multiBarChart()
@@ -35,7 +35,8 @@
             .tooltipContent(function(key, x, y, e, graph) {
               return '<h3>' + key + '</h3>' +
                      '<p>' +  y + ' i ' + x.toLowerCase() + '</p>'
-            })  
+            })
+            .noData("Ingen röstningsdata för {{ member.first_name }} {{ member.last_name }}") 
           ;
 
           // chart.xAxis.tickValues(nvd3_data[0].values.map( function(d){ console.log(d);return new Date(d.x*1000); } ) );
