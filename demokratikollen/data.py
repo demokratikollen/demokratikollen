@@ -180,13 +180,18 @@ def setup_psql_parser(parser):
         else:
             paths = [args.path]
 
+        paths = list(filter(lambda p: p.endswith('.sql'), paths))
+
+        if len(paths) == 0:
+            logger.info('No .sql files found at {0}.'.format(args.path))
+
         db_url = DB_URL
         with psycopg2.connect(db_url) as conn:
             for path_in in paths:
                 logger.info('Processing {0}.'.format(path_in))
-                f = open(path_in, encoding='utf-8')
 
-                data_import.execute_statements(data_import.statements(f), conn)
+                with open(path_in, encoding='utf-8') as f:
+                    data_import.execute_statements(data_import.statements(f), conn)
                 
                 if args.remove:
                     logger.info('Removing {0}.'.format(path_in))
