@@ -4,7 +4,7 @@ from sqlalchemy.types import Date, Enum
 from sqlalchemy.orm import relationship, backref, sessionmaker
 from sqlalchemy.ext.declarative import declarative_base
 import datetime
-from demokratikollen.core.utils import PostgresUtils, MiscUtils
+from demokratikollen.core.utils import misc as misc_utils, postgres as pg_utils
 
 
 Base = declarative_base()
@@ -130,8 +130,8 @@ class PartyVote(Base):
 
 
 def create_db_structure(engine):
-    if MiscUtils.yes_or_no("Do you really want to drop everything in the database?"):
-        PostgresUtils.drop_everything(engine)
+    if misc_utils.yes_or_no("Do you really want to drop everything in the database?"):
+        pg_utils.drop_everything(engine)
 
     Base.metadata.create_all(engine)
 

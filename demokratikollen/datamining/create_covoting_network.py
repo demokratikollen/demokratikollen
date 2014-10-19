@@ -3,9 +3,9 @@ from sqlalchemy import create_engine, func, distinct
 from sqlalchemy.orm import sessionmaker, aliased
 from sqlalchemy.sql.expression import literal
 from itertools import combinations
-from demokratikollen.core.utils import PostgresUtils
+from demokratikollen.core.utils import postgres as pg_utils
 
-engine = create_engine(PostgresUtils.engine_url())
+engine = create_engine(pg_utils.engine_url())
 
 session = sessionmaker(bind=engine)
 s = session()

@@ -9,7 +9,7 @@ import pickle
 #import PIL.Image as Image
 import colorsys
 import math
-from demokratikollen.core.utils import *
+from demokratikollen.core.utils import misc as misc_utils, postgres as pg_utils, mongo_utils as mongo_utils
 
 def row2dict(row):
     d = {}
@@ -85,15 +85,15 @@ def get_data(session, datastore,load=True, vote_cutoff=1):
 
 
 # Connect to SQLAlchemy db and create structure
-engine = create_engine(PostgresUtils.engine_url())
+engine = create_engine(pg_utils.engine_url())
 
 session = sessionmaker()
 session.configure(bind=engine)
 s = session()
 
-datastore = MongoDBDatastore()
+datastore = mongo_utils.mongo_utilsDatastore()
 
-if MiscUtils.yes_or_no("Do you want to get data from the database again?"):
+if misc_utils.yes_or_no("Do you want to get data from the database again?"):
     members, member_map, covoting_matrix = get_data(s,datastore,False)
 else:
     members, member_map, covoting_matrix = get_data(s,datastore)
