@@ -2,6 +2,8 @@
 
 import os.path
 import logging
+import urllib.request
+import urllib.parse
 
 from data_import.chains import CHAINS
 
@@ -16,13 +18,45 @@ logger = logging.getLogger(__name__)
 # SQL commands to look for in SQL files
 VALID_COMMANDS = ["INSERT"]
 
-def main():
-    pass
+class CannotCleanException(Exception):
+    """An exception for when a data file cannot be cleaned."""
+    def __init__(self, filename):
+        super(CannotCleanException, self).__init__()
+        self.filename = filename
+        
+    def __str__(self):
+        return "The file '{0}' cannot be cleaned.".format(self.path)
 
-def clean(path_in, prefix_out):
+def download(urls, out_dir, overwrite=False):
+    try:
+        os.makedirs(out_dir)
+    except FileExistsError as e:
+        pass
+
+    for url in urls:
+        url = url.strip()
+        urlparts = urllib.parse.urlparse(url)
+        filename = os.path.split(urlparts.path)[1]
+        out_path = os.path.abspath(os.path.join(out_dir, filename))
+
+        if os.path.exists(out_path) and not overwrite:
+            logger.info('Skipping {0} because it already exists.'.format(filename))
+            continue
+        
+        logger.info('Downloading {}.'.format(filename))
+        urllib.request.urlretrieve(url, out_path)
+
+def clean(path_in, prefix_out, outdir=None):
     path_in = os.path.abspath(path_in)
     dirname, filename_in = os.path.split(path_in)
-    path_out = os.path.join(dirname, prefix_out + filename_in)
+
+    if filename_in not in CHAINS:
+        raise CannotCleanException(filename_in)
+
+    if outdir is None:
+        outdir = dirname
+
+    path_out = os.path.join(outdir, prefix_out + filename_in)
     
     chain = CHAINS[filename_in]
 
@@ -32,11 +66,11 @@ def clean(path_in, prefix_out):
         f_out.write('BEGIN;\n')
         for s in statements(f_in):
             for func in chain:
-                logger.debug('Running {0}'.format(func.__name__))
+                #logger.debug('Running {0}'.format(func.__name__))
                 s = func(s)
             
             f_out.write(s + '\n')
-            
+
         f_out.write('COMMIT;')
 
 
@@ -85,8 +119,3 @@ def starts_with_command(s):
             False otherwise.
     """
     return any(s.lstrip().startswith(cmd) for cmd in VALID_COMMANDS)
-
-
-
-if __name__ == '__main__':
-    main()
