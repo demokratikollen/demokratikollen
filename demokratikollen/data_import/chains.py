@@ -30,7 +30,9 @@ CHAINS['votering-200304.sql'] = \
 CHAINS['votering-200203.sql'] = \
 CHAINS['bet-2010-2013.sql'] = \
 CHAINS['bet-2006-2009.sql'] = \
-CHAINS['bet-2002-2005.sql'] = (
+CHAINS['bet-2002-2005.sql'] = \
+CHAINS['mot-2010-2013.sql'] = \
+CHAINS['prop-2010-2013.sql'] = (
     tr.correct_line_endings,
     tr.remove_funky_characters
     )
