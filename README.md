@@ -22,40 +22,24 @@ Assumes you have cloned the repository.
 
 ## Initialization of riksdagen database
 1. Go to the application root: `cd ~/demokratikollen`
+2. Run
 
-2. Clear any contents of the database and create tables:
-
-        python import_data.py wipe
-
-3. Download data from the parliament's website:
-
-        python import_data.py download data/urls.txt data/download
-
-4. Unpack all the zipped data files:
-
-        python import_data.py unpack data/download data/download
-
-5. Clean errors so files can be imported. The flag `--remove` removes the unpacked source files after successful cleanup.
-
-        python import_data.py clean data/download data/cleaned --remove
-
-6. Execute all INSERT statements found in the cleaned data files:
-
-        python import_data.py execute data/cleaned
-
+        python import_data.py auto data/urls.txt --wipe
 
 ### Adding more data to riksdagen database
 
 When/if you download more data and want to add it, you can of course work with single files:
 
-1. Just add the new url to `~/demokratikollen/data/urls.txt`. The download command by default skips downloading files that already exist.
+**Alternative 1:** Download the file to e.g. `~/demokratikollen/data/download/my_new_file_name.sql.zip`, then do
 
-2. Then run something like this:
+    python import_data.py unpack data/download/my_new_file_name.sql.zip
+    python import_data.py clean data/download/my_new_file_name.sql.zip data/cleaned
+    python import_data.py execute data/cleaned/cleaned_my_new_file_name.sql
 
-        python import_data.py download data/download
-        python import_data.py unpack data/download/my_new_file_name.sql.zip
-        python import_data.py clean data/download/my_new_file_name.sql.zip data/cleaned
-        python import_data.py execute data/cleaned/cleaned_my_new_file_name.sql
+**Alternative 2:** Put the URL(s) of the additional file(s) in a file like `~/demokratikollen/data/my_urls.txt`. Then go to the application root: `cd ~/demokratikollen` and run
+
+    python import_data.py auto data/my_urls.txt
+        
 
 ## Import of data to ORM database
 First initialize database according to instructions above. Then run `python ~/app/populate_orm.py`.
