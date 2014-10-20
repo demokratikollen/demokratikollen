@@ -30,10 +30,9 @@ Assumes you have cloned the repository.
 
 When/if you download more data and want to add it, you can of course work with single files:
 
-**Alternative 1:** Download the file to e.g. `~/demokratikollen/data/download/my_new_file_name.sql.zip`, then do
+**Alternative 1:** Download and unpack the file to e.g. `~/demokratikollen/data/my_new_file_name.sql`, then do
 
-    python import_data.py unpack data/download/my_new_file_name.sql.zip
-    python import_data.py clean data/download/my_new_file_name.sql.zip data/cleaned
+    python import_data.py clean data/download/my_new_file_name.sql data/cleaned
     python import_data.py execute data/cleaned/cleaned_my_new_file_name.sql
 
 **Alternative 2:** Put the URL(s) of the additional file(s) in a file like `~/demokratikollen/data/my_urls.txt`. Then go to the application root: `cd ~/demokratikollen` and run
