@@ -82,7 +82,7 @@ def auto(urls_file=None, wipe=None, outdir=None):
         clean(path=outdir, outdir=outdir, prefix=DEFAULT_CLEANED_PREFIX, 
             overwrite=False, remove=True, skip=False)
         if wipe:
-            wipe(args)
+            wipe_db()
         execute(outdir, True)
     finally:
         shutil.rmtree(outdir)
@@ -119,7 +119,6 @@ def unpack(path=None, outdir=None, remove=None):
             os.remove(p)
 
 def clean(path=None, outdir=None, prefix=None, overwrite=None, remove=None, skip=None):
-    print(path, outdir, prefix, overwrite, remove, skip)
     if os.path.isdir(path):
         paths = filter(
             os.path.isfile, 
@@ -172,7 +171,7 @@ def dropall(conn):
             logger.info('Dropping table: {0}'.format(row[1]))
             cur.execute("drop table {} cascade".format(row[1]))
 
-def wipe():
+def wipe_db():
     db_url = pg_utils.database_url(which='riksdagen')
     with psycopg2.connect(db_url) as conn:
 
@@ -260,7 +259,7 @@ def setup_clean_parser(parser):
 def setup_wipe_parser(parser):
     """Setup a subparser for the wipe subcommand."""
 
-    parser.set_defaults(func=wipe)
+    parser.set_defaults(func=wipe_db)
 
 
 def setup_execute_parser(parser):
