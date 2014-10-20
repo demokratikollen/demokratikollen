@@ -30,3 +30,4 @@ data/
 demokratikollen/data/*
 *.sql
 !demokratikollen/data/create_tables.sql
+!demokratikollen/data/urls.txt
