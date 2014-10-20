@@ -25,7 +25,7 @@ class CannotCleanException(Exception):
         self.filename = filename
         
     def __str__(self):
-        return "The file '{0}' cannot be cleaned.".format(self.path)
+        return "The file '{0}' cannot be cleaned.".format(self.filename)
 
 def download(urls, out_dir, overwrite=False):
     """Download from URLs to a directory
