@@ -1,4 +1,6 @@
 http://data.riksdagen.se/dataset/person/person.sql.zip
+http://data.riksdagen.se/dataset/votering/votering-201314.sql.zip
+http://data.riksdagen.se/dataset/votering/votering-201213.sql.zip
 http://data.riksdagen.se/dataset/votering/votering-201112.sql.zip
 http://data.riksdagen.se/dataset/votering/votering-201011.sql.zip
 http://data.riksdagen.se/dataset/votering/votering-200910.sql.zip
