@@ -30,6 +30,8 @@ parties = [
             "Moderaterna"
         ]
 
+
+
 c = source_conn.cursor()
 members = {}
 
@@ -41,12 +43,15 @@ groups = {}
 for abbr,name in c:
     if name in parties:
         g = Party(name=name,abbr=abbr)
-        group_or_party = "party"
+        group_type = "party"
+    elif 'utskottet' in name:
+        g = Committee(name=name,abbr=abbr)
+        group_type = "committee"
     else:
         g = Group(name=name,abbr=abbr)
-        group_or_party = "group"
+        group_type = "group"
     groups[(abbr,name)] = g
-    print("Created {} ({}) as a {}.".format(name,abbr,group_or_party))
+    print("Created {} ({}) as a {}.".format(name,abbr,group_type))
 
 # Manually add 'Kammaren', and parties not in 'personuppdrag'
 groups['-'] = Party(name="Partiobunden",abbr="-")
@@ -72,88 +77,101 @@ for birth_year,first_name,last_name,gender,party_abbr,intressent_id in c:
     s.add(members[intressent_id])
 s.commit()
 
-pbar = InitBar(title="Adding votes")
-pbar(0)
-c.execute("SELECT COUNT(*) FROM votering WHERE avser='sakfrågan'")
-num_votes = c.fetchone()[0]
-c.execute("SELECT votering_id,intressent_id,beteckning,rm,rost,datum FROM votering WHERE avser='sakfrågan' ORDER BY votering_id")
-last_vot_id = None
-for i,(votering_id,intressent_id,beteckning,rm,rost,datum) in enumerate(c):
-    if last_vot_id!=votering_id:
-        date = datum.date()
-        poll = Poll(name="{}:{}".format(rm,beteckning),date=date)
-        s.add(poll)
-        last_vot_id = votering_id
-        add_status = 100*i/num_votes
-        pbar(add_status)
-    if i % 50000 == 0:
-        s.commit()
-    s.add(Vote(member=members[intressent_id],vote_option=rost,poll=poll))
+# pbar = InitBar(title="Adding votes")
+# pbar(0)
+# c.execute("SELECT COUNT(*) FROM votering WHERE avser='sakfrågan'")
+# num_votes = c.fetchone()[0]
+# c.execute("SELECT votering_id,intressent_id,beteckning,rm,rost,datum FROM votering WHERE avser='sakfrågan' ORDER BY votering_id")
+# last_vot_id = None
+# for i,(votering_id,intressent_id,beteckning,rm,rost,datum) in enumerate(c):
+#     if last_vot_id!=votering_id:
+#         date = datum.date()
+#         poll = Poll(name="{}:{}".format(rm,beteckning),date=date)
+#         s.add(poll)
+#         last_vot_id = votering_id
+#         add_status = 100*i/num_votes
+#         pbar(add_status)
+#     if i % 50000 == 0:
+#         s.commit()
+#     s.add(Vote(member=members[intressent_id],vote_option=rost,poll=poll))
 
-del pbar
-s.commit()
+# del pbar
+# s.commit()
 
-# Add kammaruppdrag
-print("Adding chamber appointments.")
-c.execute("""SELECT intressent_id,ordningsnummer,"from",tom,status,roll_kod FROM personuppdrag WHERE typ='kammaruppdrag' AND ordningsnummer!=0""")
-for intressent_id,ordningsnummer,fr,to,stat,roll in c:
-    role = "Ersättare" if "rsättare" in roll else "Riksdagsledamot"
-    status = "Ledig" if "Ledig" in stat else "Tjänstgörande"
-    s.add(ChamberAppointment(
-                member=members[intressent_id],
-                chair=ordningsnummer,
-                start_date=fr.date(),
-                end_date=to.date(),
-                status=status,
-                role=role))
+# # Add kammaruppdrag
+# print("Adding chamber appointments.")
+# c.execute("""SELECT intressent_id,ordningsnummer,"from",tom,status,roll_kod FROM personuppdrag WHERE typ='kammaruppdrag' AND ordningsnummer!=0""")
+# for intressent_id,ordningsnummer,fr,to,stat,roll in c:
+#     role = "Ersättare" if "rsättare" in roll else "Riksdagsledamot"
+#     status = "Ledig" if "Ledig" in stat else "Tjänstgörande"
+#     s.add(ChamberAppointment(
+#                 member=members[intressent_id],
+#                 chair=ordningsnummer,
+#                 start_date=fr.date(),
+#                 end_date=to.date(),
+#                 status=status,
+#                 role=role))
 
-
-# Party votes
-num_party_votes = 0
-num_polls = s.query(Poll).count()
-pbar = InitBar(title="Computing party votes")
-pbar(0)
-n=0
-for poll in s.query(Poll).all():
-    n = n+1
-    if n % 10 == 0:
-        pbar(100*n/num_polls)
-
-
-    votes = s.query(Vote).join(Member).join(Party) \
-        .filter(Vote.poll_id == poll.id) \
-        .order_by(Party.id)
-
-    current_party_id = 0
-    for vote in votes:
-        if current_party_id != vote.member.party_id:
-            if not current_party_id == 0:
-                s.add(PartyVote(party_id = current_party_id,
-                                poll_id = poll.id,
-                                num_yes = party_votes['Ja']                             ,
-                                num_no = party_votes['Nej'],
-                                num_abstain = party_votes['Avstår'],
-                                num_absent = party_votes['Frånvarande']))
-
-            current_party_id = vote.member.party_id
-            party_votes = {
-                'Ja': 0,
-                'Nej': 0,
-                'Avstår': 0,
-                'Frånvarande': 0
-            }
-
-        party_votes[vote.vote_option] += 1
-
-    s.add(PartyVote(party_id = current_party_id,
-                    poll_id = poll.id,
-                    num_yes = party_votes['Ja']                             ,
-                    num_no = party_votes['Nej'],
-                    num_abstain = party_votes['Avstår'],
-                    num_absent = party_votes['Frånvarande']))
+print("Adding committee reports.")
+c.execute("""SELECT dok_id,rm,beteckning,organ,publicerad,titel,dokument_url_text FROM dokument WHERE doktyp='bet'""")
+for dok_id,rm,bet,organ,publ,titel,dok_url in c:
+    committee = s.query(Committee).filter_by(abbr=organ).first()
+    s.add(CommitteeReport(
+                dok_id=dok_id,
+                published=publ,
+                session=rm,
+                code=bet,
+                title=titel,
+                text_url=dok_url,
+                committee=committee))
 
 
-del pbar
+# # Party votes
+# num_party_votes = 0
+# num_polls = s.query(Poll).count()
+# pbar = InitBar(title="Computing party votes")
+# pbar(0)
+# n=0
+# for poll in s.query(Poll).all():
+#     n = n+1
+#     if n % 10 == 0:
+#         pbar(100*n/num_polls)
+
+
+#     votes = s.query(Vote).join(Member).join(Party) \
+#         .filter(Vote.poll_id == poll.id) \
+#         .order_by(Party.id)
+
+#     current_party_id = 0
+#     for vote in votes:
+#         if current_party_id != vote.member.party_id:
+#             if not current_party_id == 0:
+#                 s.add(PartyVote(party_id = current_party_id,
+#                                 poll_id = poll.id,
+#                                 num_yes = party_votes['Ja']                             ,
+#                                 num_no = party_votes['Nej'],
+#                                 num_abstain = party_votes['Avstår'],
+#                                 num_absent = party_votes['Frånvarande']))
+
+#             current_party_id = vote.member.party_id
+#             party_votes = {
+#                 'Ja': 0,
+#                 'Nej': 0,
+#                 'Avstår': 0,
+#                 'Frånvarande': 0
+#             }
+
+#         party_votes[vote.vote_option] += 1
+
+#     s.add(PartyVote(party_id = current_party_id,
+#                     poll_id = poll.id,
+#                     num_yes = party_votes['Ja']                             ,
+#                     num_no = party_votes['Nej'],
+#                     num_abstain = party_votes['Avstår'],
+#                     num_absent = party_votes['Frånvarande']))
+
+
+# del pbar
 s.commit()
 
 source_conn.close()
