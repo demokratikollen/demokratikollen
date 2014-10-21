@@ -7,7 +7,7 @@
     <div class="row">
       <div class="col-md-5">
         <h1>{{ heading }}</h1>
-        <form method="get" action="/members/find" role="form">
+        <form method="get" action="{{ url_for('members.find') }}" role="form">
           <div class="form-group">
             {{ form.terms(class_="form-control",placeholder=form.terms.description)|safe }}
           </div>

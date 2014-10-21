@@ -24,9 +24,10 @@ def members():
 
 
 # Set the route and accepted methods
-@mod_members.route('/find', methods=['GET'])
-def find_member():
-    form = SearchForm(request.form)
+@mod_members.route('/find', methods=['GET','POST'])
+def find():
+
+    form = SearchForm(request.args)
     if not form.terms.data:
         flash({
                 "class": "alert-danger",
