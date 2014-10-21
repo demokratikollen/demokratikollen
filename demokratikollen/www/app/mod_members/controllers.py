@@ -9,7 +9,7 @@ from datetime import datetime,timedelta
 from wtforms import Form, TextField, validators
 
 # Import the database object from the main app module
-from demokratikollen.www.app import db, Member, Vote, Poll
+from demokratikollen.www.app import db, Member, Vote, Poll, ChamberAppointment
 
 # Define the blueprint: 'auth', set its url prefix: app.url/auth
 mod_members = Blueprint('members', __name__, url_prefix='/members')
@@ -135,3 +135,23 @@ def get_member(member_id):
 
     return json.jsonify(nvd3_data)
 
+@mod_members.route('/riksdagen.<string:format>')
+def riksdagen(format):
+
+    if format == 'html':
+        return render_template('/members/riksdagen.html')
+    if format == 'json':
+        current_chairs = db.session.query(ChamberAppointment) \
+                        .filter(ChamberAppointment.status == "Tjänstgörande")\
+                        .filter(ChamberAppointment.end_date > datetime.today()) \
+                        .order_by(ChamberAppointment.chair) \
+                        .distinct(ChamberAppointment.chair) \
+                        .all()
+        json_data = {"count": len(current_chairs), "data": []}
+        for chair in current_chairs:
+            json_data['data'].append({"chair": chair.chair, "party": chair.member.party.abbr, "member_id": chair.member_id})
+        return json.jsonify(json_data)
+    else:
+        return render_template('404.html'), 404
+
+    
