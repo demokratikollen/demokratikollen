@@ -17,14 +17,14 @@ mod_members = Blueprint('members', __name__, url_prefix='/members')
 class SearchForm(Form):
     terms = TextField(label='Namn',description='Namn')
 
-@mod_members.route('/')
+@mod_members.route('.html')
 def members():
     form = SearchForm()
     return render_template("/members/members.html",form=form)
 
 
 # Set the route and accepted methods
-@mod_members.route('/find', methods=['GET','POST'])
+@mod_members.route('/find', methods=['GET'])
 def find_member():
     form = SearchForm(request.form)
     if not form.terms.data:
@@ -33,7 +33,7 @@ def find_member():
                 "title": "Ingen indata:",
                 "text": "Du angav inget att söka på."
             })
-        return redirect('/members')
+        return redirect('/members.html')
         
     s_words = [w.lower() for w in form.terms.data.split()]
 
@@ -50,27 +50,22 @@ def find_member():
                 "class": "alert-warning",
                 "text": "Din sökning matchade inga ledamöter."
             })
-        return redirect('/members')
+        return redirect('/members.html')
     else:
         return render_template("/members/members.html",form=form,members=members)
 
 # Set the route and accepted methods
-@mod_members.route('/<int:member_id>', methods=['GET'])
+@mod_members.route('/<int:member_id>.html')
 def member(member_id):
-    try:
-        format = request.args['format']
-    except KeyError:
-        format = None
     m = db.session.query(Member).filter_by(id=member_id).first()
 
     return render_template("/members/member.html",member=m)
 
 
 
-@mod_members.route('/<int:member_id>/absence', methods=['GET'])
-def get_member(member_id):
+@mod_members.route('/<int:member_id>/absence.json', methods=['GET'])
+def get_member(member_id,format):
     """Return a JSON response with total and absent votes monthly for member"""
-
     y = func.date_part('year',Poll.date).label('y')
     m = func.date_part('month',Poll.date).label('m')
 
@@ -134,4 +129,5 @@ def get_member(member_id):
                 "y": total})
 
     return json.jsonify(nvd3_data)
+
 

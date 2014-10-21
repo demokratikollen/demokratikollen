@@ -7,7 +7,7 @@
     <div class="row">
       <div class="col-md-5">
         <h1>{{ heading }}</h1>
-        <form method="post" action="/members/find" role="form">
+        <form method="get" action="/members/find" role="form">
           <div class="form-group">
             {{ form.terms(class_="form-control",placeholder=form.terms.description)|safe }}
           </div>
@@ -36,7 +36,7 @@
           <tbody>
             {% for m in members -%}
             <tr>
-              <td><a href="/members/{{ m.id }}">{{ m.id }}</a></td>
+              <td><a href="/members/{{ m.id }}.html">{{ m.id }}</a></td>
               <td>{{ m.first_name }} {{ m.last_name }}</td>
               <td>{{ m.party.abbr }}</td>
             </tr>

@@ -16,7 +16,7 @@
     }
   </style>
   <script type="text/javascript">
-    d3.json("/members/{{ member.id }}/absence",function(error,data) {
+    d3.json("/members/{{ member.id }}/absence.json",function(error,data) {
       var nvd3_data = data.d;
       var month = ["Jan", "Feb", "Mars", "Apr", "Maj", "Juni", 
                     "Juli", "Aug", "Sep", "Okt", "Nov", "Dec"];
