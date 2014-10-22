@@ -17,7 +17,7 @@ mod_members = Blueprint('members', __name__, url_prefix='/members')
 class SearchForm(Form):
     terms = TextField(label='Namn',description='Namn')
 
-@mod_members.route('/')
+@mod_members.route('.html')
 def members():
     form = SearchForm()
     return render_template("/members/members.html",form=form)
@@ -25,16 +25,17 @@ def members():
 
 # Set the route and accepted methods
 @mod_members.route('/find', methods=['GET','POST'])
-def find_member():
-    form = SearchForm(request.form)
+def find():
+
+    form = SearchForm(request.args)
     if not form.terms.data:
         flash({
                 "class": "alert-danger",
                 "title": "Ingen indata:",
                 "text": "Du angav inget att söka på."
             })
-        return redirect('/members')
-        
+        return redirect('/members.html')
+
     s_words = [w.lower() for w in form.terms.data.split()]
 
     q = db.session.query(Member)
@@ -50,27 +51,22 @@ def find_member():
                 "class": "alert-warning",
                 "text": "Din sökning matchade inga ledamöter."
             })
-        return redirect('/members')
+        return redirect('/members.html')
     else:
         return render_template("/members/members.html",form=form,members=members)
 
 # Set the route and accepted methods
-@mod_members.route('/<int:member_id>', methods=['GET'])
+@mod_members.route('/<int:member_id>.html')
 def member(member_id):
-    try:
-        format = request.args['format']
-    except KeyError:
-        format = None
     m = db.session.query(Member).filter_by(id=member_id).first()
 
     return render_template("/members/member.html",member=m)
 
 
 
-@mod_members.route('/<int:member_id>/absence', methods=['GET'])
+@mod_members.route('/<int:member_id>/absence.json', methods=['GET'])
 def get_member(member_id):
     """Return a JSON response with total and absent votes monthly for member"""
-
     y = func.date_part('year',Poll.date).label('y')
     m = func.date_part('month',Poll.date).label('m')
 
@@ -122,7 +118,6 @@ def get_member(member_id):
     end = results[-1][2:]
 
     for y,m in month_iter(start,end):
-        print(y)
         absence = 0 if not (y,m) in absent else absent[(y,m)]
         total = 0 if not (y,m) in tot else tot[(y,m)]
 
@@ -136,4 +131,5 @@ def get_member(member_id):
                 "y": total})
 
     return json.jsonify(nvd3_data)
+
 
