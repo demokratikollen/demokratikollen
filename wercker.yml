@@ -4,11 +4,13 @@ build:
     steps:
         - virtualenv:
             name: setup virtualenv
+            python_location: /usr/bin/python3.4
         - pip-install:
             requirements_file: "demokratikollen/requirements/dev.txt"
+            pip_command: pip-3.4
 deploy:
     steps:
-        - add-to-known-hosts:
+        - add-to-known_hosts:
             hostname: 146.185.188.12
         - mktemp:
             envvar: PRIVATEKEY_PATH
