@@ -35,7 +35,7 @@ def find():
                 "text": "Du angav inget att söka på."
             })
         return redirect('/members.html')
-        
+
     s_words = [w.lower() for w in form.terms.data.split()]
 
     q = db.session.query(Member)
@@ -65,7 +65,7 @@ def member(member_id):
 
 
 @mod_members.route('/<int:member_id>/absence.json', methods=['GET'])
-def get_member(member_id,format):
+def get_member(member_id):
     """Return a JSON response with total and absent votes monthly for member"""
     y = func.date_part('year',Poll.date).label('y')
     m = func.date_part('month',Poll.date).label('m')
@@ -78,12 +78,13 @@ def get_member(member_id,format):
     def month_iter(start,end):
         cur_y,cur_m = start
         y2,m2 = end
-        while not (cur_y >= y2 and cur_m > m2):
+        while not (cur_y >= y2 and cur_m >= m2):
             yield cur_y,cur_m
             cur_m += 1
             if cur_m > 12:
                 cur_y += 1
                 cur_m = 1
+        yield cur_y, cur_m
 
     tot = {}
     absent = {}

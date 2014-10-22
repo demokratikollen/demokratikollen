@@ -6,10 +6,10 @@
       - python-dev
       - python3.4-dev
 
-- name: Install build-deps for matplotlib
-  sudo: yes
-  shell: apt-get -y build-dep python3-matplotlib python3-numpy
-  changed_when: False
+- name: Copy matplotlib install script
+  copy: src={{item.file}} dest={{item.path}} mode={{item.mode}}
+  with_items:
+      - {file: 'install_matplotlib', path: '~/install_matplotlib', mode: '0755'}
 
 - name: Install virtualenv
   sudo: yes

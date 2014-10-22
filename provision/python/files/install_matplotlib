@@ -1,0 +1,4 @@
+#! /bin/bash
+
+sudo apt-get -y build-dep python3-matplotlib python3-numpy
+pip install matplotlib
