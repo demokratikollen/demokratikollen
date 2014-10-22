@@ -82,12 +82,13 @@ def get_member(member_id):
     def month_iter(start,end):
         cur_y,cur_m = start
         y2,m2 = end
-        while not (cur_y >= y2 and cur_m > m2):
+        while not (cur_y >= y2 and cur_m >= m2):
             yield cur_y,cur_m
             cur_m += 1
             if cur_m > 12:
                 cur_y += 1
                 cur_m = 1
+        yield cur_y, cur_m
 
     tot = {}
     absent = {}
@@ -121,6 +122,7 @@ def get_member(member_id):
     end = results[-1][2:]
 
     for y,m in month_iter(start,end):
+        print(y)
         absence = 0 if not (y,m) in absent else absent[(y,m)]
         total = 0 if not (y,m) in tot else tot[(y,m)]
 
