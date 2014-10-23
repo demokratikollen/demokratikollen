@@ -269,7 +269,7 @@ def setup_execute_parser(parser):
         help='Path to a file or directory of files to execute SQL statements from.')
     parser.add_argument('--remove', '-r', action='store_true',
         help='Remove the source file if successfully executed.')
-    parser.set_defaults(funcs=execute)
+    parser.set_defaults(func=execute)
 
 if __name__ == '__main__':
     main()
