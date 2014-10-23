@@ -126,6 +126,7 @@ class Poll(Base):
     name = Column(String(250))
     date = Column(Date)
     votes = relationship('Vote', backref='poll')
+    report_point = relationship('PolledPoint', uselist=False, backref='poll')
 
     def __repr__(self):
         return self.name
@@ -168,12 +169,41 @@ class CommitteeReport(Document):
     __tablename__ = 'committee_reports'
     id = Column(Integer, ForeignKey('documents.id'), primary_key=True)
     committee_id = Column(Integer, ForeignKey('committees.id'))
-    # points = relationship('Committee', backref='committee_report')
+    points = relationship('CommitteeReportPoint', backref='report')
 
     __mapper_args__ = {
         'polymorphic_identity':'committee_report',
     }   
 
+class CommitteeReportPoint(Base):
+    __tablename__ = 'committee_report_points'
+    id = Column(Integer, primary_key=True)
+    number = Column(Integer)
+    title = Column(String(250))
+    committee_report_id = Column(Integer, ForeignKey('committee_reports.id'))
+    classtype = Column(String(50))
+
+    __mapper_args__ = {
+        'polymorphic_on':classtype,
+        'polymorphic_identity':'committee_report_point'
+    } 
+
+class AcclaimedPoint(CommitteeReportPoint):
+    __tablename__ = "acclaimed_points"
+    id = Column(Integer, ForeignKey('committee_report_points.id'), primary_key=True)
+
+    __mapper_args__ = {
+        'polymorphic_identity':'acclaimed_point'
+    }
+
+class PolledPoint(CommitteeReportPoint):
+    __tablename__ = "polled_point"
+    id = Column(Integer, ForeignKey('committee_report_points.id'), primary_key=True)
+    poll_id = Column(Integer, ForeignKey('polls.id'))
+
+    __mapper_args__ = {
+        'polymorphic_identity':'polled_point'
+    }
 
 #########################
 # Calculated data
