@@ -41,6 +41,8 @@ def download(urls, out_dir, overwrite=False):
     except FileExistsError as e:
         pass
 
+    downloaded = []
+
     for url in urls:
         url = url.strip()
         urlparts = urllib.parse.urlparse(url)
@@ -48,11 +50,15 @@ def download(urls, out_dir, overwrite=False):
         out_path = os.path.abspath(os.path.join(out_dir, filename))
 
         if os.path.exists(out_path) and not overwrite:
-            logger.info('Skipping {0} because it already exists.'.format(filename))
+            logger.info('Not downloading {0} because it already exists.'.format(filename))
+            downloaded.append(out_path)
             continue
         
         logger.info('Downloading {}.'.format(filename))
         urllib.request.urlretrieve(url, out_path)
+        downloaded.append(out_path)
+
+    return downloaded
 
 def clean(path_in, path_out, overwrite=None):
     """Clean input file and save result to a new file
@@ -68,7 +74,6 @@ def clean(path_in, path_out, overwrite=None):
         overwrite (optional, bool): Whether to overwrite existing files.
 
     """
-    path_in = os.path.abspath(path_in)
     dirname, filename_in = os.path.split(path_in)
 
     if filename_in not in CHAINS:
@@ -76,6 +81,7 @@ def clean(path_in, path_out, overwrite=None):
 
     if os.path.exists(path_out) and not overwrite:
         raise FileExistsError(path_out)
+
         
     outdir = os.path.dirname(path_out)
     
@@ -86,6 +92,7 @@ def clean(path_in, path_out, overwrite=None):
     
     chain = CHAINS[filename_in]
 
+    logger.info('Cleaning {0}.'.format(path_in))
     with open(path_in, 'r', encoding='utf-8') as f_in, \
             open(path_out, 'w', encoding='utf-8') as f_out:
         

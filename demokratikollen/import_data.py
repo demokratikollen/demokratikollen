@@ -9,6 +9,7 @@ import zipfile
 import time
 import shutil
 from functools import partial
+import urllib
 
 import psycopg2
 
@@ -28,9 +29,7 @@ def main():
     subparsers.required = True
 
     setup_auto_parser(subparsers.add_parser('auto',
-        help=('Download, unpack, clean and run cleaned .sql files. All the work '
-            'is done in a temporary folder which will be deleted after processing is '
-            'successfully completed.')))
+        help=('Download, unpack, clean and run cleaned .sql files.')))
     setup_download_parser(subparsers.add_parser('download',
         help=('Download files from URLs in a file.')))
     setup_unpack_parser(subparsers.add_parser('unpack',
@@ -69,28 +68,42 @@ def main():
         logger.debug(e, exc_info=sys.exc_info())
 
 
-def auto(urls_file=None, wipe=None, outdir=None):
-    if not outdir:
-        outdir = os.path.join(os.path.dirname(urls_file), str(int(time.time())))
-
-    if os.path.exists(outdir):
-        raise FileExistsError('Output directory {0} already exists.'.format(outdir))
+def auto(urls_file=None, outdir=None, wipe=None):
+    download_dir = os.path.join(outdir, 'download')
+    unpack_dir = os.path.join(outdir, 'unpack')
+    clean_dir = os.path.join(outdir, 'clean')
 
     try:
-        download(urls_file=urls_file, outdir=outdir, overwrite=False)
-        unpack(path=outdir, outdir=outdir, remove=True)
-        clean(path=outdir, outdir=outdir, prefix=DEFAULT_CLEANED_PREFIX, 
-            overwrite=False, remove=True, skip=False)
-        if wipe:
-            wipe_db()
-        execute(outdir, True)
-    finally:
-        shutil.rmtree(outdir)
+        downloaded_before = [os.path.abspath(os.path.join(download_dir, fname)) 
+            for fname in os.listdir(download_dir)]
+    except FileNotFoundError:
+        downloaded_before = []
+
+
+    downloaded = download(urls_file, outdir=download_dir, overwrite=False)
+
+    if not wipe:
+        # Only use new downloads unless wipe==True
+        downloaded = set(downloaded) - set(downloaded_before)
+
+    if wipe:
+        wipe_db()
+
+    for down_file in downloaded:
+        unpacked = unpack(path=down_file, outdir=unpack_dir, remove=False)
+
+        for unp_file in unpacked:
+            cleaned = clean(path=unp_file, outdir=clean_dir, prefix=DEFAULT_CLEANED_PREFIX, 
+                overwrite=False, remove=False)
+
+            for clean_path in cleaned:
+                execute(clean_path, remove=False)
+
 
 def download(urls_file=None, outdir=None, overwrite=None):
     with open(urls_file, encoding='utf-8') as f:
         urls = f.readlines()
-        data_import.download(urls, outdir, overwrite=overwrite)
+        return data_import.download(urls, outdir, overwrite=overwrite)
 
 def unpack(path=None, outdir=None, remove=None):
     if os.path.isdir(path):
@@ -100,9 +113,11 @@ def unpack(path=None, outdir=None, remove=None):
     else:
         paths = [path]
 
+    unpacked = []
     for p in paths:
+
         if not zipfile.is_zipfile(p):
-            logger.debug('Skipping {0} because it is not a zipfile.'.format(p))
+            logger.info('Skipping {0} because it is not a zipfile.'.format(p))
             continue
 
         if not outdir:
@@ -110,13 +125,21 @@ def unpack(path=None, outdir=None, remove=None):
 
         with zipfile.ZipFile(p) as archive:
             for member in archive.namelist():
-                logger.info(
-                    'Extracting from {0}: {1}'.format(p, os.path.join(outdir, member)))
-                archive.extract(member, path=outdir)
+                out_path = os.path.join(outdir, member)
+                if os.path.exists(out_path):
+                    logger.info('Not extracting {0} because it already exists.'.format(out_path))
+                else:
+                    logger.info(
+                        'Extracting from {0}: {1}'.format(p, out_path))
+                    archive.extract(member, path=outdir)
+
+                unpacked.append(out_path)
 
         if remove:
             logger.info('Removing {0}.'.format(p))
             os.remove(p)
+
+    return unpacked
 
 def clean(path=None, outdir=None, prefix=None, overwrite=None, remove=None, skip=None):
     if os.path.isdir(path):
@@ -126,16 +149,18 @@ def clean(path=None, outdir=None, prefix=None, overwrite=None, remove=None, skip
     else:
         paths = [path]
 
+    cleaned = []
+
     for path_in in paths:
         try:
             filename = os.path.basename(path_in)
             path_out = os.path.join(outdir, prefix + filename)
 
-            logger.info('Cleaning {0}.'.format(path_in))
-            
             t0 = time.time()
 
             data_import.clean(path_in, path_out, overwrite=overwrite)
+
+            cleaned.append(path_out)
 
             t1 = time.time()
             logger.info('Cleaned {0} in {1:.1f} seconds.'.format(filename, t1-t0))
@@ -147,13 +172,16 @@ def clean(path=None, outdir=None, prefix=None, overwrite=None, remove=None, skip
         except data_import.CannotCleanException as e:
             if skip:
                 logger.info(
-                    'Skipping {0} because it has no cleaning action defined.'.format(e.filename))
+                    'Not cleaning {0} because it has no cleaning action defined.'.format(e.filename))
             else:
                 raise e
 
         except FileExistsError as e:
-            logger.info('Skipping {0} because the output file already exists. '
+            logger.info('Not cleaning {0} because the output file already exists. '
                 'Hint: use the --overwrite option?'.format(filename))
+            cleaned.append(path_out)
+
+    return cleaned
 
 def dropall(conn):
     """Drop all tables in a postgresql database.
@@ -211,9 +239,12 @@ def setup_auto_parser(parser):
 
     parser.add_argument('urls_file', type=str,
         help='Path of file with URLs of file(s) to process (one URL per line).')
+    parser.add_argument('outdir', type=str, help='Output directory.')
     parser.add_argument('--wipe', '-w' , action='store_true',
-        help='Enable to wipe the database before writing to it.')
-    parser.add_argument('--outdir', type=str, help='Output directory.')
+        help=('Enable to wipe the database before writing to it. If this flag is not set, the '
+        'auto subcommand is run in a sort of "update" mode: only '
+        'those files that do not exist in the output directory yet will be downloaded '
+        'and processed.'))
     parser.set_defaults(func=auto)
 
 def setup_download_parser(parser):
