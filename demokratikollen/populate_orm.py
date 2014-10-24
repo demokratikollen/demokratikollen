@@ -77,26 +77,26 @@ for birth_year,first_name,last_name,gender,party_abbr,intressent_id in c:
     s.add(members[intressent_id])
 s.commit()
 
-# pbar = InitBar(title="Adding votes")
-# pbar(0)
-# c.execute("SELECT COUNT(*) FROM votering WHERE avser='sakfrågan'")
-# num_votes = c.fetchone()[0]
-# c.execute("SELECT votering_id,intressent_id,beteckning,rm,rost,datum FROM votering WHERE avser='sakfrågan' ORDER BY votering_id")
-# last_vot_id = None
-# for i,(votering_id,intressent_id,beteckning,rm,rost,datum) in enumerate(c):
-#     if last_vot_id!=votering_id:
-#         date = datum.date()
-#         poll = Poll(name="{}:{}".format(rm,beteckning),date=date)
-#         s.add(poll)
-#         last_vot_id = votering_id
-#         add_status = 100*i/num_votes
-#         pbar(add_status)
-#     if i % 50000 == 0:
-#         s.commit()
-#     s.add(Vote(member=members[intressent_id],vote_option=rost,poll=poll))
+pbar = InitBar(title="Adding votes")
+pbar(0)
+polls = {}
+c.execute("SELECT COUNT(*) FROM votering WHERE avser='sakfrågan'")
+num_votes = c.fetchone()[0]
+c.execute("SELECT votering_id,intressent_id,beteckning,rm,rost,datum FROM votering WHERE avser='sakfrågan' ORDER BY votering_id LIMIT 10000")
+for i,(votering_id,intressent_id,beteckning,rm,rost,datum) in enumerate(c):
+    if votering_id not in polls:
+        date = datum.date()
+        polls[votering_id] = Poll(name="{}:{}".format(rm,beteckning),date=date)
+        s.add(polls[votering_id])
+        add_status = 100*i/num_votes
+        pbar(add_status)
+    if i % 50000 == 0:
+        s.commit()
+    s.add(Vote(member=members[intressent_id],
+                vote_option=rost,poll=polls[votering_id]))
 
-# del pbar
-# s.commit()
+del pbar
+s.commit()
 
 # # Add kammaruppdrag
 # print("Adding chamber appointments.")
@@ -113,17 +113,42 @@ s.commit()
 #                 role=role))
 
 print("Adding committee reports.")
-c.execute("""SELECT dok_id,rm,beteckning,organ,publicerad,titel,dokument_url_text FROM dokument WHERE doktyp='bet'""")
-for dok_id,rm,bet,organ,publ,titel,dok_url in c:
+c.execute("""SELECT dok_id,rm,beteckning,organ,publicerad,titel,dokument_url_text,hangar_id FROM dokument WHERE doktyp='bet'""")
+reports = {}
+for dok_id,rm,bet,organ,publ,titel,dok_url,hangar_id in c:
     committee = s.query(Committee).filter_by(abbr=organ).first()
     s.add(CommitteeReport(
-                dok_id=dok_id,
-                published=publ,
-                session=rm,
-                code=bet,
-                title=titel,
-                text_url=dok_url,
-                committee=committee))
+            dok_id=dok_id,
+            published=publ,
+            session=rm,
+            code=bet,
+            title=titel,
+            text_url=dok_url,
+            committee=committee))
+
+c.execute("""SELECT rm,bet,punkt,rubrik,beslutstyp,votering_id FROM dokutskottsforslag""")
+for rm,bet,punkt,rubrik,beslutstyp,votering_id in c:
+    try:
+        rep = s.query(CommitteeReport).filter_by(session=rm,code=bet).one()
+        if not votering_id:
+            s.add(AcclaimedPoint(
+                    number=punkt,
+                    title=rubrik,
+                    report=rep))
+        else:
+            if votering_id in polls:
+                s.add(PolledPoint(
+                        number=punkt,
+                        title=rubrik,
+                        report=rep,
+                        poll=polls[votering_id]))
+            else:
+                print("No poll found! Skipping {}:{}, point {}\n'{}'"\
+                        .format(rm,bet,punkt,rubrik))
+    except NoResultFound:
+        pass
+
+
 
 
 # # Party votes

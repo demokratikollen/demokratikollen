@@ -197,7 +197,7 @@ class AcclaimedPoint(CommitteeReportPoint):
     }
 
 class PolledPoint(CommitteeReportPoint):
-    __tablename__ = "polled_point"
+    __tablename__ = "polled_points"
     id = Column(Integer, ForeignKey('committee_report_points.id'), primary_key=True)
     poll_id = Column(Integer, ForeignKey('polls.id'))
 
