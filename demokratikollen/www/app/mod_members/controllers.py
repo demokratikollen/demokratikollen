@@ -63,6 +63,15 @@ def member(member_id):
     return render_template("/members/member.html",member=m)
 
 
+# Set the route and accepted methods
+@mod_members.route('/current.json')
+def current():
+    members = db.session.query(Member).limit(100)
+    output = {"d": [{
+                        "full_name": "{} {}".format(m.first_name,m.last_name),
+                        "party": m.party.abbr
+                    } for m in members]}
+    return json.jsonify(output)
 
 @mod_members.route('/<int:member_id>/absence.json', methods=['GET'])
 def get_member(member_id):
