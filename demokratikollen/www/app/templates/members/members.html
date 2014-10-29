@@ -6,56 +6,61 @@
 {% block head %}
 {{ super() }}
 <style>
-  .twitter-typeahead {
-    width: 100%;
-  }
-  .twitter-typeahead .tt-query,
-  .twitter-typeahead .tt-hint {
-    margin-bottom: 0px;
-  }
-  .tt-hint {
-    display: block;
-    width: 100%;
-    height: 38px;
-    padding: 8px 12px 12px;
-    font-size: 14px;
-    line-height: 1.428571429;
-    color: #999;
-    vertical-align: middle;
-    background-color: #ffffff;
-    border: 1px solid #cccccc;
-    border-radius: 4px;
-    -webkit-box-shadow: inset 0 1px 1px rgba(0, 0, 0, 0.075);
-          box-shadow: inset 0 1px 1px rgba(0, 0, 0, 0.075);
-    -webkit-transition: border-color ease-in-out 0.15s, box-shadow ease-in-out 0.15s;
-          transition: border-color ease-in-out 0.15s, box-shadow ease-in-out 0.15s;
-  }
-  .tt-dropdown-menu {
+  span.twitter-typeahead .tt-dropdown-menu {
+    position: absolute;
+    top: 100%;
+    left: 0;
+    z-index: 1000;
+    display: none;
+    float: left;
     min-width: 160px;
-    margin-top: 2px;
     padding: 5px 0;
+    margin: 2px 0 0;
+    list-style: none;
+    font-size: 14px;
+    text-align: left;
     background-color: #ffffff;
     border: 1px solid #cccccc;
     border: 1px solid rgba(0, 0, 0, 0.15);
     border-radius: 4px;
     -webkit-box-shadow: 0 6px 12px rgba(0, 0, 0, 0.175);
-          box-shadow: 0 6px 12px rgba(0, 0, 0, 0.175);
+    box-shadow: 0 6px 12px rgba(0, 0, 0, 0.175);
     background-clip: padding-box;
-
   }
-  .tt-suggestion {
+  span.twitter-typeahead .tt-suggestion > p {
     display: block;
     padding: 3px 20px;
+    clear: both;
+    font-weight: normal;
+    line-height: 1.42857143;
+    color: #333333;
+    white-space: nowrap;
   }
-  .tt-suggestion.tt-is-under-cursor {
-    color: #fff;
+  span.twitter-typeahead .tt-suggestion > p:hover,
+  span.twitter-typeahead .tt-suggestion > p:focus {
+    color: #ffffff;
+    text-decoration: none;
+    outline: 0;
     background-color: #428bca;
   }
-  .tt-suggestion.tt-is-under-cursor a {
-    color: #fff;
+  span.twitter-typeahead .tt-suggestion.tt-cursor {
+    color: #ffffff;
+    background-color: #428bca;
   }
-  .tt-suggestion p {
-    margin: 0;
+  span.twitter-typeahead {
+    width: 100%;
+  }
+  .input-group span.twitter-typeahead {
+    display: block !important;
+  }
+  .input-group span.twitter-typeahead .tt-dropdown-menu {
+    top: 32px !important;
+  }
+  .input-group.input-group-lg span.twitter-typeahead .tt-dropdown-menu {
+    top: 44px !important;
+  }
+  .input-group.input-group-sm span.twitter-typeahead .tt-dropdown-menu {
+    top: 28px !important;
   }
 </style>
 {% endblock %}
@@ -115,10 +120,19 @@
     queryTokenizer: Bloodhound.tokenizers.whitespace,
     // `states` is an array of state names defined in "The Basics"
     prefetch: {
-      url: '/members/current.json',
+      url: "{{ url_for('members.th_current') }}",
       filter: function(obj) {
         return obj.d;
       }
+    },
+    remote: {
+      url: "{{ url_for('members.th_query') }}?q=%QUERY",
+      filter: function(obj) {
+        return obj.d;
+      }
+    },
+    dupDetector: function(remoteMatch, localMatch) {
+      return remoteMatch.id===localMatch.id;
     }
   });
 

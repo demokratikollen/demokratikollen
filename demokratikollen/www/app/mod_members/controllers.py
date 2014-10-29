@@ -3,13 +3,13 @@ from flask import Blueprint, request, render_template, \
                   flash, g, session, redirect, url_for, \
                   json
 
-from sqlalchemy import func,or_
+from sqlalchemy import func,or_,not_,and_
 from sqlalchemy.orm import aliased
 from datetime import datetime,timedelta
 from wtforms import Form, TextField, validators
 
 # Import the database object from the main app module
-from demokratikollen.www.app import db, Member, Vote, Poll
+from demokratikollen.www.app import db, Member, Vote, Poll, ChamberAppointment
 
 # Define the blueprint: 'auth', set its url prefix: app.url/auth
 mod_members = Blueprint('members', __name__, url_prefix='/members')
@@ -63,15 +63,44 @@ def member(member_id):
     return render_template("/members/member.html",member=m)
 
 
-# Set the route and accepted methods
-@mod_members.route('/current.json')
-def current():
-    members = db.session.query(Member).limit(100)
+# Helper to construct typeahead responses
+def typeahead_response(members):
     output = {"d": [{
                         "full_name": "{} {}".format(m.first_name,m.last_name),
-                        "party": m.party.abbr
+                        "party": m.party.abbr,
+                        "id": m.id
                     } for m in members]}
     return json.jsonify(output)
+
+
+@mod_members.route('/typeahead/current.json')
+def th_current():
+    now = datetime.utcnow()
+    members = db.session.query(Member).join(ChamberAppointment) \
+                    .filter(ChamberAppointment.end_date > now,
+                            ChamberAppointment.start_date < now,
+                            ChamberAppointment.status != "Ledig")
+    return typeahead_response(members)
+
+# Set the route and accepted methods
+@mod_members.route('/typeahead/query.json',methods=['GET'])
+def th_query():
+    s_words = [w.lower() for w in request.args['q'].split()]
+    db_q = db.session.query(Member)
+
+    now = datetime.utcnow()
+    db_q = db_q.join(ChamberAppointment) \
+                    .filter(not_(and_(ChamberAppointment.end_date > now,
+                            ChamberAppointment.start_date < now,
+                            ChamberAppointment.status != "Ledig")))
+    for w in s_words:
+        db_q = db_q.filter(or_(
+                    func.lower(Member.first_name).like('%{}%'.format(w)),
+                    func.lower(Member.last_name).like('%{}%'.format(w))))
+
+    print(db_q)
+    return typeahead_response(db_q.all())
+
 
 @mod_members.route('/<int:member_id>/absence.json', methods=['GET'])
 def get_member(member_id):
