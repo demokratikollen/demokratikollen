@@ -62,13 +62,16 @@
   .input-group.input-group-sm span.twitter-typeahead .tt-dropdown-menu {
     top: 28px !important;
   }
+  .form-group {
+    margin-bottom: 50px;
+  }
 </style>
 {% endblock %}
 
 {% block content %}
     <div class="row">
-      <div class="col-md-5">
-        <h1>{{ heading }}</h1>
+      <div class="col-lg-4 col-md-6 col-xs-8">
+        <h2>{{ heading }}</h2>
         <form method="get" action="{{ url_for('members.find') }}" role="form">
           <div class="form-group">
             <div id="member-typeahead">
@@ -77,37 +80,8 @@
           </div>
         </form>
       </div>
-      <div class="col-md-7">
-        {% with messages = get_flashed_messages() %}
-        {% if messages -%}
-        {% for m in messages -%}
-        <div class="alert {{ m.class }}" role="alert">
-          {% if m.title %}<strong>{{ m.title }}</strong> {% endif %}{{ m.text }}
-        </div>
-        {%- endfor %}
-        {%- endif %}
-        {% endwith %}
-        {% if members -%}
-        <table class="table table-striped">
-          <thead>
-            <tr>
-              <th>Id</th>
-              <th>Namn</th>
-              <th>Parti</th>
-            </tr>
-          </thead>
-          <tbody>
-            {% for m in members -%}
-            <tr>
-              <td><a href="/members/{{ m.id }}.html">{{ m.id }}</a></td>
-              <td>{{ m.first_name }} {{ m.last_name }}</td>
-              <td>{{ m.party.abbr }}</td>
-            </tr>
-            {%- endfor %}
-          </tbody>
-        </table>
-        {% endif %}
-      </div>
+    </div>
+    <div class="row" id="member-page">
     </div>
 {% endblock %}
 
@@ -145,6 +119,8 @@
         return m.full_name + ' (' + m.party + ')';
       },
       source: members.ttAdapter()
+  }).on('typeahead:selected', function (obj, datum) {
+      $('#member-page').load("/members/ajax/"+datum.id+".html");
   });
 </script>
 {% endblock %}

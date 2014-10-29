@@ -14,13 +14,10 @@ from demokratikollen.www.app import db, Member, Vote, Poll, ChamberAppointment
 # Define the blueprint: 'auth', set its url prefix: app.url/auth
 mod_members = Blueprint('members', __name__, url_prefix='/members')
 
-class SearchForm(Form):
-    terms = TextField(label='Namn',description='Namn')
 
 @mod_members.route('.html')
 def members():
-    form = SearchForm()
-    return render_template("/members/members.html",form=form)
+    return render_template("/members/members.html")
 
 
 # Set the route and accepted methods
@@ -62,6 +59,10 @@ def member(member_id):
 
     return render_template("/members/member.html",member=m)
 
+@mod_members.route('/ajax/<int:member_id>.html')
+def member_ajax(member_id):
+    m = db.session.query(Member).filter_by(id=member_id).one()
+    return render_template("/members/member_ajax.html",member=m)
 
 # Helper to construct typeahead responses
 def typeahead_response(members):
