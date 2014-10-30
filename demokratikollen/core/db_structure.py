@@ -120,24 +120,13 @@ class Party(Group):
 # Voting
 #########################
 
-class Poll(Base):
-    __tablename__ = 'polls'
-    id = Column(Integer, primary_key=True)
-    name = Column(String(250))
-    date = Column(Date)
-    votes = relationship('Vote', backref='poll')
-    report_point = relationship('PolledPoint', uselist=False, backref='poll')
-
-    def __repr__(self):
-        return self.name
-
 VoteOptionsType = Enum('Ja','Nej','Avstår','Frånvarande',name='vote_options')
 
 class Vote(Base):
     __tablename__ = 'votes'
     id = Column(Integer, primary_key=True)
     member_id = Column(Integer, ForeignKey('members.id'))
-    poll_id = Column(Integer, ForeignKey('polls.id'))
+    polled_point_id = Column(Integer, ForeignKey('polled_points.id'))
     vote_option = Column(VoteOptionsType)
 
     def __repr__(self):
@@ -199,7 +188,10 @@ class AcclaimedPoint(CommitteeReportPoint):
 class PolledPoint(CommitteeReportPoint):
     __tablename__ = "polled_points"
     id = Column(Integer, ForeignKey('committee_report_points.id'), primary_key=True)
-    poll_id = Column(Integer, ForeignKey('polls.id'))
+    poll_date = Column(Date)
+    votes = relationship('Vote', backref='polled_point')
+
+    r_votering_id = Column(String(250))
 
     __mapper_args__ = {
         'polymorphic_identity':'polled_point'
@@ -213,7 +205,7 @@ class PartyVote(Base):
     __tablename__ = 'party_votes'
     id = Column(Integer, primary_key=True)
     party_id = Column(Integer, ForeignKey('parties.id'))
-    poll_id = Column(Integer, ForeignKey('polls.id'))
+    polled_point_id = Column(Integer, ForeignKey('polled_points.id'))
     num_yes = Column(Integer)
     num_no = Column(Integer)
     num_abstain = Column(Integer)
