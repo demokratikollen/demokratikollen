@@ -6,11 +6,11 @@ mkdir -p docker/postgres
 mkdir -p docker/mongo
 
 #copy files
-cp -r src/dockerfiles/webapp docker/app
-cp -r src/dockerfiles/postgres docker/postgres
-cp -r src/dockerfiles/mongo docker/mongo
+cp -r src/dockerfiles/webapp docker
+cp -r src/dockerfiles/postgres docker
+cp -r src/dockerfiles/mongo docker
 
-cp -r src/demokratikollen/ docker/app/
+cp -r src/demokratikollen/* docker/app
 
 
 #Build the postgres image if it does not exist.
