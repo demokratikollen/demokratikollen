@@ -1,10 +1,9 @@
 #!/bin/bash
 
 #create the dir structure
-mkdir docker
-mkdir docker/app
-mkdir docker/postgres
-mkdir docker/mongo
+mkdir -p docker/app
+mkdir -p docker/postgres
+mkdir -p docker/mongo
 
 #copy files
 cp -r src/dockerfiles/webapp docker/app
@@ -16,7 +15,7 @@ cp -r src/demokratikollen/ docker/app/
 
 #Build the postgres image if it does not exist.
 if [ ! -f /docker/imids/postgres ]; then
-    docker build -t demokratikollen/postgres docker/postgres > /home/wercker/docker/imids
+    docker build -t demokratikollen/postgres docker/postgres> /home/wercker/docker/imids
 fi
 
 #If the container isn't alreay running, start it
