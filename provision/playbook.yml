@@ -1,4 +1,4 @@
-- hosts: all
+- hosts: develop
   vars:
       app_name: demokratikollen
       venv_dir: ~/.virtualenv
@@ -9,3 +9,9 @@
       - python
       - web
       - deploy
+- hosts: deploy
+  vars:
+      app_name: demokratikollen
+      venv_dir: ~/.virtualenv
+  roles:
+      - setup
