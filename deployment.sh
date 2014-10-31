@@ -1,10 +1,5 @@
 #!/bin/bash
 
-#create the dir structure
-mkdir -p docker/app
-mkdir -p docker/postgres
-mkdir -p docker/mongo
-
 #copy files
 cp -r src/dockerfiles/webapp docker
 cp -r src/dockerfiles/postgres docker
@@ -13,15 +8,39 @@ cp -r src/dockerfiles/mongo docker
 cp -r src/demokratikollen/* docker/webapp
 
 
-#Build the postgres image if it does not exist.
-if [ ! -f /home/wercker/docker/imids/postgres ]; then
-    docker build -t demokratikollen/postgres docker/postgres> /home/wercker/docker/imids/postgres
+#Get the postgres image id, if it does not exist, create it
+postgres_image_id=`docker images | sed -nr 's/demokratikollen\/postgres\s*latest\s*([a-z0-9]*).*/\1/p'`
+
+if [ -z $postgres_image_id ]; then
+    postgres_image_id=`docker build -t demokratikollen/postgres docker/postgres`
 fi
 
-#If the container isn't alreay running, start it
-if [ ! -f /home/wercker/docker/coids/postgres ]; then
-    docker run -d --name postgres demokratikollen/postgres > /home/wercker/docker/coids/postgres
+#Get the posgres container id, if it does not exist create it
+postgres_container_id=`sudo docker ps | sed -nr 's/([a-z0-9]*)\s*demokratikollen\/postgres.*/\1/p'`
+
+if [ -z -f $postgres_container_id ]; then
+    postgres_container_id=`docker run -d --name postgres demokratikollen/postgres`
 fi
+
+#Get the webapp image id. Build it if it does not exist
+webapp_image_id=`docker images | sed -nr 's/demokratikollen\/webapp\s*latest\s*([a-z0-9]*).*/\1/p'`
+
+if [ -z $webapp_image_id ]; then
+	webapp_image_id=`docker build -t demokratikollen/webapp docker/webapp`
+	#build environment variables needed by the webapp
+	#envs="DATABASE_URL=postgresql://demokratikollen@localhost:"
+	#link the webapp to the postgresql database.
+	#docker run 
+fi
+
+#Get the webapp container id. Start it if it does not exist
+webapp_container_id=`sudo docker ps | sed -nr 's/([a-z0-9]*)\s*demokratikollen\/webapp.*/\1/p'`
+
+#if [ -z -f $webapp_container_id ]; then
+#    webapp_container_id=`docker run -d --name webapp demokratikollen/webapp`
+#fi
+
+
 
 #remove files.
 rm -rf docker/webapp

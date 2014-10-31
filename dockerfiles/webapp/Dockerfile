@@ -2,8 +2,8 @@
 FROM python:3.4.2
 MAINTAINER joharohl <johan@rohlen.net>
 
-COPY . /usr/src/app
-WORKDIR /usr/src/app
+COPY . /usr/src/apps/demokratikollen
+WORKDIR /usr/src/apps/demokratikollen
 RUN pip install -r requirements.txt
 
-ENV PYTHONPATH=/src/
+ENV PYTHONPATH /usr/src/apps
