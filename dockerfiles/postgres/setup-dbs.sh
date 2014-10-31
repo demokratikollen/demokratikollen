@@ -2,7 +2,7 @@
 echo "******CREATING RIKSDAGEN DATABASE******"
 gosu postgres postgres --single <<- EOSQL
    CREATE DATABASE riksdagen;
-   CREATE USER riksdagen;
+   CREATE USER demokratikollen;
    GRANT ALL PRIVILEGES ON DATABASE riksdagen to demokratikollen;
 EOSQL
 echo ""
