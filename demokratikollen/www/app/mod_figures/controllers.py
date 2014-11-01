@@ -27,9 +27,9 @@ def voteringsfrekvens(format):
 
         if time_format == 'dow':
             # get polls grouped on day of week
-            poll_agg = db.session.query(func.date_part('dow', PolledPoint.date), func.count(PolledPoint.id)) \
-                    .group_by(func.date_part('dow', PolledPoint.date))  \
-                    .order_by(func.date_part('dow', PolledPoint.date))
+            poll_agg = db.session.query(func.date_part('dow', PolledPoint.poll_date), func.count(PolledPoint.id)) \
+                    .group_by(func.date_part('dow', PolledPoint.poll_date))  \
+                    .order_by(func.date_part('dow', PolledPoint.poll_date))
 
             weekdays = ['Söndag', 'Måndag', 'Tisdag', 'Onsdag', 'Torsdag', 'Fredag', 'Lördag']
 
@@ -37,9 +37,9 @@ def voteringsfrekvens(format):
             for poll in poll_agg:
                 data.append(dict(label=weekdays[int(poll[0])], value=poll[1]))
         if time_format == 'month':
-            poll_agg = db.session.query(func.date_part('month', PolledPoint.date), func.count(PolledPoint.id)) \
-                    .group_by(func.date_part('month', PolledPoint.date))  \
-                    .order_by(func.date_part('month', PolledPoint.date))
+            poll_agg = db.session.query(func.date_part('month', PolledPoint.poll_date), func.count(PolledPoint.id)) \
+                    .group_by(func.date_part('month', PolledPoint.poll_date))  \
+                    .order_by(func.date_part('month', PolledPoint.poll_date))
 
             months = ['Jan.', 'Feb.', 'Mars', 'Apr.', 'Maj', 'Juni', 'Juli', 'Aug.', 'Sep.', 'Okt.', 'Nov.', 'Dec.']
             data = []
@@ -62,7 +62,7 @@ def partipiskan():
     for party in parties:
         q = s.query(PartyVote, PolledPoint).join(PolledPoint).join(Party) \
             .filter(Party.id==party.id)\
-            .order_by(PolledPoint.date.asc())
+            .order_by(PolledPoint.poll_date.asc())
 
         num_polls = 0
         num_piska = 0
