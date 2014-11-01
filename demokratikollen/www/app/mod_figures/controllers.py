@@ -3,7 +3,7 @@ from flask import Blueprint, request, render_template, \
                   flash, g, session, redirect, url_for, \
                   json
 
-from demokratikollen.www.app import db, PartyVote, Poll, Party, Member, ChamberAppointment
+from demokratikollen.www.app import db, PartyVote, PolledPoint, Party, Member, ChamberAppointment
 from sqlalchemy import func
 
 import datetime as dt
@@ -27,9 +27,9 @@ def voteringsfrekvens(format):
 
         if time_format == 'dow':
             # get polls grouped on day of week
-            poll_agg = db.session.query(func.date_part('dow', Poll.date), func.count(Poll.id)) \
-                    .group_by(func.date_part('dow', Poll.date))  \
-                    .order_by(func.date_part('dow', Poll.date))
+            poll_agg = db.session.query(func.date_part('dow', PolledPoint.date), func.count(PolledPoint.id)) \
+                    .group_by(func.date_part('dow', PolledPoint.date))  \
+                    .order_by(func.date_part('dow', PolledPoint.date))
 
             weekdays = ['Söndag', 'Måndag', 'Tisdag', 'Onsdag', 'Torsdag', 'Fredag', 'Lördag']
 
@@ -37,9 +37,9 @@ def voteringsfrekvens(format):
             for poll in poll_agg:
                 data.append(dict(label=weekdays[int(poll[0])], value=poll[1]))
         if time_format == 'month':
-            poll_agg = db.session.query(func.date_part('month', Poll.date), func.count(Poll.id)) \
-                    .group_by(func.date_part('month', Poll.date))  \
-                    .order_by(func.date_part('month', Poll.date))
+            poll_agg = db.session.query(func.date_part('month', PolledPoint.date), func.count(PolledPoint.id)) \
+                    .group_by(func.date_part('month', PolledPoint.date))  \
+                    .order_by(func.date_part('month', PolledPoint.date))
 
             months = ['Jan.', 'Feb.', 'Mars', 'Apr.', 'Maj', 'Juni', 'Juli', 'Aug.', 'Sep.', 'Okt.', 'Nov.', 'Dec.']
             data = []
@@ -60,9 +60,9 @@ def partipiskan():
     data = dict(key="% Polls with party split", values=list())
 
     for party in parties:
-        q = s.query(PartyVote, Poll).join(Poll).join(Party) \
+        q = s.query(PartyVote, PolledPoint).join(PolledPoint).join(Party) \
             .filter(Party.id==party.id)\
-            .order_by(Poll.date.asc())
+            .order_by(PolledPoint.date.asc())
 
         num_polls = 0
         num_piska = 0

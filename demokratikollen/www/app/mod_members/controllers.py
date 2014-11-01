@@ -9,7 +9,7 @@ from datetime import datetime,timedelta
 from wtforms import Form, TextField, validators
 
 # Import the database object from the main app module
-from demokratikollen.www.app import db, Member, Vote, Poll, ChamberAppointment
+from demokratikollen.www.app import db, Member, Vote, PolledPoint, ChamberAppointment
 
 # Define the blueprint: 'auth', set its url prefix: app.url/auth
 mod_members = Blueprint('members', __name__, url_prefix='/members')
@@ -106,11 +106,11 @@ def th_query():
 @mod_members.route('/<int:member_id>/absence.json', methods=['GET'])
 def get_member(member_id):
     """Return a JSON response with total and absent votes monthly for member"""
-    y = func.date_part('year',Poll.date).label('y')
-    m = func.date_part('month',Poll.date).label('m')
+    y = func.date_part('year',PolledPoint.date).label('y')
+    m = func.date_part('month',PolledPoint.date).label('m')
 
     q = db.session.query(Vote.vote_option,func.count(Vote.id),y,m) \
-                            .join(Poll).filter(Vote.member_id==member_id) \
+                            .join(PolledPoint).filter(Vote.member_id==member_id) \
                             .group_by(Vote.vote_option,'y','m') \
                             .order_by('y','m')
 
