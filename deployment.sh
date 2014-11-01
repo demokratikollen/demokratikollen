@@ -17,8 +17,8 @@ cp -r src/demokratikollen/* docker/webapp/
 
 #don't go crazy on the downloads
 echo "http://data.riksdagen.se/dataset/person/person.sql.zip" > data/urls.txt
-echo "http://data.riksdagen.se/dataset/votering/votering-201314.sql.zip" > data/urls.txt
-echo "http://data.riksdagen.se/dataset/dokument/bet-2010-2013.sql.zip" > data/urls.txt
+echo "http://data.riksdagen.se/dataset/votering/votering-201314.sql.zip" >> data/urls.txt
+echo "http://data.riksdagen.se/dataset/dokument/bet-2010-2013.sql.zip" >> data/urls.txt
 cp src/demokratikollen/data/create_tables.sql data/
 
 #Get the postgres image id, if it does not exist, create it
