@@ -12,6 +12,7 @@ sudo docker rmi demokratikollen/webapp
 cp -r src/dockerfiles/webapp docker/
 cp -r src/dockerfiles/postgres docker/
 cp -r src/dockerfiles/mongo docker/
+cp -r src/dockerfiles/nginx docker/
 
 cp -r src/demokratikollen/* docker/webapp/
 
@@ -22,24 +23,25 @@ echo "http://data.riksdagen.se/dataset/dokument/bet-2010-2013.sql.zip" >> data/u
 cp src/demokratikollen/data/create_tables.sql data/
 
 #Get the postgres image id, if it does not exist, create it
-postgres_image_id=`sudo docker images | sed -nr 's/demokratikollen\/postgres\s*latest\s*([a-z0-9]*).*/\1/p'`
+postgres_image_id=`sudo docker images | sed -nr 's/demokratikollen\/postgres\s*[a-z0-9]*\s*([a-z0-9]*).*/\1/p'`
 
 if [ -z $postgres_image_id ]; then
-    postgres_image_id=`sudo docker build -t demokratikollen/postgres docker/postgres`
+    sudo docker build -t demokratikollen/postgres docker/postgres
 fi
 
 #Get the posgres container id, if it does not exist create it
 postgres_container_id=`sudo docker ps | sed -nr 's/([a-z0-9]*)\s*demokratikollen\/postgres.*/\1/p'`
 
 if [ -z $postgres_container_id ]; then
-    postgres_container_id=`sudo docker run -d --name postgres demokratikollen/postgres`
+    sudo docker run -d --name postgres demokratikollen/postgres
 fi
 
 #Get the webapp image id. Build it if it does not exist
-webapp_image_id=`sudo docker images | sed -nr 's/demokratikollen\/webapp\s*latest\s*([a-z0-9]*).*/\1/p'`
+webapp_image_id=`sudo docker images | sed -nr 's/demokratikollen\/webapp\s*[a-z0-9]*\s*([a-z0-9]*).*/\1/p'`
 
 if [ -z $webapp_image_id ]; then
-	webapp_image_id=`sudo docker build -t demokratikollen/webapp docker/webapp`
+	sudo docker build -t demokratikollen/webapp docker/webapp
+
 	db_main_env="DATABASE_URL=postgresql://demokratikollen@db:5432/demokratikollen"
 	db_riksdagen_env="DATABASE_RIKSDAGEN_URL=postgresql://demokratikollen@db:5432/riksdagen"
 	
@@ -58,15 +60,26 @@ if [ -z $webapp_image_id ]; then
 	sudo docker commit webapp demokratikollen/webapp
 fi
 
-#Get the webapp container id. Start it if it does not exist
+#Get the webapp container id. Start it if it is not already started
 webapp_container_id=`sudo docker ps | sed -nr 's/([a-z0-9]*)\s*demokratikollen\/webapp.*/\1/p'`
 
 if [ -z $webapp_container_id ]; then
     sudo docker start webapp
 fi
 
+#Create the nginx image if it does not exist
+nginx_image_id=`sudo docker images | sed -nr 's/demokratikollen\/nginx\s*[a-z0-9]*\s*([a-z0-9]*).*/\1/p'`
 
+if [ -z $nginx_image_id ]; then
+    sudo docker build -t demokratikollen/nginx docker/nginx
+fi
 
+#Get the webapp container id. Start it if it is not already started
+nginx_container_id=`sudo docker ps | sed -nr 's/([a-z0-9]*)\s*demokratikollen\/nginx.*/\1/p'`
+
+if [ -z $nginx_container_id ]; then
+    sudo docker run -d -P --link webapp:webapp demokratikollen/nginx 
+fi
 
 #remove files.
 rm -rf docker/webapp

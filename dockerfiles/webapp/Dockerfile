@@ -7,3 +7,5 @@ WORKDIR /usr/src/apps/demokratikollen
 RUN pip install -r requirements.txt
 
 ENV PYTHONPATH /usr/src/apps
+
+EXPOSE 8000
