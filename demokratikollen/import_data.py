@@ -99,7 +99,6 @@ def auto(urls_file=None, outdir=None, wipe=None):
             for clean_path in cleaned:
                 execute(clean_path, remove=False)
 
-
 def download(urls_file=None, outdir=None, overwrite=None):
     with open(urls_file, encoding='utf-8') as f:
         urls = f.readlines()
