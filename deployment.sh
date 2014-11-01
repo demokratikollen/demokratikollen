@@ -59,12 +59,12 @@ if [ -z $webapp_image_id ]; then
 
 	#populate the orm
 	sudo docker run --name webapp -e $db_main_env -e $db_riksdagen_env -w /usr/src/apps/demokratikollen --link postgres:db demokratikollen/webapp:temp python populate_orm.py
-	sudo docker commit webapp demokratikollen/webapp:temp
+	sudo docker commit webapp demokratikollen/webapp:latest
 	sudo docker rm webapp
 
 	#create the final container
-	sudo docker create --name webapp -e $db_main_env -e $db_riksdagen_env --link postgres:db demokratikollen/webapp-temp python /usr/src/apps/demokratikollen/www/run.py
-	sudo docker commit webapp demokratikollen/webapp:latest
+	sudo docker create --name webapp -e $db_main_env -e $db_riksdagen_env --link postgres:db demokratikollen/webapp:latest python /usr/src/apps/demokratikollen/www/run.py
+	sudo docker rmi demokratikollem/webapp:temp
 fi
 
 #Get the webapp container id. Start it if it is not already started
