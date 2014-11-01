@@ -9,6 +9,7 @@ sudo docker rm -f $(sudo docker ps -a -q)
 sudo docker rmi demokratikollen/postgres
 sudo docker rmi demokratikollen/webapp
 sudo docker rmi demokratikollen/nginx
+sudo docker rmi demokratikollen/webapp:latest
 
 #copy files
 cp -r src/dockerfiles/webapp docker/
@@ -53,18 +54,17 @@ if [ -z $webapp_image_id ]; then
 	db_riksdagen_env="DATABASE_RIKSDAGEN_URL=postgresql://demokratikollen@db:5432/riksdagen"
 	
 	#populate the riksdagen database
-	sudo docker run --name webapp -e $db_main_env -e $db_riksdagen_env -w /usr/src/apps/demokratikollen --volume /home/wercker/data:/data --link postgres:db demokratikollen/webapp python import_data.py auto /data/urls.txt --wipe
-	sudo docker commit webapp demokratikollen/webapp:temp
+	sudo docker run --name webapp -e $db_main_env -e $db_riksdagen_env -w /usr/src/apps/demokratikollen --volume /home/wercker/data:/data --link postgres:db demokratikollen/webapp:latest python import_data.py auto /data/urls.txt --wipe
+	sudo docker commit webapp demokratikollen/webapp:latest
 	sudo docker rm webapp
 
 	#populate the orm
-	sudo docker run --name webapp -e $db_main_env -e $db_riksdagen_env -w /usr/src/apps/demokratikollen --link postgres:db demokratikollen/webapp:temp python populate_orm.py
+	sudo docker run --name webapp -e $db_main_env -e $db_riksdagen_env -w /usr/src/apps/demokratikollen --link postgres:db demokratikollen/webapp:latest python populate_orm.py
 	sudo docker commit webapp demokratikollen/webapp:latest
 	sudo docker rm webapp
 
 	#create the final container
 	sudo docker create --name webapp -e $db_main_env -e $db_riksdagen_env --link postgres:db demokratikollen/webapp:latest python /usr/src/apps/demokratikollen/www/run.py
-	sudo docker rmi demokratikollem/webapp:temp
 fi
 
 #Get the webapp container id. Start it if it is not already started
