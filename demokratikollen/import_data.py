@@ -85,6 +85,8 @@ def auto(urls_file=None, wipe=None, outdir=None):
         if wipe:
             wipe_db()
         execute(execdir, True)
+    finally:
+        pass
 
 def download(urls_file=None, outdir=None, overwrite=None):
     with open(urls_file, encoding='utf-8') as f:
