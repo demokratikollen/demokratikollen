@@ -78,7 +78,7 @@ def auto(urls_file=None, wipe=None, outdir=None):
 
     try:
         download(urls_file=urls_file, outdir=outdir, overwrite=False)
-        unpack(path=outdir, outdir=outdir, remove=True)
+        unpack(path=outdir, outdir=outdir, remove=False)
         clean(path=outdir, outdir=outdir, prefix=DEFAULT_CLEANED_PREFIX, 
             overwrite=False, remove=True, skip=False)
         if wipe:
