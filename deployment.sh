@@ -7,6 +7,7 @@ mkdir -p data
 sudo docker rm -f $(sudo docker ps -a -q)
 sudo docker rmi demokratikollen/postgres
 sudo docker rmi demokratikollen/webapp
+sudo docker rmi demokratikollen/nginx
 
 #copy files
 cp -r src/dockerfiles/webapp docker/
@@ -22,6 +23,7 @@ echo "http://data.riksdagen.se/dataset/votering/votering-201314.sql.zip" >> data
 echo "http://data.riksdagen.se/dataset/dokument/bet-2010-2013.sql.zip" >> data/urls.txt
 cp src/demokratikollen/data/create_tables.sql data/
 
+echo "Creating postgres images and containers"
 #Get the postgres image id, if it does not exist, create it
 postgres_image_id=`sudo docker images | sed -nr 's/demokratikollen\/postgres\s*[a-z0-9]*\s*([a-z0-9]*).*/\1/p'`
 
@@ -36,6 +38,7 @@ if [ -z $postgres_container_id ]; then
     sudo docker run -d --name postgres demokratikollen/postgres
 fi
 
+echo "Creating webapp images and containers"
 #Get the webapp image id. Build it if it does not exist
 webapp_image_id=`sudo docker images | sed -nr 's/demokratikollen\/webapp\s*[a-z0-9]*\s*([a-z0-9]*).*/\1/p'`
 
@@ -67,6 +70,7 @@ if [ -z $webapp_container_id ]; then
     sudo docker start webapp
 fi
 
+echo "Creating nginx images and containers"
 #Create the nginx image if it does not exist
 nginx_image_id=`sudo docker images | sed -nr 's/demokratikollen\/nginx\s*[a-z0-9]*\s*([a-z0-9]*).*/\1/p'`
 
