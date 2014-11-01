@@ -1,5 +1,6 @@
 #!/bin/bash
 
+#first time we run create folders
 mkdir -p docker
 mkdir -p data
 
@@ -11,11 +12,14 @@ sudo docker rmi demokratikollen/nginx
 
 #copy files
 cp -r src/dockerfiles/webapp docker/
-cp -r src/dockerfiles/postgres docker/
-cp -r src/dockerfiles/mongo docker/
-cp -r src/dockerfiles/nginx docker/
-
 cp -r src/demokratikollen/* docker/webapp/
+
+cp -r src/dockerfiles/postgres docker/
+
+cp -r src/dockerfiles/mongo docker/
+
+cp -r src/dockerfiles/nginx docker/
+cp -r src/demokratikollen/www/app/static docker/nginx/
 
 #don't go crazy on the downloads
 echo "http://data.riksdagen.se/dataset/person/person.sql.zip" > data/urls.txt
@@ -50,17 +54,17 @@ if [ -z $webapp_image_id ]; then
 	
 	#populate the riksdagen database
 	sudo docker run --name webapp -e $db_main_env -e $db_riksdagen_env -w /usr/src/apps/demokratikollen --volume /home/wercker/data:/data --link postgres:db demokratikollen/webapp python import_data.py auto /data/urls.txt --wipe
-	sudo docker commit webapp demokratikollen/webapp
+	sudo docker commit webapp demokratikollen/webapp:temp
 	sudo docker rm webapp
 
 	#populate the orm
-	sudo docker run --name webapp -e $db_main_env -e $db_riksdagen_env -w /usr/src/apps/demokratikollen --link postgres:db demokratikollen/webapp python populate_orm.py
-	sudo docker commit webapp demokratikollen/webapp
+	sudo docker run --name webapp -e $db_main_env -e $db_riksdagen_env -w /usr/src/apps/demokratikollen --link postgres:db demokratikollen/webapp:temp python populate_orm.py
+	sudo docker commit webapp demokratikollen/webapp:temp
 	sudo docker rm webapp
 
 	#create the final container
-	sudo docker create --name webapp -e $db_main_env -e $db_riksdagen_env --link postgres:db demokratikollen/webapp python /usr/src/apps/demokratikollen/www/run.py
-	sudo docker commit webapp demokratikollen/webapp
+	sudo docker create --name webapp -e $db_main_env -e $db_riksdagen_env --link postgres:db demokratikollen/webapp-temp python /usr/src/apps/demokratikollen/www/run.py
+	sudo docker commit webapp demokratikollen/webapp:latest
 fi
 
 #Get the webapp container id. Start it if it is not already started
@@ -82,10 +86,16 @@ fi
 nginx_container_id=`sudo docker ps | sed -nr 's/([a-z0-9]*)\s*demokratikollen\/nginx.*/\1/p'`
 
 if [ -z $nginx_container_id ]; then
-    sudo docker run -d -P --link webapp:webapp demokratikollen/nginx 
+    sudo docker run -d -p 80:80 --link webapp:webapp demokratikollen/nginx 
 fi
+
+#remove old source files
+rm -rf old_src
+#copy cur to old
+cp -r src old_src
 
 #remove files.
 rm -rf docker/webapp
 rm -rf docker/postgres
 rm -rf docker/mongo
+rm -rf docker/nginx
