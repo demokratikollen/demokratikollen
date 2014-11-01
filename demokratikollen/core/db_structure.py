@@ -216,9 +216,7 @@ class PartyVote(Base):
 
 
 def create_db_structure(engine):
-    if misc_utils.yes_or_no("Do you really want to drop everything in the database?"):
-        pg_utils.drop_everything(engine)
-
+    pg_utils.drop_everything(engine)
     Base.metadata.create_all(engine)
 
 
