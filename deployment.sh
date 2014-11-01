@@ -1,6 +1,12 @@
 #!/bin/bash
 
 mkdir -p docker
+mkdir -p data
+
+#kill everything for now.
+sudo docker rm -f $(sudo docker ps -a -q)
+sudo docker rmi demokratikollen/postgres
+sudo docker rmi demokratikollen/webapp
 
 #copy files
 cp -r src/dockerfiles/webapp docker/
@@ -9,6 +15,11 @@ cp -r src/dockerfiles/mongo docker/
 
 cp -r src/demokratikollen/* docker/webapp/
 
+#don't go crazy on the downloads
+echo "http://data.riksdagen.se/dataset/person/person.sql.zip" > data/urls.txt
+echo "http://data.riksdagen.se/dataset/votering/votering-201314.sql.zip" > data/urls.txt
+echo "http://data.riksdagen.se/dataset/dokument/bet-2010-2013.sql.zip" > data/urls.txt
+cp src/demokratikollen/data/create_tables.sql data/
 
 #Get the postgres image id, if it does not exist, create it
 postgres_image_id=`sudo docker images | sed -nr 's/demokratikollen\/postgres\s*latest\s*([a-z0-9]*).*/\1/p'`
@@ -29,18 +40,31 @@ webapp_image_id=`sudo docker images | sed -nr 's/demokratikollen\/webapp\s*lates
 
 if [ -z $webapp_image_id ]; then
 	webapp_image_id=`sudo docker build -t demokratikollen/webapp docker/webapp`
-	#build environment variables needed by the webapp
-	#envs="DATABASE_URL=postgresql://demokratikollen@localhost:"
-	#link the webapp to the postgresql database.
-	#docker run 
+	db_main_env="DATABASE_URL=postgresql://demokratikollen@db:5432/demokratikollen"
+	db_riksdagen_env="DATABASE_RIKSDAGEN_URL=postgresql://demokratikollen@db:5432/riksdagen"
+	
+	#populate the riksdagen database
+	sudo docker run --name webapp -e $db_main_env -e $db_riksdagen_env -w /usr/src/apps/demokratikollen --volume /home/wercker/data:/data --link postgres:db demokratikollen/webapp python import_data.py auto /data/urls.txt --wipe
+	sudo docker commit webapp demokratikollen/webapp
+	sudo docker rm webapp
+
+	#populate the orm
+	sudo docker run --name webapp -e $db_main_env -e $db_riksdagen_env -w /usr/src/apps/demokratikollen --link postgres:db demokratikollen/webapp python populate_orm.py
+	sudo docker commit webapp demokratikollen/webapp
+	sudo docker rm webapp
+
+	#create the final container
+	sudo docker create --name webapp -e $db_main_env -e $db_riksdagen_env --link postgres:db demokratikollen/webapp python /usr/src/apps/demokratikollen/www/run.py
+	sudo docker commit webapp demokratikollen/webapp
 fi
 
 #Get the webapp container id. Start it if it does not exist
 webapp_container_id=`sudo docker ps | sed -nr 's/([a-z0-9]*)\s*demokratikollen\/webapp.*/\1/p'`
 
-#if [ -z -f $webapp_container_id ]; then
-#    webapp_container_id=`docker run -d --name webapp demokratikollen/webapp`
-#fi
+if [ -z $webapp_container_id ]; then
+    sudo docker start webapp
+fi
+
 
 
 
