@@ -71,19 +71,20 @@ def main():
 
 def auto(urls_file=None, wipe=None, outdir=None):
     if not outdir:
-        outdir = os.path.join(os.path.dirname(urls_file), str(int(time.time())))
+        outdir = os.path.dirname(urls_file)
 
-    if os.path.exists(outdir):
-        raise FileExistsError('Output directory {0} already exists.'.format(outdir))
+    zipdir = os.path.join(outdir, "zips")
+    cleandir = os.path.join(outdir, "cleaned")
+    execdir = os.path.join(outdir, "execs")
 
     try:
-        download(urls_file=urls_file, outdir=outdir, overwrite=False)
-        unpack(path=outdir, outdir=outdir, remove=False)
-        clean(path=outdir, outdir=outdir, prefix=DEFAULT_CLEANED_PREFIX, 
+        download(urls_file=urls_file, outdir=zipdir, overwrite=False)
+        unpack(path=zipdir, outdir=cleandir, remove=False)
+        clean(path=cleandir, outdir=execdir, prefix=DEFAULT_CLEANED_PREFIX, 
             overwrite=False, remove=True, skip=False)
         if wipe:
             wipe_db()
-        execute(outdir, True)
+        execute(execdir, True)
     finally:
         shutil.rmtree(outdir)
 
