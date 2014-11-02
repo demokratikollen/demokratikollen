@@ -215,8 +215,10 @@ class PartyVote(Base):
         return '{}: {}'.format(self.member.__repr__(),self.vote_option.__repr__())
 
 
-def create_db_structure(engine):
-    pg_utils.drop_everything(engine)
+def create_db_structure(engine, do_not_confirm=False):
+    if do_not_confirm or misc_utils.yes_or_no("Do you really want to drop everything in the database?"):
+        pg_utils.drop_everything(engine)
+
     Base.metadata.create_all(engine)
 
 
