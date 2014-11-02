@@ -54,6 +54,9 @@ Vagrant.configure(VAGRANTFILE_API_VERSION) do |config|
     # Provisioning configuration for Ansible (for Mac/Linux hosts).
     config.vm.provision "ansible" do |ansible|
       ansible.playbook = "provision/playbook.yml"
+      ansible.groups = {
+        "develop" => ["default"]
+      }
     end
   end
 

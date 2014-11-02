@@ -9,11 +9,13 @@ from datetime import datetime,timedelta
 from wtforms import Form, TextField, validators
 
 # Import the database object from the main app module
-from demokratikollen.www.app import db, Member, Vote, Poll, ChamberAppointment
+from demokratikollen.www.app import db, Member, Vote, PolledPoint, ChamberAppointment
 
 # Define the blueprint: 'auth', set its url prefix: app.url/auth
 mod_members = Blueprint('members', __name__, url_prefix='/members')
 
+class SearchForm(Form):
+    terms = TextField(label='Namn',description='Namn')
 
 @mod_members.route('.html')
 def members():
@@ -24,8 +26,8 @@ def members():
 @mod_members.route('/find', methods=['GET','POST'])
 def find():
 
-    form = SearchForm(request.args)
-    if not form.terms.data:
+    form = Form(request.args)
+    if not form.data:
         flash({
                 "class": "alert-danger",
                 "title": "Ingen indata:",
@@ -33,7 +35,7 @@ def find():
             })
         return redirect('/members.html')
 
-    s_words = [w.lower() for w in form.terms.data.split()]
+    s_words = [w.lower() for w in form.data.split()]
 
     q = db.session.query(Member)
 
@@ -106,11 +108,11 @@ def th_query():
 @mod_members.route('/<int:member_id>/absence.json', methods=['GET'])
 def get_member(member_id):
     """Return a JSON response with total and absent votes monthly for member"""
-    y = func.date_part('year',Poll.date).label('y')
-    m = func.date_part('month',Poll.date).label('m')
+    y = func.date_part('year',PolledPoint.poll_date).label('y')
+    m = func.date_part('month',PolledPoint.poll_date).label('m')
 
     q = db.session.query(Vote.vote_option,func.count(Vote.id),y,m) \
-                            .join(Poll).filter(Vote.member_id==member_id) \
+                            .join(PolledPoint).filter(Vote.member_id==member_id) \
                             .group_by(Vote.vote_option,'y','m') \
                             .order_by('y','m')
 
