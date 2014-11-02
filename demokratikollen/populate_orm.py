@@ -13,7 +13,7 @@ source_conn = pg.connect(os.environ['DATABASE_RIKSDAGEN_URL'])
 
 # Connect to SQLAlchemy db and create structure
 engine = create_engine(pg_utils.engine_url())
-create_db_structure(engine)
+create_db_structure(engine, do_not_confirm=True)
 
 session = sessionmaker()
 session.configure(bind=engine)
@@ -33,6 +33,7 @@ parties = [
 
 
 c = source_conn.cursor()
+
 members = {}
 
 
@@ -97,8 +98,10 @@ pbar(0)
 polls = {}
 c.execute("SELECT COUNT(*) FROM votering WHERE avser='sakfrågan'")
 num_votes = c.fetchone()[0]
-c.execute("SELECT votering_id,intressent_id,beteckning,rm,punkt,rost,datum FROM votering WHERE avser='sakfrågan' ORDER BY votering_id")
-for i,(votering_id,intressent_id,beteckning,rm,punkt,rost,datum) in enumerate(c):
+c_named = source_conn.cursor("named")
+c_named.itersize = 50000
+c_named.execute("SELECT votering_id,intressent_id,beteckning,rm,punkt,rost,datum FROM votering WHERE avser='sakfrågan' ORDER BY votering_id")
+for i,(votering_id,intressent_id,beteckning,rm,punkt,rost,datum) in enumerate(c_named):
     if votering_id not in polls:
         date = datum.date()
         polls[votering_id] = PolledPoint(poll_date=date,r_votering_id=votering_id,number=punkt)
@@ -143,55 +146,5 @@ for rm,bet,punkt,rubrik,beslutstyp,votering_id in c:
     except NoResultFound:
         pass
 
-
-
-
-# Party votes
-num_party_votes = 0
-num_polls = s.query(func.count(PolledPoint.id)).scalar()
-pbar = InitBar(title="Computing party votes")
-pbar(0)
-n=0
-for polled_point in s.query(PolledPoint):
-    n = n+1
-    if n % 10 == 0:
-        pbar(100*n/num_polls)
-
-
-    votes = s.query(Vote).join(Member).join(Party) \
-        .filter(Vote.polled_point_id == polled_point.id) \
-        .order_by(Party.id)
-
-    current_party_id = 0
-    for vote in votes:
-        if current_party_id != vote.member.party_id:
-            if not current_party_id == 0:
-                s.add(PartyVote(party_id = current_party_id,
-                                polled_point_id = polled_point.id,
-                                num_yes = party_votes['Ja']                             ,
-                                num_no = party_votes['Nej'],
-                                num_abstain = party_votes['Avstår'],
-                                num_absent = party_votes['Frånvarande']))
-
-            current_party_id = vote.member.party_id
-            party_votes = {
-                'Ja': 0,
-                'Nej': 0,
-                'Avstår': 0,
-                'Frånvarande': 0
-            }
-
-        party_votes[vote.vote_option] += 1
-
-    s.add(PartyVote(party_id = current_party_id,
-                    polled_point_id = polled_point.id,
-                    num_yes = party_votes['Ja']                             ,
-                    num_no = party_votes['Nej'],
-                    num_abstain = party_votes['Avstår'],
-                    num_absent = party_votes['Frånvarande']))
-
-
-# del pbar
 s.commit()
-
 source_conn.close()
