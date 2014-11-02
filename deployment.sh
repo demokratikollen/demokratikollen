@@ -70,7 +70,7 @@ if [ -z $webapp_image_id ]; then
 	mongo_env="mongodb://mongo:27017/demokratikollen"
 	
 	#populate the riksdagen database
-	sudo docker run --name webapp -e $postgres_main_env -e $postgres_riksdagen_env -w /usr/src/apps/demokratikollen --volume /home/wercker/data:/data --link postgres:postgres demokratikollen/webapp:latest python import_data.py auto /data/urls.txt --wipe
+	sudo docker run --name webapp -e $postgres_main_env -e $postgres_riksdagen_env -w /usr/src/apps/demokratikollen --volume /home/wercker/data:/data --link postgres:postgres demokratikollen/webapp:latest python import_data.py auto /data/urls.txt /data --wipe
 	sudo docker commit webapp demokratikollen/webapp:latest
 	sudo docker rm webapp
 
