@@ -3,48 +3,125 @@
 {% set header_members_class = "active" %}
 {% block title %}{{ heading }}{% endblock %}
 
+{% block head %}
+{{ super() }}
+<style>
+  span.twitter-typeahead .tt-dropdown-menu {
+    position: absolute;
+    top: 100%;
+    left: 0;
+    z-index: 1000;
+    display: none;
+    float: left;
+    min-width: 160px;
+    padding: 5px 0;
+    margin: 2px 0 0;
+    list-style: none;
+    font-size: 14px;
+    text-align: left;
+    background-color: #ffffff;
+    border: 1px solid #cccccc;
+    border: 1px solid rgba(0, 0, 0, 0.15);
+    border-radius: 4px;
+    -webkit-box-shadow: 0 6px 12px rgba(0, 0, 0, 0.175);
+    box-shadow: 0 6px 12px rgba(0, 0, 0, 0.175);
+    background-clip: padding-box;
+  }
+  span.twitter-typeahead .tt-suggestion > p {
+    display: block;
+    padding: 3px 20px;
+    clear: both;
+    font-weight: normal;
+    line-height: 1.42857143;
+    color: #333333;
+    white-space: nowrap;
+  }
+  span.twitter-typeahead .tt-suggestion > p:hover,
+  span.twitter-typeahead .tt-suggestion > p:focus {
+    color: #ffffff;
+    text-decoration: none;
+    outline: 0;
+    background-color: #428bca;
+  }
+  span.twitter-typeahead .tt-suggestion.tt-cursor {
+    color: #ffffff;
+    background-color: #428bca;
+  }
+  span.twitter-typeahead {
+    width: 100%;
+  }
+  .input-group span.twitter-typeahead {
+    display: block !important;
+  }
+  .input-group span.twitter-typeahead .tt-dropdown-menu {
+    top: 32px !important;
+  }
+  .input-group.input-group-lg span.twitter-typeahead .tt-dropdown-menu {
+    top: 44px !important;
+  }
+  .input-group.input-group-sm span.twitter-typeahead .tt-dropdown-menu {
+    top: 28px !important;
+  }
+  .form-group {
+    margin-bottom: 50px;
+  }
+</style>
+{% endblock %}
+
 {% block content %}
     <div class="row">
-      <div class="col-md-5">
-        <h1>{{ heading }}</h1>
-        {% from "members/_formhelpers.html" import render_field %}
-        <form method="post" action="/members/find" role="form">
+      <div class="col-lg-4 col-md-6 col-xs-8">
+        <h2>{{ heading }}</h2>
+        <form method="get" action="{{ url_for('members.find') }}" role="form">
           <div class="form-group">
-            {{ form.terms(class_="form-control",placeholder=form.terms.description)|safe }}
+            <div id="member-typeahead">
+              <input class="typeahead form-control" type="text" placeholder="Sök ledamot" autocomplete="off" width="300">
+            </div>
           </div>
-          <p><button type="submit" class="btn btn-default">Hitta ledamöter</button>
+          <p><button type="submit" class="btn btn-default">Hitta ledamöter</button></p>
         </form>
       </div>
-      <div class="col-md-7">
-        {% with messages = get_flashed_messages() %}
-        {% if messages -%}
-        {% for m in messages -%}
-        <div class="alert {{ m.class }}" role="alert">
-          {% if m.title %}<strong>{{ m.title }}</strong> {% endif %}{{ m.text }}
-        </div>
-        {%- endfor %}
-        {%- endif %}
-        {% endwith %}
-        {% if members -%}
-        <table class="table table-striped">
-          <thead>
-            <tr>
-              <th>Id</th>
-              <th>Namn</th>
-              <th>Parti</th>
-            </tr>
-          </thead>
-          <tbody>
-            {% for m in members -%}
-            <tr>
-              <td><a href="/members/{{ m.id }}">{{ m.id }}</a></td>
-              <td>{{ m.first_name }} {{ m.last_name }}</td>
-              <td>{{ m.party.abbr }}</td>
-            </tr>
-            {%- endfor %}
-          </tbody>
-        </table>
-        {% endif %}
-      </div>
     </div>
+    <div class="row" id="member-page">
+    </div>
+{% endblock %}
+
+{% block scripts_end %}
+<script src="//cdnjs.cloudflare.com/ajax/libs/typeahead.js/0.10.4/dist/typeahead.bundle.min.js" type="text/javascript"></script>
+<script type="text/javascript">
+  // constructs the suggestion engine
+  var members = new Bloodhound({
+    datumTokenizer: Bloodhound.tokenizers.obj.whitespace('full_name'),
+    queryTokenizer: Bloodhound.tokenizers.whitespace,
+    // `states` is an array of state names defined in "The Basics"
+    prefetch: {
+      url: "{{ url_for('members.th_current') }}",
+      filter: function(obj) {
+        return obj.d;
+      }
+    },
+    remote: {
+      url: "{{ url_for('members.th_query') }}?q=%QUERY",
+      filter: function(obj) {
+        return obj.d;
+      }
+    },
+    dupDetector: function(remoteMatch, localMatch) {
+      return remoteMatch.id===localMatch.id;
+    }
+  });
+
+  // kicks off the loading/processing of `local` and `prefetch`
+  members.initialize();
+
+  $('#member-typeahead .typeahead').typeahead(null,{
+      name: 'members',
+      displayKey: function(m) {
+        return m.full_name + ' (' + m.party + ')';
+      },
+      source: members.ttAdapter()
+  }).on('typeahead:selected', function (obj, datum) {
+      $('#member-page').load("/members/ajax/"+datum.id+".html");
+  });
+</script>
 {% endblock %}

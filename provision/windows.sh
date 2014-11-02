@@ -37,6 +37,13 @@ if [ ! -f /usr/local/bin/ansible ]; then
   sudo pip install ansible
 fi
 
+# Fix the ansible host file to be able to only do the develop provisioning
+if [ ! -f /tmp/ansible_hosts ] ; then
+  sudo echo "localhost ansible_connection=local" >> /tmp/ansible_hosts
+  sudo echo "[develop]" >> /tmp/ansible_hosts
+  sudo echo "localhost" >> /tmp/ansible_hosts
+fi
+
 echo "Running Ansible provisioner defined in Vagrantfile."
-ansible-playbook /vagrant/${ANSIBLE_PLAYBOOK} -i 'localhost,' --extra-vars "is_windows=true" --connection=local
+ansible-playbook /vagrant/${ANSIBLE_PLAYBOOK} -i /tmp/ansible_hosts --extra-vars "is_windows=true"
 

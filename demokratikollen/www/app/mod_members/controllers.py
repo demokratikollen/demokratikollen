@@ -3,13 +3,13 @@ from flask import Blueprint, request, render_template, \
                   flash, g, session, redirect, url_for, \
                   json
 
-from sqlalchemy import func,or_
+from sqlalchemy import func,or_,not_,and_
 from sqlalchemy.orm import aliased
 from datetime import datetime,timedelta
 from wtforms import Form, TextField, validators
 
 # Import the database object from the main app module
-from demokratikollen.www.app import db, Member, Vote, Poll, ChamberAppointment
+from demokratikollen.www.app import db, Member, Vote, PolledPoint, ChamberAppointment
 
 # Define the blueprint: 'auth', set its url prefix: app.url/auth
 mod_members = Blueprint('members', __name__, url_prefix='/members')
@@ -17,25 +17,25 @@ mod_members = Blueprint('members', __name__, url_prefix='/members')
 class SearchForm(Form):
     terms = TextField(label='Namn',description='Namn')
 
-@mod_members.route('/')
+@mod_members.route('.html')
 def members():
-    form = SearchForm()
-    return render_template("/members/members.html",form=form)
+    return render_template("/members/members.html")
 
 
 # Set the route and accepted methods
 @mod_members.route('/find', methods=['GET','POST'])
-def find_member():
-    form = SearchForm(request.form)
-    if not form.terms.data:
+def find():
+
+    form = Form(request.args)
+    if not form.data:
         flash({
                 "class": "alert-danger",
                 "title": "Ingen indata:",
                 "text": "Du angav inget att söka på."
             })
-        return redirect('/members')
-        
-    s_words = [w.lower() for w in form.terms.data.split()]
+        return redirect('/members.html')
+
+    s_words = [w.lower() for w in form.data.split()]
 
     q = db.session.query(Member)
 
@@ -50,44 +50,82 @@ def find_member():
                 "class": "alert-warning",
                 "text": "Din sökning matchade inga ledamöter."
             })
-        return redirect('/members')
+        return redirect('/members.html')
     else:
         return render_template("/members/members.html",form=form,members=members)
 
 # Set the route and accepted methods
-@mod_members.route('/<int:member_id>', methods=['GET'])
+@mod_members.route('/<int:member_id>.html')
 def member(member_id):
-    try:
-        format = request.args['format']
-    except KeyError:
-        format = None
     m = db.session.query(Member).filter_by(id=member_id).first()
 
     return render_template("/members/member.html",member=m)
 
+@mod_members.route('/ajax/<int:member_id>.html')
+def member_ajax(member_id):
+    m = db.session.query(Member).filter_by(id=member_id).one()
+    return render_template("/members/member_ajax.html",member=m)
+
+# Helper to construct typeahead responses
+def typeahead_response(members):
+    output = {"d": [{
+                        "full_name": "{} {}".format(m.first_name,m.last_name),
+                        "party": m.party.abbr,
+                        "id": m.id
+                    } for m in members]}
+    return json.jsonify(output)
 
 
-@mod_members.route('/<int:member_id>/absence', methods=['GET'])
+@mod_members.route('/typeahead/current.json')
+def th_current():
+    now = datetime.utcnow()
+    members = db.session.query(Member).join(ChamberAppointment) \
+                    .filter(ChamberAppointment.end_date > now,
+                            ChamberAppointment.start_date < now,
+                            ChamberAppointment.status != "Ledig")
+    return typeahead_response(members)
+
+# Set the route and accepted methods
+@mod_members.route('/typeahead/query.json',methods=['GET'])
+def th_query():
+    s_words = [w.lower() for w in request.args['q'].split()]
+    db_q = db.session.query(Member)
+
+    now = datetime.utcnow()
+    db_q = db_q.join(ChamberAppointment) \
+                    .filter(not_(and_(ChamberAppointment.end_date > now,
+                            ChamberAppointment.start_date < now,
+                            ChamberAppointment.status != "Ledig")))
+    for w in s_words:
+        db_q = db_q.filter(or_(
+                    func.lower(Member.first_name).like('%{}%'.format(w)),
+                    func.lower(Member.last_name).like('%{}%'.format(w))))
+
+    print(db_q)
+    return typeahead_response(db_q.all())
+
+
+@mod_members.route('/<int:member_id>/absence.json', methods=['GET'])
 def get_member(member_id):
     """Return a JSON response with total and absent votes monthly for member"""
-
-    y = func.date_part('year',Poll.date).label('y')
-    m = func.date_part('month',Poll.date).label('m')
+    y = func.date_part('year',PolledPoint.poll_date).label('y')
+    m = func.date_part('month',PolledPoint.poll_date).label('m')
 
     q = db.session.query(Vote.vote_option,func.count(Vote.id),y,m) \
-                            .join(Poll).filter(Vote.member_id==member_id) \
+                            .join(PolledPoint).filter(Vote.member_id==member_id) \
                             .group_by(Vote.vote_option,'y','m') \
                             .order_by('y','m')
 
     def month_iter(start,end):
         cur_y,cur_m = start
         y2,m2 = end
-        while not (cur_y >= y2 and cur_m > m2):
+        while not (cur_y >= y2 and cur_m >= m2):
             yield cur_y,cur_m
             cur_m += 1
             if cur_m > 12:
                 cur_y += 1
                 cur_m = 1
+        yield cur_y, cur_m
 
     tot = {}
     absent = {}
@@ -153,5 +191,3 @@ def riksdagen(format):
         return json.jsonify(json_data)
     else:
         return render_template('404.html'), 404
-
-    

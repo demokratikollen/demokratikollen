@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 from sqlalchemy import Column, String, Integer, ForeignKey, create_engine
-from sqlalchemy.types import Date, Enum
+from sqlalchemy.types import Date, Enum, DateTime
 from sqlalchemy.orm import relationship, backref, sessionmaker
 from sqlalchemy.ext.declarative import declarative_base
 import datetime
@@ -25,6 +25,10 @@ class Member(Base):
         return '{}, {} ({})'.format(self.last_name,self.first_name,self.party.abbr)
 
 
+#########################
+# Appointments
+#########################
+
 class Appointment(Base):
     __tablename__ = 'appointments'
     id = Column(Integer, primary_key=True)
@@ -47,6 +51,16 @@ class GroupAppointment(Appointment):
         'polymorphic_identity':'group_appointment'
     }
 
+class CommitteeAppointment(Appointment):
+    __tablename__ = 'committee_appointments'
+    id = Column(Integer, ForeignKey('appointments.id'), primary_key=True)
+    committee_id = Column(Integer, ForeignKey('committees.id'))
+
+    __mapper_args__ = {
+        'polymorphic_identity':'committee_appointment'
+    }
+
+
 class ChamberAppointment(Appointment):
     __tablename__ = 'chamber_appointments'
     id = Column(Integer, ForeignKey('appointments.id'), primary_key=True)
@@ -63,6 +77,9 @@ class ChamberAppointment(Appointment):
     def __repr__(self):
         return 'Chair {}: {} {} {}-{}: {}'.format(self.chair,self.status,self.role,self.start_date,self.end_date,self.member)    
 
+#########################
+# Groups
+#########################
 
 class Group(Base):
     __tablename__ = 'groups'
@@ -78,6 +95,16 @@ class Group(Base):
     }
 
 
+class Committee(Group):
+    __tablename__ = 'committees'
+    id = Column(Integer, ForeignKey('groups.id'), primary_key=True)
+    reports = relationship('CommitteeReport', backref='committee')
+
+    __mapper_args__ = {
+        'polymorphic_identity':'committee'
+    }
+
+
 class Party(Group):
     __tablename__ = 'parties'
     id = Column(Integer, ForeignKey('groups.id'), primary_key=True)
@@ -89,18 +116,9 @@ class Party(Group):
     def __repr__(self):
         return 'Party {}: {} ({})'.format(self.id,self.name,self.abbr)    
 
-
-class Poll(Base):
-    __tablename__ = 'polls'
-    id = Column(Integer, primary_key=True)
-    name = Column(String(250))
-    date = Column(Date)
-    votes = relationship('Vote', backref='poll')
-
-    def __repr__(self):
-        return self.name
-
-
+#########################
+# Voting
+#########################
 
 VoteOptionsType = Enum('Ja','Nej','Avstår','Frånvarande',name='vote_options')
 
@@ -108,19 +126,86 @@ class Vote(Base):
     __tablename__ = 'votes'
     id = Column(Integer, primary_key=True)
     member_id = Column(Integer, ForeignKey('members.id'))
-    poll_id = Column(Integer, ForeignKey('polls.id'))
+    polled_point_id = Column(Integer, ForeignKey('polled_points.id'))
     vote_option = Column(VoteOptionsType)
 
     def __repr__(self):
         return '{}: {}'.format(self.member.__repr__(),self.vote_option.__repr__())
 
 
+#########################
+# Documents
+#########################
+
+class Document(Base):
+    __tablename__ = 'documents'
+    id = Column(Integer, primary_key=True)
+    dok_id = Column(String(100))
+    published = Column(DateTime)
+    session = Column(String(10))
+    code = Column(String(20))
+    title = Column(String(250))
+    classtype = Column(String(50))
+    text_url = Column(String(250))
+
+    __mapper_args__ = {
+        'polymorphic_identity':'document',
+        'polymorphic_on':classtype
+    }
+
+    
+class CommitteeReport(Document):
+    __tablename__ = 'committee_reports'
+    id = Column(Integer, ForeignKey('documents.id'), primary_key=True)
+    committee_id = Column(Integer, ForeignKey('committees.id'))
+    points = relationship('CommitteeReportPoint', backref='report')
+
+    __mapper_args__ = {
+        'polymorphic_identity':'committee_report',
+    }   
+
+class CommitteeReportPoint(Base):
+    __tablename__ = 'committee_report_points'
+    id = Column(Integer, primary_key=True)
+    number = Column(Integer)
+    title = Column(String(250))
+    committee_report_id = Column(Integer, ForeignKey('committee_reports.id'))
+    classtype = Column(String(50))
+
+    __mapper_args__ = {
+        'polymorphic_on':classtype,
+        'polymorphic_identity':'committee_report_point'
+    } 
+
+class AcclaimedPoint(CommitteeReportPoint):
+    __tablename__ = "acclaimed_points"
+    id = Column(Integer, ForeignKey('committee_report_points.id'), primary_key=True)
+
+    __mapper_args__ = {
+        'polymorphic_identity':'acclaimed_point'
+    }
+
+class PolledPoint(CommitteeReportPoint):
+    __tablename__ = "polled_points"
+    id = Column(Integer, ForeignKey('committee_report_points.id'), primary_key=True)
+    poll_date = Column(Date)
+    votes = relationship('Vote', backref='polled_point')
+
+    r_votering_id = Column(String(250))
+
+    __mapper_args__ = {
+        'polymorphic_identity':'polled_point'
+    }
+
+#########################
+# Calculated data
+#########################
 
 class PartyVote(Base):
     __tablename__ = 'party_votes'
     id = Column(Integer, primary_key=True)
     party_id = Column(Integer, ForeignKey('parties.id'))
-    poll_id = Column(Integer, ForeignKey('polls.id'))
+    polled_point_id = Column(Integer, ForeignKey('polled_points.id'))
     num_yes = Column(Integer)
     num_no = Column(Integer)
     num_abstain = Column(Integer)
@@ -130,8 +215,8 @@ class PartyVote(Base):
         return '{}: {}'.format(self.member.__repr__(),self.vote_option.__repr__())
 
 
-def create_db_structure(engine):
-    if misc_utils.yes_or_no("Do you really want to drop everything in the database?"):
+def create_db_structure(engine, do_not_confirm=False):
+    if do_not_confirm or misc_utils.yes_or_no("Do you really want to drop everything in the database?"):
         pg_utils.drop_everything(engine)
 
     Base.metadata.create_all(engine)
