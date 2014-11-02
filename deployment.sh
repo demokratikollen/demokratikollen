@@ -10,23 +10,22 @@ sudo docker rmi demokratikollen/postgres
 sudo docker rmi demokratikollen/webapp
 sudo docker rmi demokratikollen/nginx
 sudo docker rmi demokratikollen/webapp:latest
+sudo docker rmi demokratikollen/mongo
 
 #copy files
 cp -r src/dockerfiles/webapp docker/
 cp -r src/demokratikollen/* docker/webapp/
 
-cp -r src/dockerfiles/postgres docker/
-
 cp -r src/dockerfiles/mongo docker/
+
+cp -r src/dockerfiles/postgres docker/
 
 cp -r src/dockerfiles/nginx docker/
 cp -r src/demokratikollen/www/app/static docker/nginx/
 
-#don't go crazy on the downloads
-echo "http://data.riksdagen.se/dataset/person/person.sql.zip" > data/urls.txt
-echo "http://data.riksdagen.se/dataset/votering/votering-201314.sql.zip" >> data/urls.txt
-echo "http://data.riksdagen.se/dataset/dokument/bet-2010-2013.sql.zip" >> data/urls.txt
+#copy files for import_data
 cp src/demokratikollen/data/create_tables.sql data/
+cp src/dockerfiles/webapp/urls.txt data/
 
 echo "Creating postgres images and containers"
 #Get the postgres image id, if it does not exist, create it
@@ -43,6 +42,20 @@ if [ -z $postgres_container_id ]; then
     sudo docker run -d --name postgres demokratikollen/postgres
 fi
 
+echo "Creating mongo images and containers"
+
+mongodb_image_id=`sudo docker images | sed -nr 's/demokratikollen\/mongodb\s*[a-z0-9]*\s*([a-z0-9]*).*/\1/p'`
+
+if [ -z $mongodb_image_id ]; then
+	sudo docker build -t demokratikollen/mongo docker/mongo
+
+#Get the posgres container id, if it does not exist create it
+mongodb_container_id=`sudo docker ps | sed -nr 's/([a-z0-9]*)\s*demokratikollen\/mongo.*/\1/p'`
+
+if [ -z $mongo_container_id ]; then
+    sudo docker run -d --name mongo demokratikollen/mongo
+fi	
+
 echo "Creating webapp images and containers"
 #Get the webapp image id. Build it if it does not exist
 webapp_image_id=`sudo docker images | sed -nr 's/demokratikollen\/webapp\s*[a-z0-9]*\s*([a-z0-9]*).*/\1/p'`
@@ -50,21 +63,23 @@ webapp_image_id=`sudo docker images | sed -nr 's/demokratikollen\/webapp\s*[a-z0
 if [ -z $webapp_image_id ]; then
 	sudo docker build -t demokratikollen/webapp docker/webapp
 
-	db_main_env="DATABASE_URL=postgresql://demokratikollen@db:5432/demokratikollen"
-	db_riksdagen_env="DATABASE_RIKSDAGEN_URL=postgresql://demokratikollen@db:5432/riksdagen"
+	postgres_main_env="DATABASE_URL=postgresql://demokratikollen@postgres:5432/demokratikollen"
+	postgres_riksdagen_env="DATABASE_RIKSDAGEN_URL=postgresql://demokratikollen@postgres:5432/riksdagen"
+
+	mongo_env="mongodb://mongo:27017/demokratikollen"
 	
 	#populate the riksdagen database
-	sudo docker run --name webapp -e $db_main_env -e $db_riksdagen_env -w /usr/src/apps/demokratikollen --volume /home/wercker/data:/data --link postgres:db demokratikollen/webapp:latest python import_data.py auto /data/urls.txt --wipe
+	sudo docker run --name webapp -e $postgres_main_env -e $postgres_riksdagen_env -w /usr/src/apps/demokratikollen --volume /home/wercker/data:/data --link postgres:postgres demokratikollen/webapp:latest python import_data.py auto /data/urls.txt --wipe
 	sudo docker commit webapp demokratikollen/webapp:latest
 	sudo docker rm webapp
 
 	#populate the orm
-	sudo docker run --name webapp -e $db_main_env -e $db_riksdagen_env -w /usr/src/apps/demokratikollen --link postgres:db demokratikollen/webapp:latest python populate_orm.py
+	sudo docker run --name webapp -e $postgres_main_env -e $postgres_riksdagen_env -w /usr/src/apps/demokratikollen --link postgres:postgres demokratikollen/webapp:latest python populate_orm.py
 	sudo docker commit webapp demokratikollen/webapp:latest
 	sudo docker rm webapp
 
 	#create the final container
-	sudo docker create --name webapp -e $db_main_env -e $db_riksdagen_env --link postgres:db demokratikollen/webapp:latest python /usr/src/apps/demokratikollen/www/run.py
+	sudo docker create --name webapp -e $postgres_main_env -e $postgres_riksdagen_env -e $mongo_env --link postgres:postgres --link mongo:mongo  demokratikollen/webapp:latest python /usr/src/apps/demokratikollen/www/run.py
 fi
 
 #Get the webapp container id. Start it if it is not already started
