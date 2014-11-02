@@ -48,6 +48,7 @@ mongodb_image_id=`sudo docker images | sed -nr 's/demokratikollen\/mongodb\s*[a-
 
 if [ -z $mongodb_image_id ]; then
 	sudo docker build -t demokratikollen/mongo docker/mongo
+fi
 
 #Get the posgres container id, if it does not exist create it
 mongodb_container_id=`sudo docker ps | sed -nr 's/([a-z0-9]*)\s*demokratikollen\/mongo.*/\1/p'`
