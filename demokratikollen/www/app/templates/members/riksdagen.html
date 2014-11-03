@@ -69,7 +69,31 @@
         var circles = d3.selectAll('g circle').data(RO.data)
 
         circles.style("fill", function(d) { return RO.partyColors[d.party] })
-               .on('click', function(d) { $(location).attr('href', '/members/' + d.member_id ) });
+               .on('click', function(d) { $(location).attr('href', '/members/' + d.member_id + '.html' ) });
+
+        //call the absence function, later generate buttong and attach callback
+        $.get('{{url_for('members.absence')}}', RO.SetRadiusFromAbsence);
+    },
+    SetRadiusFromAbsence: function(json_data, textStatus, jqxhr) {
+        var data = json_data.data;
+
+        var circles = d3.selectAll('g circle');
+        circles.attr("r", function(d) {
+          if( d.member_id in data ) {
+            var total = data[d.member_id]["Frånvarande"] || 0;
+            total += data[d.member_id]["Ja"] || 0;
+            total += data[d.member_id]["Nej"] || 0;
+            total += data[d.member_id]["Avstår"] || 0;
+
+            var absence = data[d.member_id]["Frånvarande"] || 0;
+            
+            return 10.0*(1 - (absence/total))
+          }
+          else
+          {
+            return 10
+          }
+        });
     },
     partyColors: {"S": "#ED1B34", "M": "#52BDEC", "SD": "#FBC700", 
                   "MP": "#53A045", "C": "#016A3A", "V": "#D9291C",
@@ -83,6 +107,6 @@
 
 {% block content %}
     <div class="row">
-      <div id="chart" style="position:static; width: 700; height: 400px"><svg /></div>
+      <div id="chart" style="height: 400px; float: none; marigin: 0 auto"><svg /></div>
     </div>
 {% endblock %}

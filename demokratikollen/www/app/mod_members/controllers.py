@@ -173,6 +173,26 @@ def get_member(member_id):
 
     return json.jsonify(nvd3_data)
 
+@mod_members.route('/abscence.json')
+def absence():
+    q = db.session.query(Member.id, Vote.vote_option, func.count(Vote.id)) \
+                            .join(Vote) \
+                            .group_by(Vote.vote_option, Member.id) \
+                            .order_by(Member.id)
+
+    
+    json_data = {"data": {}}
+
+    for member_id, vote_option, n_votes in q:
+        if str(member_id) in json_data["data"]:
+                json_data["data"][str(member_id)][str(vote_option)] = n_votes
+        else:
+            json_data["data"][str(member_id)] = dict()
+            json_data["data"][str(member_id)][str(vote_option)] = n_votes
+
+
+    return json.jsonify(json_data)
+
 @mod_members.route('/riksdagen.<string:format>')
 def riksdagen(format):
 
@@ -188,6 +208,7 @@ def riksdagen(format):
         json_data = {"count": len(current_chairs), "data": []}
         for chair in current_chairs:
             json_data['data'].append({"chair": chair.chair, "party": chair.member.party.abbr, "member_id": chair.member_id})
+        json_data['data'] = sorted(json_data['data'], key=lambda k: k['party'])
         return json.jsonify(json_data)
     else:
         return render_template('404.html'), 404
