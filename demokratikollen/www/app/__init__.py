@@ -1,8 +1,9 @@
 # Import flask and template operators
 from flask import Flask, render_template
 
-# Import SQLAlchemy
+# Import extensions
 from flask.ext.sqlalchemy import SQLAlchemy
+from flask.ext.cache import Cache
 
 import sys
 import os
@@ -18,6 +19,9 @@ app.config.from_object('demokratikollen.www.config')
 # Define the database object which is imported
 # by modules and controllers
 db = SQLAlchemy(app)
+
+# Setup the Cache
+cache = Cache(app,config={'CACHE_TYPE': 'filesystem', 'CACHE_DIR': str(os.path.dirname(os.path.dirname(__file__))) + '/cache'})
 
 # Sample HTTP error handling
 @app.errorhandler(404)

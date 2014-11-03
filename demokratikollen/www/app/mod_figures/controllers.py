@@ -9,6 +9,8 @@ from sqlalchemy import func
 import datetime as dt
 import calendar
 
+from demokratikollen.www.app import cache
+
 mod_figures = Blueprint('figures', __name__, url_prefix='/figures')
 
 ########
@@ -49,13 +51,14 @@ def voteringsfrekvens(format):
     else:
         return render_template('404.html'), 404
 
+@cache.cached()
 @mod_figures.route('/partipiskan', methods=['GET'])
 def partipiskan():
 
     s = db.session
 
     parties = s.query(Party).join(Member).join(ChamberAppointment) \
-                .filter(ChamberAppointment.start_date > dt.date(2010,10,5)).distinct().all()
+                .filter(ChamberAppointment.start_date > dt.date(2002,9,1)).distinct().all()
 
     data = dict(key="% Polls with party split", values=list())
 
