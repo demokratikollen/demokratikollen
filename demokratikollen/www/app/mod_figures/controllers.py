@@ -21,38 +21,45 @@ def voteringsfrekvens(format):
     if format == 'html':
         return render_template('/figures/voteringsfrekvens.html')
     if format == 'json':
+        @cache.memoize()
+        def generate_data_for_voteringsfrekvens(time_format):
+            if time_format == 'dow':
+                # get polls grouped on day of week
+                poll_agg = db.session.query(func.date_part('dow', PolledPoint.poll_date), func.count(PolledPoint.id)) \
+                    .group_by(func.date_part('dow', PolledPoint.poll_date))  \
+                    .order_by(func.date_part('dow', PolledPoint.poll_date))
+
+                weekdays = ['Söndag', 'Måndag', 'Tisdag', 'Onsdag', 'Torsdag', 'Fredag', 'Lördag']
+
+                data = []
+                for poll in poll_agg:
+                    data.append(dict(label=weekdays[int(poll[0])], value=poll[1]))
+                return data
+
+            if time_format == 'month':
+                poll_agg = db.session.query(func.date_part('month', PolledPoint.poll_date), func.count(PolledPoint.id)) \
+                    .group_by(func.date_part('month', PolledPoint.poll_date))  \
+                    .order_by(func.date_part('month', PolledPoint.poll_date))
+
+                months = ['Jan.', 'Feb.', 'Mars', 'Apr.', 'Maj', 'Juni', 'Juli', 'Aug.', 'Sep.', 'Okt.', 'Nov.', 'Dec.']
+                data = []
+                for poll in poll_agg:
+                    data.append(dict(label=months[int(poll[0])-1], value=poll[1]))
+                return data
 
         if 'time' in request.args:
             time_format = request.args['time']
         else:
             time_format = 'dow'
 
-        if time_format == 'dow':
-            # get polls grouped on day of week
-            poll_agg = db.session.query(func.date_part('dow', PolledPoint.poll_date), func.count(PolledPoint.id)) \
-                    .group_by(func.date_part('dow', PolledPoint.poll_date))  \
-                    .order_by(func.date_part('dow', PolledPoint.poll_date))
-
-            weekdays = ['Söndag', 'Måndag', 'Tisdag', 'Onsdag', 'Torsdag', 'Fredag', 'Lördag']
-
-            data = []
-            for poll in poll_agg:
-                data.append(dict(label=weekdays[int(poll[0])], value=poll[1]))
-        if time_format == 'month':
-            poll_agg = db.session.query(func.date_part('month', PolledPoint.poll_date), func.count(PolledPoint.id)) \
-                    .group_by(func.date_part('month', PolledPoint.poll_date))  \
-                    .order_by(func.date_part('month', PolledPoint.poll_date))
-
-            months = ['Jan.', 'Feb.', 'Mars', 'Apr.', 'Maj', 'Juni', 'Juli', 'Aug.', 'Sep.', 'Okt.', 'Nov.', 'Dec.']
-            data = []
-            for poll in poll_agg:
-                data.append(dict(label=months[int(poll[0])-1], value=poll[1]))
+        data = generate_data_for_voteringsfrekvens(time_format)
+        
         return json.jsonify(key='voteringsfrekvens', values=data)
     else:
         return render_template('404.html'), 404
 
-@cache.cached()
 @mod_figures.route('/partipiskan', methods=['GET'])
+@cache.cached()
 def partipiskan():
 
     s = db.session
@@ -80,8 +87,8 @@ def partipiskan():
                 num_piska += 1
                 num_defectors.append(total-winner)
                 
-        
-        data['values'].append( dict(label=party.abbr, value=num_piska/num_polls) )
+        if num_polls > 0:
+            data['values'].append( dict(label=party.abbr, value=num_piska/num_polls) )
 
 
 
