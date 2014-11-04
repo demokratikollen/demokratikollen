@@ -64,22 +64,13 @@ webapp_image_id=`sudo docker images | sed -nr 's/demokratikollen\/webapp\s*[a-z0
 if [ -z $webapp_image_id ]; then
 	sudo docker build -t demokratikollen/webapp docker/webapp
 
-	postgres_main_env="DATABASE_URL=postgresql://demokratikollen@postgres:5432/demokratikollen"
-	postgres_riksdagen_env="DATABASE_RIKSDAGEN_URL=postgresql://demokratikollen@postgres:5432/riksdagen"
-
-	mongo_env="mongodb://mongo:27017/demokratikollen"
-	
-	#populate the riksdagen database
-	sudo docker run --rm -e $postgres_main_env -e $postgres_riksdagen_env -w /usr/src/apps/demokratikollen --volume /home/wercker/data:/data --link postgres:postgres demokratikollen/webapp:latest python import_data.py auto /data/urls.txt /data --wipe
-
-	#populate the orm
-	sudo docker run --rm -e $postgres_main_env -e $postgres_riksdagen_env -w /usr/src/apps/demokratikollen --link postgres:postgres demokratikollen/webapp:latest python populate_orm.py
-
-	#populate party_votes
-	sudo docker run --rm -e $postgres_main_env -e $postgres_riksdagen_env -w /usr/src/apps/demokratikollen --link postgres:postgres demokratikollen/webapp:latest python compute_party_votes.py
+	while read cmd; do
+		sudo docker $cmd
+	done < docker/webapp/setup 
 
 	#create the final container
-	sudo docker create --name webapp -e $postgres_main_env -e $postgres_riksdagen_env -e $mongo_env --link postgres:postgres --link mongo:mongo  demokratikollen/webapp:latest python /usr/src/apps/demokratikollen/www/run.py
+	deamon = $(cat docker/webapp/deamon)
+	sudo docker $deamon
 fi
 
 #Get the webapp container id. Start it if it is not already started
