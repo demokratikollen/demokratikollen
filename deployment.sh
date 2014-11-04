@@ -68,7 +68,7 @@ if [ -z $webapp_image_id ]; then
 	done < docker/webapp/setup 
 
 	#create the final container
-	deamon = $(cat docker/webapp/deamon)
+	deamon=$(cat docker/webapp/deamon)
 	sudo docker $deamon
 fi
 
