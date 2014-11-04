@@ -70,14 +70,13 @@ if [ -z $webapp_image_id ]; then
 	mongo_env="mongodb://mongo:27017/demokratikollen"
 	
 	#populate the riksdagen database
-	sudo docker run --name webapp -e $postgres_main_env -e $postgres_riksdagen_env -w /usr/src/apps/demokratikollen --volume /home/wercker/data:/data --link postgres:postgres demokratikollen/webapp:latest python import_data.py auto /data/urls.txt /data --wipe
-	sudo docker commit webapp demokratikollen/webapp:latest
-	sudo docker rm webapp
+	sudo docker run --rm -e $postgres_main_env -e $postgres_riksdagen_env -w /usr/src/apps/demokratikollen --volume /home/wercker/data:/data --link postgres:postgres demokratikollen/webapp:latest python import_data.py auto /data/urls.txt /data --wipe
 
 	#populate the orm
-	sudo docker run --name webapp -e $postgres_main_env -e $postgres_riksdagen_env -w /usr/src/apps/demokratikollen --link postgres:postgres demokratikollen/webapp:latest python populate_orm.py
-	sudo docker commit webapp demokratikollen/webapp:latest
-	sudo docker rm webapp
+	sudo docker run --rm -e $postgres_main_env -e $postgres_riksdagen_env -w /usr/src/apps/demokratikollen --link postgres:postgres demokratikollen/webapp:latest python populate_orm.py
+
+	#populate party_votes
+	sudo docker run --rm -e $postgres_main_env -e $postgres_riksdagen_env -w /usr/src/apps/demokratikollen --link postgres:postgres demokratikollen/webapp:latest python compute_party_votes.py
 
 	#create the final container
 	sudo docker create --name webapp -e $postgres_main_env -e $postgres_riksdagen_env -e $mongo_env --link postgres:postgres --link mongo:mongo  demokratikollen/webapp:latest python /usr/src/apps/demokratikollen/www/run.py
