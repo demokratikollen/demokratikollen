@@ -6,11 +6,10 @@ mkdir -p data
 
 #kill everything for now.
 sudo docker rm -f $(sudo docker ps -a -q)
-sudo docker rmi demokratikollen/postgres
-sudo docker rmi demokratikollen/webapp
-sudo docker rmi demokratikollen/nginx
+sudo docker rmi demokratikollen/postgres:latest
+sudo docker rmi demokratikollen/nginx:latest
 sudo docker rmi demokratikollen/webapp:latest
-sudo docker rmi demokratikollen/mongo
+sudo docker rmi demokratikollen/mongo:latest
 
 #copy files
 cp -r src/dockerfiles/webapp docker/
@@ -44,7 +43,7 @@ fi
 
 echo "Creating mongo images and containers"
 
-mongodb_image_id=`sudo docker images | sed -nr 's/demokratikollen\/mongodb\s*[a-z0-9]*\s*([a-z0-9]*).*/\1/p'`
+mongodb_image_id=`sudo docker images | sed -nr 's/demokratikollen\/mongo\s*[a-z0-9]*\s*([a-z0-9]*).*/\1/p'`
 
 if [ -z $mongodb_image_id ]; then
 	sudo docker build -t demokratikollen/mongo docker/mongo
