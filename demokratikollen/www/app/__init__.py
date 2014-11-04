@@ -1,8 +1,10 @@
 # Import flask and template operators
 from flask import Flask, render_template
 
-# Import SQLAlchemy
+# Import extensions
 from flask.ext.sqlalchemy import SQLAlchemy
+
+from demokratikollen.www.app.helpers.cache import cache
 
 import sys
 import os
@@ -14,6 +16,9 @@ app = Flask(__name__, static_url_path='/')
 
 # Configurations
 app.config.from_object('demokratikollen.www.config')
+
+#init the cache
+cache.init_app(app)
 
 # Define the database object which is imported
 # by modules and controllers
