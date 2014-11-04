@@ -10,6 +10,9 @@ bin/
 local/
 app/www/ghostdriver.log
 
+#cache
+demokratikollen/www/cache
+
 #python c files
 *.pyc
 
