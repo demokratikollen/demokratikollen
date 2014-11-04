@@ -3,7 +3,8 @@ from flask import Flask, render_template
 
 # Import extensions
 from flask.ext.sqlalchemy import SQLAlchemy
-from demokratikollen.www.app.cache import cache
+
+from demokratikollen.www.app.helpers.cache import cache
 
 import sys
 import os

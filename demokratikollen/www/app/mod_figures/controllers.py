@@ -4,12 +4,12 @@ from flask import Blueprint, request, render_template, \
                   json
 
 from demokratikollen.www.app import db, PartyVote, PolledPoint, Party, Member, ChamberAppointment
+from demokratikollen.www.app.helpers.cache import cache
+
 from sqlalchemy import func
 
 import datetime as dt
 import calendar
-
-from demokratikollen.www.app import cache
 
 mod_figures = Blueprint('figures', __name__, url_prefix='/figures')
 
@@ -22,7 +22,7 @@ def voteringsfrekvens(format):
         return render_template('/figures/voteringsfrekvens.html')
     if format == 'json':
         @cache.memoize()
-        def generate_data_for_voteringsfrekvens(time_format):
+        def generate_data(time_format):
             if time_format == 'dow':
                 # get polls grouped on day of week
                 poll_agg = db.session.query(func.date_part('dow', PolledPoint.poll_date), func.count(PolledPoint.id)) \
@@ -52,7 +52,7 @@ def voteringsfrekvens(format):
         else:
             time_format = 'dow'
 
-        data = generate_data_for_voteringsfrekvens(time_format)
+        data = generate_data(time_format)
         
         return json.jsonify(key='voteringsfrekvens', values=data)
     else:

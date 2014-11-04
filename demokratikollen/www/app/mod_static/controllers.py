@@ -4,7 +4,7 @@ from flask import Blueprint, request, render_template, \
 
 # Import the database object from the main app module
 from demokratikollen.www.app import db
-from demokratikollen.www.app.cache import cache
+from demokratikollen.www.app.helpers.cache import cache
 
 # Define the blueprint: 'auth', set its url prefix: app.url/auth
 mod_static = Blueprint('static', __name__, url_prefix='/')
