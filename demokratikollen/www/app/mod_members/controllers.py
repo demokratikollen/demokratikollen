@@ -10,6 +10,7 @@ from wtforms import Form, TextField, validators
 
 # Import the database object from the main app module
 from demokratikollen.www.app import db, Member, Vote, PolledPoint, ChamberAppointment
+from demokratikollen.www.app.helpers.cache import cache
 
 # Define the blueprint: 'auth', set its url prefix: app.url/auth
 mod_members = Blueprint('members', __name__, url_prefix='/members')
@@ -62,6 +63,7 @@ def member(member_id):
     return render_template("/members/member.html",member=m)
 
 @mod_members.route('/ajax/<int:member_id>.html')
+@cache.memoize(3600*24)
 def member_ajax(member_id):
     m = db.session.query(Member).filter_by(id=member_id).one()
     return render_template("/members/member_ajax.html",member=m)
@@ -88,6 +90,7 @@ def th_current():
 # Set the route and accepted methods
 @mod_members.route('/typeahead/query.json',methods=['GET'])
 def th_query():
+    
     s_words = [w.lower() for w in request.args['q'].split()]
     db_q = db.session.query(Member)
 
@@ -106,6 +109,7 @@ def th_query():
 
 
 @mod_members.route('/<int:member_id>/absence.json', methods=['GET'])
+@cache.memoize(3600*24)
 def get_member(member_id):
     """Return a JSON response with total and absent votes monthly for member"""
     y = func.date_part('year',PolledPoint.poll_date).label('y')

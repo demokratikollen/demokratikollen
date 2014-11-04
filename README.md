@@ -65,6 +65,18 @@ file located in the root of the app dir. Templates for each module need to be lo
 same name as the module in the templates folder. The master layout in `layout.html` defines should be used as 
 a parent for module templates.
 
+### Caching of pages in the webapp 
+Caching is enabled for the Flask app. Caching is done by importing the cache
+module with `from ...app.helpers.cache import cache` and using the decorators
+`@cache.cached(int timeout in seconds)` and `@cache.memoize(int timeout in
+seconds)` on any method. The `cached` decorator should be used for methods
+without arguments while the `memoize` decorator should be used for methods
+with arguments.
+
+Although there are some speedups the main benefit of caching methods in the
+webapp is to keep the database interactions down. Full caching will probably
+be done at the nginx level if that should ever be needed.
+
 ## MongoDB Datastore
 To use the datastore add `from utils.mongodb import MongoDBDatastore` and create a new datastore object as `ds = MongoDBDatastore()`. 
 In order to save an object in the datastore call the `store_object(object[any], identifier[string])` method which saves the object in the database. Subsequent calls with the same identifier should overwrite the object. Retrieve objects with the `get_object(identifier)` method. 
