@@ -36,14 +36,20 @@
        {% block header %}
         <ul class="nav nav-pills pull-right">
           <li class="{{header_home_class}}"><a href="/">Hem</a></li>
-          <li class="{{header_members_class}}"><a href="{{ url_for('members.members') }}">Members</a></li>
+          <li class="dropdown {{header_members_class}}">
+            <a class="dropdown-toggle" data-toggle="dropdown" href="#">Ledamöter</a>
+            <ul class="dropdown-menu" role="menu">
+              <li class="{{header_member_search_class}}"><a href="{{ url_for('members.members') }}">Sök</a></li>
+              <li class="{{header_member_riksdagen_class}}"><a href="{{ url_for('members.riksdagen_html') }}">Riksdagen</a></li>
+            </ul>
+            </li>
 
           <li class="dropdown {{header_figures_class}}">
             <a class="dropdown-toggle" data-toggle="dropdown" href="#">
               Figures <span class="caret"></span>
             </a>
             <ul class="dropdown-menu" role="menu">
-              <li class="{{header_partipiskan_class}}"><a href="/figures/partipiskan">Partipiskan</a></li>
+              <li class="{{header_partipiskan_class}}"><a href="{{url_for('figures.partipiskan')}}">Partipiskan</a></li>
               <li class="{{header_voteringsfrekvens_class}}"><a href="{{url_for('figures.voteringsfrekvens', format='html')}}">Voteringsfrekvens</a></li>
             </ul>
           </li>
