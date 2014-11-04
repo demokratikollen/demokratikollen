@@ -20,7 +20,7 @@ class SearchForm(Form):
 
 @mod_members.route('.html')
 def members():
-    return render_template("/members/members.html")
+    return render_template("/members/members.html", header_member_search_class='active')
 
 
 # Set the route and accepted methods
@@ -178,7 +178,8 @@ def get_member(member_id):
     return json.jsonify(nvd3_data)
 
 @mod_members.route('/abscence.json')
-def absence():
+@cache.cached(24*3600)
+def absence_json():
     q = db.session.query(Member.id, Vote.vote_option, func.count(Vote.id)) \
                             .join(Vote) \
                             .group_by(Vote.vote_option, Member.id) \
@@ -197,22 +198,21 @@ def absence():
 
     return json.jsonify(json_data)
 
-@mod_members.route('/riksdagen.<string:format>')
-def riksdagen(format):
+@mod_members.route('/riksdagen.html')
+def riksdagen_html():
+    return render_template('/members/riksdagen.html',header_member_riksdagen_class='active')
 
-    if format == 'html':
-        return render_template('/members/riksdagen.html')
-    if format == 'json':
-        current_chairs = db.session.query(ChamberAppointment) \
+@mod_members.route('/riksdagen.json')
+@cache.cached(24*3600)
+def riksdagen_json():
+    current_chairs = db.session.query(ChamberAppointment) \
                         .filter(ChamberAppointment.status == "Tjänstgörande")\
                         .filter(ChamberAppointment.end_date > datetime.today()) \
                         .order_by(ChamberAppointment.chair) \
                         .distinct(ChamberAppointment.chair) \
                         .all()
-        json_data = {"count": len(current_chairs), "data": []}
-        for chair in current_chairs:
-            json_data['data'].append({"chair": chair.chair, "party": chair.member.party.abbr, "member_id": chair.member_id})
+    json_data = {"count": len(current_chairs), "data": []}
+    for chair in current_chairs:
+        json_data['data'].append({"chair": chair.chair, "party": chair.member.party.abbr, "member_id": chair.member_id})
         json_data['data'] = sorted(json_data['data'], key=lambda k: k['party'])
-        return json.jsonify(json_data)
-    else:
-        return render_template('404.html'), 404
+    return json.jsonify(json_data)

@@ -1,6 +1,6 @@
 {% extends "layout.html" %}
 {% set header_members_class = "active" %}
-{% block title %}Hem{% endblock %}
+{% block title %}Riksdagen{% endblock %}
 {% block head %}
 
   {{ super() }}
@@ -60,7 +60,7 @@
              .attr("r", function(d) { return d.r})
              .style("fill", function(d) { return d.color});
 
-      $.get('{{url_for('members.riksdagen', format='json')}}', RO.Update);
+      $.get('{{url_for('members.riksdagen_json')}}', RO.Update);
     },
     Update: function(json_data, textStatus, jqxhr) {
         RO.data = json_data.data;
@@ -72,7 +72,7 @@
                .on('click', function(d) { $(location).attr('href', '/members/' + d.member_id + '.html' ) });
 
         //call the absence function, later generate buttong and attach callback
-        $.get('{{url_for('members.absence')}}', RO.SetRadiusFromAbsence);
+        $.get('{{url_for('members.absence_json')}}', RO.SetRadiusFromAbsence);
     },
     SetRadiusFromAbsence: function(json_data, textStatus, jqxhr) {
         var data = json_data.data;
