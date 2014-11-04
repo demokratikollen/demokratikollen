@@ -94,10 +94,10 @@ def auto(urls_file=None, outdir=None, wipe=None):
 
         for unp_file in unpacked:
             cleaned = clean(path=unp_file, outdir=clean_dir, prefix=DEFAULT_CLEANED_PREFIX, 
-                overwrite=False, remove=False)
+                overwrite=False, remove=True)
 
             for clean_path in cleaned:
-                execute(clean_path, remove=False)
+                execute(clean_path, remove=True)
 
 def download(urls_file=None, outdir=None, overwrite=None):
     with open(urls_file, encoding='utf-8') as f:
