@@ -48,6 +48,7 @@ mongodb_image_id=`sudo docker images | sed -nr 's/demokratikollen\/mongodb\s*[a-
 
 if [ -z $mongodb_image_id ]; then
 	sudo docker build -t demokratikollen/mongo docker/mongo
+fi
 
 #Get the posgres container id, if it does not exist create it
 mongodb_container_id=`sudo docker ps | sed -nr 's/([a-z0-9]*)\s*demokratikollen\/mongo.*/\1/p'`
@@ -69,7 +70,7 @@ if [ -z $webapp_image_id ]; then
 	mongo_env="mongodb://mongo:27017/demokratikollen"
 	
 	#populate the riksdagen database
-	sudo docker run --name webapp -e $postgres_main_env -e $postgres_riksdagen_env -w /usr/src/apps/demokratikollen --volume /home/wercker/data:/data --link postgres:postgres demokratikollen/webapp:latest python import_data.py auto /data/urls.txt --wipe
+	sudo docker run --name webapp -e $postgres_main_env -e $postgres_riksdagen_env -w /usr/src/apps/demokratikollen --volume /home/wercker/data:/data --link postgres:postgres demokratikollen/webapp:latest python import_data.py auto /data/urls.txt /data --wipe
 	sudo docker commit webapp demokratikollen/webapp:latest
 	sudo docker rm webapp
 
