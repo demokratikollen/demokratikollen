@@ -24,21 +24,26 @@ Assumes you have cloned the repository.
 1. Go to the application root: `cd ~/demokratikollen`
 2. Run
 
-        python import_data.py auto data/urls.txt --wipe
+        python import_data.py auto data/urls.txt data/auto --wipe
+
+This command will skip any download, unpacking or cleaning step where the output file already exists. If you for some reason want to redo some step(s) for some file(s), first delete all the outdated things from the `data/auto` directory or whatever output directory you are using.
 
 ### Adding more data to riksdagen database
 
-When/if you download more data and want to add it, you can of course work with single files:
+When someone has updated `data/urls.txt` with more URLs, you probably just want to download, unpack, clean and execute the additions.
 
-**Alternative 1:** Download and unpack the file to e.g. `~/demokratikollen/data/my_new_file_name.sql`, then do
+**Alternative 1**: If you used the initialization command above, and didn't change anything since then, just run this to download and process any new additions to `urls.txt`:
 
-    python import_data.py clean data/download/my_new_file_name.sql data/cleaned
-    python import_data.py execute data/cleaned/cleaned_my_new_file_name.sql
+        python import_data.py auto data/urls.txt data/auto
 
-**Alternative 2:** Put the URL(s) of the additional file(s) in a file like `~/demokratikollen/data/my_urls.txt`. Then go to the application root: `cd ~/demokratikollen` and run
+**Note:** The downloaded .zip files are used by the `auto` subcommand as indicators of which things have already been imported. If a .zip file is already there, the `auto` command won't process it again unless you use `--wipe`. Since you followed the initialization instruction above and did not remove the downloaded files manually in between, only new URLs from `data/urls.txt` will be downloaded and processed.
 
-    python import_data.py auto data/my_urls.txt
-        
+**Alternative 2**: You can also work with single files or directories. Please check the help `python import_data.py --help`. For example, you can do things like
+
+        python import data.py download data/urls.txt data/my_downloads
+        python import_data.py unpack data/my_downloads data/unpacked
+        python import_data.py clean data/unpacked data/cleaned --overwrite --remove
+        python import_data.py execute data/cleaned        
 
 ## Import of data to ORM database
 First initialize database according to instructions above. Then run `python ~/app/populate_orm.py`.
@@ -59,6 +64,18 @@ defined as a Flask Blueprint in the `controller.py` file and registered in the a
 file located in the root of the app dir. Templates for each module need to be located in a folder with the 
 same name as the module in the templates folder. The master layout in `layout.html` defines should be used as 
 a parent for module templates.
+
+### Caching of pages in the webapp 
+Caching is enabled for the Flask app. Caching is done by importing the cache
+module with `from ...app.helpers.cache import cache` and using the decorators
+`@cache.cached(int timeout in seconds)` and `@cache.memoize(int timeout in
+seconds)` on any method. The `cached` decorator should be used for methods
+without arguments while the `memoize` decorator should be used for methods
+with arguments.
+
+Although there are some speedups the main benefit of caching methods in the
+webapp is to keep the database interactions down. Full caching will probably
+be done at the nginx level if that should ever be needed.
 
 ## MongoDB Datastore
 To use the datastore add `from utils.mongodb import MongoDBDatastore` and create a new datastore object as `ds = MongoDBDatastore()`. 

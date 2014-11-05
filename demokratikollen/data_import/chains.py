@@ -46,3 +46,19 @@ CHAINS['person.sql'] = (
     tr.fix_names,
     str
     )
+
+CHAINS['prop-2010-2013.sql'] = \
+CHAINS['prop-2006-2009.sql'] = \
+CHAINS['prop-2002-2005.sql'] = (
+    tr.ifmatch(
+        (r'INSERT INTO dokument \(hangar_id,dok_id,rm,beteckning,doktyp,typ,subtyp,tempbeteckning,organ,mottagare,nummer,slutnummer,datum,systemdatum,publicerad,titel,subtitel,status,htmlformat,relaterat_id,source,sourceid,dokument_url_text,dokument_url_html,dokumentstatus_url_xml,html\)'),
+
+        # ('INSERT INTO dokument (hangar_id,dok_id,rm,beteckning,doktyp,typ,subtyp,'
+        # 'tempbeteckning,organ,mottagare,nummer,slutnummer,datum,systemdatum,publicerad,titel,'
+        # 'subtitel,status,htmlformat,relaterat_id,source,sourceid,dokument_url_text,'
+        # 'dokument_url_html,dokumentstatus_url_xml,html)'),
+        partial(tr.remove_col_in_insert, 26)
+        ),
+    tr.correct_line_endings,
+    tr.remove_funky_characters
+)

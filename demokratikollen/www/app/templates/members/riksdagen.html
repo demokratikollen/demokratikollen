@@ -1,0 +1,112 @@
+{% extends "layout.html" %}
+{% set header_members_class = "active" %}
+{% block title %}Riksdagen{% endblock %}
+{% block head %}
+
+  {{ super() }}
+
+  <script type="text/javascript">
+
+  RO = 
+  {
+    Setup: function() {
+      var bubble_radius = 10;
+      var padding = 1.55;
+      var width = 700; //width of the figure
+      var outer_radius = width/2 - bubble_radius;
+      var distance_between_centers = 2*bubble_radius+padding;
+      var n_rows = 10;
+      var rows = [];
+      var counter = 0;
+
+      var i;
+      var circleData = [];
+
+      //Calculate positions for the radius and angle of each row and blob
+      for(i = 0; i < n_rows; i++) {
+        r = outer_radius - i*distance_between_centers;
+        n = Math.floor(Math.PI*r/distance_between_centers);
+        rows.push({"r": r, "n": n});
+      }
+      
+      //calculate positions for each blob
+      for(i = 0; i < n_rows; i++) {
+        var n = rows[i].n
+        var r = rows[i].r
+   
+        var angles = d3.scale.linear().domain(d3.range(n)).range(d3.range(0,Math.PI*(1 + 1/n),Math.PI/(n-1)));
+        var j
+        for (j = 0; j < n; j++) {
+          var cx = width/2 - r*Math.cos(angles(j))
+          var cy = width/2 - r*Math.sin(angles(j))
+
+          circleData.push({"cx": cx, "cy": cy, "r": bubble_radius, "color": 'grey', "id": counter})
+          counter++;
+        }
+      } 
+
+      //add a container at the correct position
+      var centers = d3.select("#chart svg")
+                  .selectAll('g')
+                  .data(circleData)
+                  .enter()
+                  .append("g")
+                  .attr("transform", function(d) { return "translate("+ d.cx + "," + d.cy + ")" });
+
+      //add the 
+      centers.append("circle")
+             .attr("cx", 0)
+             .attr("cy", 0)
+             .attr("r", function(d) { return d.r})
+             .style("fill", function(d) { return d.color});
+
+      $.get('{{url_for('members.riksdagen_json')}}', RO.Update);
+    },
+    Update: function(json_data, textStatus, jqxhr) {
+        RO.data = json_data.data;
+
+        //update data
+        var circles = d3.selectAll('g circle').data(RO.data)
+
+        circles.style("fill", function(d) { return RO.partyColors[d.party] })
+               .on('click', function(d) { $(location).attr('href', '/members/' + d.member_id + '.html' ) });
+
+        //call the absence function, later generate buttong and attach callback
+        $.get('{{url_for('members.absence_json')}}', RO.SetRadiusFromAbsence);
+    },
+    SetRadiusFromAbsence: function(json_data, textStatus, jqxhr) {
+        var data = json_data.data;
+
+        var circles = d3.selectAll('g circle');
+        circles.attr("r", function(d) {
+          if( d.member_id in data ) {
+            var total = data[d.member_id]["Frånvarande"] || 0;
+            total += data[d.member_id]["Ja"] || 0;
+            total += data[d.member_id]["Nej"] || 0;
+            total += data[d.member_id]["Avstår"] || 0;
+
+            var absence = data[d.member_id]["Frånvarande"] || 0;
+            
+            return 10.0*(1 - (absence/total))
+          }
+          else
+          {
+            return 10
+          }
+        });
+    },
+    partyColors: {"S": "#ED1B34", "M": "#52BDEC", "SD": "#FBC700", 
+                  "MP": "#53A045", "C": "#016A3A", "V": "#D9291C",
+                  "FP": "#004B92", "KD": "#073192"},
+    data: null
+  };
+  $(RO.Setup);
+  </script>
+
+{% endblock %}
+
+{% block content %}
+    <div class="row">
+      <div id="chart" style="height: 400px; float: none; marigin: 0 auto"><svg /></div>
+    </div>
+{% endblock %}

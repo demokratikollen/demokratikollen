@@ -2,9 +2,11 @@
 
 import re
 import itertools
+import logging
 
 import sqlparse
 
+logger = logging.getLogger(__name__)
 
 def correct_line_endings(s):
     # Make uniform line endings
@@ -94,60 +96,70 @@ def remove_from_list(identifier_list, col_index, filter_func):
             break
 
 
-def remove_col_in_insert(col_index, stmt):
+def remove_col_in_insert(col_index, stmt_text):
     '''Removes a column from an SQL INSERT statement.
 
     Removes the column name and value from an SQL INSERT statement.
 
     Args:
-        text (sqlparse.sql.Statement): A parsed SQL INSERT statement.
+        text (str): An SQL INSERT statement.
         col_index (int): The (zero-based) index of the column to be removed.
 
     Returns:
         The modified statement.
 
     '''
-    # PART 1: remove the column name
-
-    # table_name (col0, col1, col2, col3)
-    into_what = next(t for t in stmt.tokens if isinstance(t, sqlparse.sql.Function))
-
-    # (col0, col1, col2, col3)
-    cols_in_parenthesis = into_what.tokens[-1]
-    assert isinstance(cols_in_parenthesis, sqlparse.sql.Parenthesis)
-
-    # col0, col1, col2, col3
-    cols = cols_in_parenthesis.tokens[1]
-    assert isinstance(cols, sqlparse.sql.IdentifierList)
-
-    # Find and kill the identifier
-    remove_from_list(cols, col_index, lambda t: isinstance(t, sqlparse.sql.Identifier))
+    if col_index == 0:
+        raise NotImplementedError()
 
 
-    # PART 2: remove the value
+    name = r"[^),]+"
+    literal = r"\s*(?:'(?:\\.|''|[^\\'])*'|\s*[\d.]+\s*)\s*"
+    regex = (
+        "(" +
+        r"INSERT\sINTO[^(]+\(" + #INSERT INTO tablename (
 
-    # Find the last parenthesis -- this should be the values
-    # (value0, value1, value2, value3)
-    values_in_parenthesis = next(
-        t for t in reversed(stmt.tokens) if isinstance(t, sqlparse.sql.Parenthesis))
+        r"(?:{0})".format(name) + # first column
+        r"(?:,{0}){{{1}}}".format(name, col_index-2) + # other columns before
 
-    # value0, value1, value2, value3
-    values = values_in_parenthesis.tokens[1]
-    assert isinstance(values, sqlparse.sql.IdentifierList)
+        ")" +
 
-    # Find and kill the value
-    remove_from_list(
-        values,
-        col_index,
-        lambda t: t.ttype.split()[1] is sqlparse.tokens.Token.Literal)
+        r"(?:,{0})".format(name) + # column to remove
 
-    return stmt
+        "(" +
+
+        r"(?:,{0})*".format(name) + # columns after
+
+        r"\)\s*VALUES\s*\(" # ) VALUES (
+        
+        r"(?:{0})".format(literal) + # first value
+        r"(?:,{0}){{{1}}}".format(literal, col_index-2) + # other values before
+
+        ")" +
+
+        r"(?:,{0})".format(literal) + # column to remove
+
+        "(" +
+
+        r"(?:,{0})*".format(literal) + # columns after
+
+        r"\)" +
+
+        ")" 
+    )
+
+    match = re.search(regex, stmt_text)
+    assert(len(match.groups()) == 3)
+
+    return ''.join(match.groups())
+
+
 
 def ifmatch(regex, transformation, otherwise=None):
 
     def func(stmt):
-        stmt_text = str(stmt)
-        if re.search(regex, stmt_text):
+        stmt = str(stmt)
+        if re.search(regex, stmt):
             return transformation(stmt)
         elif otherwise is not None:
             return otherwise(stmt)

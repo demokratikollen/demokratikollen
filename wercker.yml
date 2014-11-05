@@ -1,0 +1,27 @@
+box: wercker/python
+
+build:
+    steps:
+        - virtualenv:
+            name: setup virtualenv
+            python_location: /usr/bin/python3.4
+        - pip-install:
+            requirements_file: "demokratikollen/requirements/dev.txt"
+            pip_command: pip3.4
+deploy:
+    steps:
+        - add-to-known_hosts:
+            hostname: 146.185.188.12
+        - add-ssh-key:
+            keyname: DO_KEY
+        - script:
+            name: transfer application
+            code: |
+                cd $WERCKER_SOURCE_DIR
+                pwd
+                ls -la
+                rsync -zr --exclude '.git' --exclude 'provision' . wercker@146.185.188.12:~/src
+        - script:
+            name: Do provisioning
+            code: |
+                ssh wercker@146.185.188.12 'cp src/deployment.sh . ; sh deployment.sh'

@@ -9,23 +9,26 @@ from datetime import datetime,timedelta
 from wtforms import Form, TextField, validators
 
 # Import the database object from the main app module
-from demokratikollen.www.app import db, Member, Vote, Poll, ChamberAppointment
+from demokratikollen.www.app import db, Member, Vote, PolledPoint, ChamberAppointment
+from demokratikollen.www.app.helpers.cache import cache
 
 # Define the blueprint: 'auth', set its url prefix: app.url/auth
 mod_members = Blueprint('members', __name__, url_prefix='/members')
 
+class SearchForm(Form):
+    terms = TextField(label='Namn',description='Namn')
 
 @mod_members.route('.html')
 def members():
-    return render_template("/members/members.html")
+    return render_template("/members/members.html", header_member_search_class='active')
 
 
 # Set the route and accepted methods
 @mod_members.route('/find', methods=['GET','POST'])
 def find():
 
-    form = SearchForm(request.args)
-    if not form.terms.data:
+    form = Form(request.args)
+    if not form.data:
         flash({
                 "class": "alert-danger",
                 "title": "Ingen indata:",
@@ -33,7 +36,7 @@ def find():
             })
         return redirect('/members.html')
 
-    s_words = [w.lower() for w in form.terms.data.split()]
+    s_words = [w.lower() for w in form.data.split()]
 
     q = db.session.query(Member)
 
@@ -60,6 +63,7 @@ def member(member_id):
     return render_template("/members/member.html",member=m)
 
 @mod_members.route('/ajax/<int:member_id>.html')
+@cache.memoize(3600*24)
 def member_ajax(member_id):
     m = db.session.query(Member).filter_by(id=member_id).one()
     return render_template("/members/member_ajax.html",member=m)
@@ -86,6 +90,7 @@ def th_current():
 # Set the route and accepted methods
 @mod_members.route('/typeahead/query.json',methods=['GET'])
 def th_query():
+    
     s_words = [w.lower() for w in request.args['q'].split()]
     db_q = db.session.query(Member)
 
@@ -104,13 +109,14 @@ def th_query():
 
 
 @mod_members.route('/<int:member_id>/absence.json', methods=['GET'])
+@cache.memoize(3600*24)
 def get_member(member_id):
     """Return a JSON response with total and absent votes monthly for member"""
-    y = func.date_part('year',Poll.date).label('y')
-    m = func.date_part('month',Poll.date).label('m')
+    y = func.date_part('year',PolledPoint.poll_date).label('y')
+    m = func.date_part('month',PolledPoint.poll_date).label('m')
 
     q = db.session.query(Vote.vote_option,func.count(Vote.id),y,m) \
-                            .join(Poll).filter(Vote.member_id==member_id) \
+                            .join(PolledPoint).filter(Vote.member_id==member_id) \
                             .group_by(Vote.vote_option,'y','m') \
                             .order_by('y','m')
 
@@ -171,4 +177,42 @@ def get_member(member_id):
 
     return json.jsonify(nvd3_data)
 
+@mod_members.route('/abscence.json')
+@cache.cached(24*3600)
+def absence_json():
+    q = db.session.query(Member.id, Vote.vote_option, func.count(Vote.id)) \
+                            .join(Vote) \
+                            .group_by(Vote.vote_option, Member.id) \
+                            .order_by(Member.id)
 
+    
+    json_data = {"data": {}}
+
+    for member_id, vote_option, n_votes in q:
+        if str(member_id) in json_data["data"]:
+                json_data["data"][str(member_id)][str(vote_option)] = n_votes
+        else:
+            json_data["data"][str(member_id)] = dict()
+            json_data["data"][str(member_id)][str(vote_option)] = n_votes
+
+
+    return json.jsonify(json_data)
+
+@mod_members.route('/riksdagen.html')
+def riksdagen_html():
+    return render_template('/members/riksdagen.html',header_member_riksdagen_class='active')
+
+@mod_members.route('/riksdagen.json')
+@cache.cached(24*3600)
+def riksdagen_json():
+    current_chairs = db.session.query(ChamberAppointment) \
+                        .filter(ChamberAppointment.status == "Tjänstgörande")\
+                        .filter(ChamberAppointment.end_date > datetime.today()) \
+                        .order_by(ChamberAppointment.chair) \
+                        .distinct(ChamberAppointment.chair) \
+                        .all()
+    json_data = {"count": len(current_chairs), "data": []}
+    for chair in current_chairs:
+        json_data['data'].append({"chair": chair.chair, "party": chair.member.party.abbr, "member_id": chair.member_id})
+        json_data['data'] = sorted(json_data['data'], key=lambda k: k['party'])
+    return json.jsonify(json_data)
