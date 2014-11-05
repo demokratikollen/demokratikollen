@@ -65,7 +65,7 @@ if [ -z $webapp_image_id ]; then
 
 	while read cmd; do
 		sudo docker $cmd
-	done < docker/webapp/setup 
+	done < <(grep '' docker/webapp/setup) 
 
 	#create the final container
 	deamon=$(cat docker/webapp/deamon)
