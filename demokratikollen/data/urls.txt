@@ -13,6 +13,7 @@ http://data.riksdagen.se/dataset/votering/votering-200304.sql.zip
 http://data.riksdagen.se/dataset/votering/votering-200203.sql.zip
 http://data.riksdagen.se/dataset/dokument/bet-2010-2013.sql.zip
 http://data.riksdagen.se/dataset/dokument/bet-2006-2009.sql.zip
+<<<<<<< Updated upstream
 http://data.riksdagen.se/dataset/dokument/bet-2002-2005.sql.zip
 http://data.riksdagen.se/dataset/dokument/mot-2010-2013.sql.zip
 http://data.riksdagen.se/dataset/dokument/mot-2006-2009.sql.zip
@@ -20,3 +21,6 @@ http://data.riksdagen.se/dataset/dokument/mot-2002-2005.sql.zip
 http://data.riksdagen.se/dataset/dokument/prop-2010-2013.sql.zip
 http://data.riksdagen.se/dataset/dokument/prop-2006-2009.sql.zip
 http://data.riksdagen.se/dataset/dokument/prop-2002-2005.sql.zip
+=======
+http://data.riksdagen.se/dataset/dokument/bet-2002-2005.sql.zip
+>>>>>>> Stashed changes
