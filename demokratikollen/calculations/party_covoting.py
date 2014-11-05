@@ -3,6 +3,7 @@ from sqlalchemy import create_engine, func, distinct, or_
 from sqlalchemy.orm import sessionmaker, aliased
 from sqlalchemy.sql.expression import literal
 from itertools import combinations
+from demokratikollen.core.utils.mongodb import MongoDBDatastore
 from demokratikollen.core.utils import postgres as pg_utils
 import datetime as dt
 
@@ -26,8 +27,12 @@ def main():
     v2 = aliased(PartyVote)
     v3 = aliased(PartyVote)
 
+    mdb = MongoDBDatastore()
+    mongodb = mdb.get_mongodb_database() 
+    mongo_collection = mongodb.party_covoting
+    # .update({"identifier": identifier}, object_to_store, upsert=True)
+
     for (partyA, partyB) in combinations(parties, 2):
-        
         
         conflicting_votes = s.query(v1, v2) \
                                 .filter(v1.polled_point_id == v2.polled_point_id) \
