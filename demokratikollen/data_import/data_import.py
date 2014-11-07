@@ -53,7 +53,7 @@ def download(urls, out_dir, overwrite=False, checkremote=True):
         if os.path.exists(out_path) and not overwrite:
             if checkremote:
                 local_size = os.path.getsize(out_path)
-                response = urlib.request.url_open(url)
+                response = urllib.request.url_open(url)
                 remote_size = int(response.getheader('Content-Length'))
                 if local_size != remote_size:
                     logger.info('Downloading {0} since the remote and local filesizes differ.'.format(filename))
