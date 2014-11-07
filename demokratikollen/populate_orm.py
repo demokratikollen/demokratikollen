@@ -60,6 +60,7 @@ groups['PP'] = Party(name="Piratpartiet",abbr="PP")
 groups['NYD'] = Party(name="Ny demokrati",abbr="NYD")
 for g in groups.values():
     s.add(g)
+s.commit()
 
 print("Adding members.")
 c.execute("SELECT fodd_ar,tilltalsnamn,efternamn,kon,parti,intressent_id FROM person")
@@ -91,7 +92,7 @@ for dok_id,rm,bet,organ,publ,titel,dok_url,hangar_id in c:
             title=titel,
             text_url=dok_url,
             committee=committee))
-
+s.commit()
 
 pbar = InitBar(title="Adding votes")
 pbar(0)
@@ -130,6 +131,7 @@ for intressent_id,ordningsnummer,fr,to,stat,roll in c:
                 end_date=to.date(),
                 status=status,
                 role=role))
+s.commit()
 
 c.execute("""SELECT rm,bet,punkt,rubrik,beslutstyp,votering_id FROM dokutskottsforslag""")
 for rm,bet,punkt,rubrik,beslutstyp,votering_id in c:
