@@ -102,7 +102,7 @@ if [ -z $webapp_container_id ]; then
     sudo docker start webapp
 else #Check if we need to rebuild something.
 	if [ -n $rebuild_riksdagen ]; then
-		sudo docker exec $webapp_container_id python import_data.py auto data/urls.txt data --wipe
+		sudo docker exec $webapp_container_id python import_data.py auto /data/urls.txt /data --wipe
 	fi
 	if [ -n $rebuild_orm ]; then
 		sudo docker exec $webapp_container_id python populate_orm.py
