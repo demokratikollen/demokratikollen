@@ -4,13 +4,7 @@
 mkdir -p docker
 mkdir -p data
 
-#kill everything for now.
-sudo docker rm -f $(sudo docker ps -a -q)
-sudo docker rmi demokratikollen/postgres:latest
-sudo docker rmi demokratikollen/nginx:latest
-sudo docker rmi demokratikollen/webapp:latest
-sudo docker rmi demokratikollen/mongo:latest
-
+echo "copying new source"
 #copy files
 cp -r src/dockerfiles/webapp docker/
 cp -r src/demokratikollen/* docker/webapp/
@@ -26,16 +20,45 @@ cp -r src/demokratikollen/www/app/static docker/nginx/
 cp src/demokratikollen/data/create_tables.sql data/
 cp src/dockerfiles/webapp/urls.txt data/
 
+#Check if the files to download have changed size remotely
+echo "Checking if remote files has changed..."
+remote_changed=""
+while read url; do
+	local_file=$(echo "$url" | sed -n 's/http:\/\/data\.riksdagen\.se\/.*\///gp')
+	local_file="data/download/$local_file"
+	remote_size=$(curl -I $url | sed -n 's/Content-Length: //gp')
+	local_size=$(ls -l $local_file | sed -rn 's/.*root root ([0-9]+).*/\1/gp')
+
+	echo "Remote: $remote_size ; Local: $local_size"
+
+	if [ $remote_size != $local_size ]; then
+		remote_changed="true"
+	fi
+done < <(grep '' data/urls.txt) 
+
+echo "Checking if src has changed..."
+#Check if any of the app changed that requires a rebuild of the databases.
+db_structure_diff=$(diff src/demokratikollen/core/db_structure.py old_src/demokratikollen/core/db_structure.py )
+setup_diff=$(diff src/dockerfiles/webapp/setup old_src/dockerfiles/webapp/setup)
+envs_diff=$(diff src/dockerfiles/webapp/envs old_src/dockerfiles/webapp/envs)
+deamon_diff=$(diff src/dockerfiles/webapp/deamon old_src/dockerfiles/webapp/deamon)
+urls_diff=$(diff src/dockerfiles/webapp/urls.txt old_src/dockerfiles/webapp/urls.txt)
+
+rebuild_orm="$db_structure_diff"
+rebuild_webapp_container="$setup_diff$envs_diff$deamon_diff"
+rebuild_riksdagen="$remote_changed$urls_diff"
+
 echo "Creating postgres images and containers"
 #Get the postgres image id, if it does not exist, create it
-postgres_image_id=`sudo docker images | sed -nr 's/demokratikollen\/postgres\s*[a-z0-9]*\s*([a-z0-9]*).*/\1/p'`
+'s/demokratikollen\/nginx.+latest.+([a-z0-9]{12}).*/\1/gp'
+postgres_image_id=$(sudo docker images | sed -nr 's/demokratikollen\/postgres.+latest.+([a-z0-9]{12}).*/\1/gp')
 
 if [ -z $postgres_image_id ]; then
     sudo docker build -t demokratikollen/postgres docker/postgres
 fi
 
-#Get the posgres container id, if it does not exist create it
-postgres_container_id=`sudo docker ps | sed -nr 's/([a-z0-9]*)\s*demokratikollen\/postgres.*/\1/p'`
+#Get the postgres container id, if it does not exist create it
+postgres_container_id=$(sudo docker ps | sed -nr 's/([0-9a-z]{12}).+postgres$/\1/gp')
 
 if [ -z $postgres_container_id ]; then
     sudo docker run -d --name postgres demokratikollen/postgres
@@ -43,14 +66,13 @@ fi
 
 echo "Creating mongo images and containers"
 
-mongodb_image_id=`sudo docker images | sed -nr 's/demokratikollen\/mongo\s*[a-z0-9]*\s*([a-z0-9]*).*/\1/p'`
+mongodb_image_id=$(sudo docker images | sed -nr 's/demokratikollen\/mongo.+latest.+([a-z0-9]{12}).*/\1/gp')
 
 if [ -z $mongodb_image_id ]; then
 	sudo docker build -t demokratikollen/mongo docker/mongo
 fi
 
-#Get the posgres container id, if it does not exist create it
-mongodb_container_id=`sudo docker ps | sed -nr 's/([a-z0-9]*)\s*demokratikollen\/mongo.*/\1/p'`
+mongodb_container_id=$(sudo docker ps | sed -nr 's/([0-9a-z]{12}).+mongo$/\1/gp')
 
 if [ -z $mongo_container_id ]; then
     sudo docker run -d --name mongo demokratikollen/mongo
@@ -58,7 +80,7 @@ fi
 
 echo "Creating webapp images and containers"
 #Get the webapp image id. Build it if it does not exist
-webapp_image_id=`sudo docker images | sed -nr 's/demokratikollen\/webapp\s*[a-z0-9]*\s*([a-z0-9]*).*/\1/p'`
+webapp_image_id=$(sudo docker images | sed -nr 's/demokratikollen\/webapp.+latest.+([a-z0-9]{12}).*/\1/gp')
 
 if [ -z $webapp_image_id ]; then
 	sudo docker build -t demokratikollen/webapp docker/webapp
@@ -73,25 +95,33 @@ if [ -z $webapp_image_id ]; then
 fi
 
 #Get the webapp container id. Start it if it is not already started
-webapp_container_id=`sudo docker ps | sed -nr 's/([a-z0-9]*)\s*demokratikollen\/webapp.*/\1/p'`
+webapp_container_id=$(sudo docker ps | sed -nr 's/([0-9a-z]{12}).+webapp$/\1/gp')
 
 if [ -z $webapp_container_id ]; then
     sudo docker start webapp
+else #Check if we need to rebuild something.
+	if [-z $rebuild_riksdagen ]; then
+		sudo docker exec $webapp_container_id python import_data.py auto /data/urls.txt /data --wipe
+	fi
+	if [-z $rebuild_orm ]; then
+		sudo docker exec $webapp_container_id python populate_orm.py
+		sudo docker exec $webapp_container_id python compute_party_votes.py
+	fi
 fi
 
 echo "Creating nginx images and containers"
 #Create the nginx image if it does not exist
-nginx_image_id=`sudo docker images | sed -nr 's/demokratikollen\/nginx\s*[a-z0-9]*\s*([a-z0-9]*).*/\1/p'`
+nginx_image_id=$(sudo docker images | sed -nr 's/demokratikollen\/nginx.+latest.+([a-z0-9]{12}).*/\1/gp')
 
 if [ -z $nginx_image_id ]; then
     sudo docker build -t demokratikollen/nginx docker/nginx
 fi
 
 #Get the webapp container id. Start it if it is not already started
-nginx_container_id=`sudo docker ps | sed -nr 's/([a-z0-9]*)\s*demokratikollen\/nginx.*/\1/p'`
+nginx_container_id=$(sudo docker ps | sed -nr 's/([0-9a-z]{12}).+webapp$/\1/gp')
 
 if [ -z $nginx_container_id ]; then
-    sudo docker run -d -p 80:80 --link webapp:webapp demokratikollen/nginx 
+    sudo docker run -d -p 80:80 --name nginx --link webapp:webapp demokratikollen/nginx 
 fi
 
 #remove old source files
