@@ -16,6 +16,50 @@ mod_figures = Blueprint('figures', __name__, url_prefix='/figures')
 ########
 # Routes
 
+@mod_figures.route('/party_bias/<partyA>_vs_<partyB>.<string:format>')
+def party_bias(partyA_abbr, partyB_abbr):
+    if format == 'html':
+        return "Not implemented"
+    if format == 'json':
+        @cache.memoize()
+        def get_data():
+            
+            A_id = s.query(Party.id).filter(Party.abbr==partyA).one()[0]
+            B_id = s.query(Party.id).filter(Party.abbr==partyB).one()[0]
+
+            mdb = MongoDBDatastore()
+            mongodb = mdb.get_mongodb_database() 
+            mongo_collection = mongodb.party_covoting
+
+            return mongo_collection.find_one({"partyA": partyA_id, "partyB": partyB_id})
+
+
+    return json.jsonify(get_data())
+
+
+
+@mod_figures.route('/party_bias/<int:partyA_id>_vs_<int:partyB_id>.<string:format>')
+def voteringsfrekvens(format):
+    if format == 'html':
+        return "Not implemented"
+    if format == 'json':
+        @cache.memoize()
+        def get_data():
+            
+            #M_id = s.query(Party.id).filter(Party.abbr=='M').one()[0]
+            #S_id = s.query(Party.id).filter(Party.abbr=='S').one()[0]
+
+            mdb = MongoDBDatastore()
+            mongodb = mdb.get_mongodb_database() 
+            mongo_collection = mongodb.party_covoting
+
+            return mongo_collection.find_one({"partyA": partyA_id, "partyB": partyB_id})
+
+
+    return json.jsonify(get_data())
+
+
+
 @mod_figures.route('/voteringsfrekvens.<string:format>')
 def voteringsfrekvens(format):
     if format == 'html':
