@@ -26,12 +26,13 @@ remote_changed=""
 while read url; do
 	local_file=$(echo "$url" | sed -n 's/http:\/\/data\.riksdagen\.se\/.*\///gp')
 	local_file="data/download/$local_file"
-	remote_size=$(curl -Is $url | sed -n 's/Content-Length: //gp')
+	remote_size=$(curl -Is $url | sed -nr 's/Content-Length: ([0-9]+).*/\1/gp')
 	local_size=$(ls -l $local_file | sed -rn 's/.*root root ([0-9]+).*/\1/gp')
 
-	echo "Remote: $remote_size ; Local: $local_size"
+    echo "File: $local_file, $remote_size:$local_size"
 
-	if [ $remote_size != $local_size ]; then
+	if [ "$remote_size" != "$local_size" ]; then
+		echo "File is different. Preparing rebuild."
 		remote_changed="true"
 	fi
 
