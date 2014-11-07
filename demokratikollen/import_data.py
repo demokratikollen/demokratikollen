@@ -102,7 +102,7 @@ def auto(urls_file=None, outdir=None, wipe=None):
 def download(urls_file=None, outdir=None, overwrite=None, checkremote=None):
     with open(urls_file, encoding='utf-8') as f:
         urls = f.readlines()
-        return data_import.download(urls, outdir, overwrite=overwrite, checkremote=check_remote)
+        return data_import.download(urls, outdir, overwrite=overwrite, checkremote=checkremote)
 
 def unpack(path=None, outdir=None, remove=None):
     if os.path.isdir(path):

@@ -27,13 +27,14 @@ class CannotCleanException(Exception):
     def __str__(self):
         return "The file '{0}' cannot be cleaned.".format(self.filename)
 
-def download(urls, out_dir, overwrite=False, check_remote=True):
+def download(urls, out_dir, overwrite=False, checkremote=True):
     """Download from URLs to a directory
 
     Args:
         urls (list of str): The URLs to download from.
         out_dir (str): Path of the directory to download to.
         overwrite (optional, bool): Whether to overwrite existing files.
+        checkremote (optional, bool): Check for changes at the remote server.
     """
 
     try:
