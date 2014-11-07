@@ -50,7 +50,6 @@ rebuild_webapp_container="$setup_diff$envs_diff$deamon_diff"
 rebuild_riksdagen="$remote_changed$urls_diff"
 rebuild_orm="$db_structure_diff$rebuild_riksdagen"
 
-
 echo "Creating postgres images and containers"
 #Get the postgres image id, if it does not exist, create it
 postgres_image_id=$(sudo docker images | sed -nr 's/demokratikollen\/postgres.+latest.+([a-z0-9]{12}).*/\1/gp')
@@ -78,7 +77,7 @@ mongo_container_id=$(sudo docker ps | sed -nr 's/([0-9a-z]{12}).+mongo/\1/gp')
 
 if [ -z $mongo_container_id ]; then
     sudo docker run -d --name mongo demokratikollen/mongo
-fi	
+fi
 
 echo "Creating webapp images and containers"
 #Get the webapp image id. Build it if it does not exist
@@ -102,10 +101,10 @@ webapp_container_id=$(sudo docker ps | sed -nr 's/([0-9a-z]{12}).+webapp/\1/gp')
 if [ -z $webapp_container_id ]; then
     sudo docker start webapp
 else #Check if we need to rebuild something.
-	if [ -z $rebuild_riksdagen ]; then
-		sudo docker exec $webapp_container_id python import_data.py auto /data/urls.txt /data --wipe
+	if [ -n $rebuild_riksdagen ]; then
+		sudo docker exec $webapp_container_id python import_data.py auto data/urls.txt data --wipe
 	fi
-	if [ -z $rebuild_orm ]; then
+	if [ -n $rebuild_orm ]; then
 		sudo docker exec $webapp_container_id python populate_orm.py
 		sudo docker exec $webapp_container_id python compute_party_votes.py
 	fi
