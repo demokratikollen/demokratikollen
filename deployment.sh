@@ -26,7 +26,7 @@ remote_changed=""
 while read url; do
 	local_file=$(echo "$url" | sed -n 's/http:\/\/data\.riksdagen\.se\/.*\///gp')
 	local_file="data/download/$local_file"
-	remote_size=$(curl -I $url | sed -n 's/Content-Length: //gp')
+	remote_size=$(curl -Is $url | sed -n 's/Content-Length: //gp')
 	local_size=$(ls -l $local_file | sed -rn 's/.*root root ([0-9]+).*/\1/gp')
 
 	echo "Remote: $remote_size ; Local: $local_size"
@@ -39,7 +39,7 @@ done < <(grep '' data/urls.txt)
 
 echo "Checking if src has changed..."
 #Check if any of the app changed that requires a rebuild of the databases.
-db_structure_diff=$(diff src/demokratikollen/core/db_structure.py old_src/demokratikollen/core/db_structure.py )
+db_structure_diff=$(diff src/demokratikollen/core/db_structure.py old_src/demokratikollen/core/db_structure.py)
 setup_diff=$(diff src/dockerfiles/webapp/setup old_src/dockerfiles/webapp/setup)
 envs_diff=$(diff src/dockerfiles/webapp/envs old_src/dockerfiles/webapp/envs)
 deamon_diff=$(diff src/dockerfiles/webapp/deamon old_src/dockerfiles/webapp/deamon)
@@ -119,7 +119,7 @@ if [ -z $nginx_image_id ]; then
 fi
 
 #Get the webapp container id. Start it if it is not already started
-nginx_container_id=$(sudo docker ps | sed -nr 's/([0-9a-z]{12}).+webapp/\1/gp')
+nginx_container_id=$(sudo docker ps | sed -nr 's/([0-9a-z]{12}).+nginx/\1/gp')
 
 if [ -z $nginx_container_id ]; then
     sudo docker run -d -p 80:80 --name nginx --link webapp:webapp demokratikollen/nginx 
