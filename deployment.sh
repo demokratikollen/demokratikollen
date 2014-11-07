@@ -67,13 +67,13 @@ fi
 
 echo "Creating mongo images and containers"
 
-mongodb_image_id=$(sudo docker images | sed -nr 's/demokratikollen\/mongo.+latest.+([a-z0-9]{12}).*/\1/gp')
+mongo_image_id=$(sudo docker images | sed -nr 's/demokratikollen\/mongo.+latest.+([a-z0-9]{12}).*/\1/gp')
 
-if [ -z $mongodb_image_id ]; then
+if [ -z $mongo_image_id ]; then
 	sudo docker build -t demokratikollen/mongo docker/mongo
 fi
 
-mongodb_container_id=$(sudo docker ps | sed -nr 's/([0-9a-z]{12}).+mongo/\1/gp')
+mongo_container_id=$(sudo docker ps | sed -nr 's/([0-9a-z]{12}).+mongo/\1/gp')
 
 if [ -z $mongo_container_id ]; then
     sudo docker run -d --name mongo demokratikollen/mongo
@@ -101,10 +101,10 @@ webapp_container_id=$(sudo docker ps | sed -nr 's/([0-9a-z]{12}).+webapp/\1/gp')
 if [ -z $webapp_container_id ]; then
     sudo docker start webapp
 else #Check if we need to rebuild something.
-	if [-z $rebuild_riksdagen ]; then
+	if [ -z $rebuild_riksdagen ]; then
 		sudo docker exec $webapp_container_id python import_data.py auto /data/urls.txt /data --wipe
 	fi
-	if [-z $rebuild_orm ]; then
+	if [ -z $rebuild_orm ]; then
 		sudo docker exec $webapp_container_id python populate_orm.py
 		sudo docker exec $webapp_container_id python compute_party_votes.py
 	fi
