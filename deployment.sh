@@ -97,7 +97,7 @@ deamon=$(cat docker/webapp/deamon)
 sudo docker $deamon
 
 #start the container
-sudo docker start webapp
+webapp_container_id=$(sudo docker start webapp)
 
 #Check if any of the databases needs to be rebuild.
 if [ -n "$rebuild_riksdagen" ]; then
