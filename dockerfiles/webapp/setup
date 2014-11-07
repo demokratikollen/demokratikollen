@@ -1,3 +1,3 @@
-run --rm --env-file=docker/webapp/envs -w /usr/src/apps/demokratikollen --volume /home/wercker/data:/data --link postgres:postgres demokratikollen/webapp:latest python import_data.py auto /data/urls.txt /data --wipe
+run --rm --env-file=docker/webapp/envs -w /usr/src/apps/demokratikollen --volume /home/wercker/data:/data --link postgres:postgres demokratikollen/webapp:latest python import_data.py auto data/urls.txt data --wipe
 run --rm --env-file=docker/webapp/envs -w /usr/src/apps/demokratikollen --link postgres:postgres demokratikollen/webapp:latest python populate_orm.py
 run --rm --env-file=docker/webapp/envs -w /usr/src/apps/demokratikollen --link postgres:postgres demokratikollen/webapp:latest python compute_party_votes.py
