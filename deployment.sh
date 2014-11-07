@@ -34,7 +34,7 @@ while read url; do
 	if [ $remote_size != $local_size ]; then
 		remote_changed="true"
 	fi
-done < <(grep '' data/urls.txt) 
+done < <(grep '' data/urls.txt)
 
 echo "Checking if src has changed..."
 #Check if any of the app changed that requires a rebuild of the databases.
@@ -44,9 +44,10 @@ envs_diff=$(diff src/dockerfiles/webapp/envs old_src/dockerfiles/webapp/envs)
 deamon_diff=$(diff src/dockerfiles/webapp/deamon old_src/dockerfiles/webapp/deamon)
 urls_diff=$(diff src/dockerfiles/webapp/urls.txt old_src/dockerfiles/webapp/urls.txt)
 
-rebuild_orm="$db_structure_diff"
 rebuild_webapp_container="$setup_diff$envs_diff$deamon_diff"
 rebuild_riksdagen="$remote_changed$urls_diff"
+rebuild_orm="$db_structure_diff$rebuild_riksdagen"
+
 
 echo "Creating postgres images and containers"
 #Get the postgres image id, if it does not exist, create it

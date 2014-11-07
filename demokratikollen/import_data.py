@@ -80,7 +80,7 @@ def auto(urls_file=None, outdir=None, wipe=None):
         downloaded_before = []
 
 
-    downloaded = download(urls_file, outdir=download_dir, overwrite=False)
+    downloaded = download(urls_file, outdir=download_dir, overwrite=False, checkremote=True)
 
     if not wipe:
         # Only use new downloads unless wipe==True
@@ -99,10 +99,10 @@ def auto(urls_file=None, outdir=None, wipe=None):
             for clean_path in cleaned:
                 execute(clean_path, remove=True)
 
-def download(urls_file=None, outdir=None, overwrite=None):
+def download(urls_file=None, outdir=None, overwrite=None, checkremote=None):
     with open(urls_file, encoding='utf-8') as f:
         urls = f.readlines()
-        return data_import.download(urls, outdir, overwrite=overwrite)
+        return data_import.download(urls, outdir, overwrite=overwrite, checkremote=check_remote)
 
 def unpack(path=None, outdir=None, remove=None):
     if os.path.isdir(path):
@@ -254,6 +254,8 @@ def setup_download_parser(parser):
     parser.add_argument('outdir', type=str, help='Output directory.')
     parser.add_argument('--overwrite', '-o' , action='store_true',
         help='Enable to overwrite files.')
+    parser.add_argument('--checkremote', action='store_true', 
+        help='Enable to check for filesize diff on remote to control which file is downloaded')
     parser.set_defaults(func=download)
 
 

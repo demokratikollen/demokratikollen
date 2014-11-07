@@ -27,7 +27,7 @@ class CannotCleanException(Exception):
     def __str__(self):
         return "The file '{0}' cannot be cleaned.".format(self.filename)
 
-def download(urls, out_dir, overwrite=False):
+def download(urls, out_dir, overwrite=False, check_remote=True):
     """Download from URLs to a directory
 
     Args:
@@ -50,7 +50,15 @@ def download(urls, out_dir, overwrite=False):
         out_path = os.path.abspath(os.path.join(out_dir, filename))
 
         if os.path.exists(out_path) and not overwrite:
-            logger.info('Not downloading {0} because it already exists.'.format(filename))
+            if check_remote:
+                local_size = os.path.getsize(out_path)
+                response = urlib.request.url_open(url)
+                remote_size = int(response.getheader('Content-Length'))
+                if local_size != remote_size:
+                    logger.info('Downloading {0} since the remote and local filesizes differ.'.format(filename))
+                    urllib.request.urlretrieve(url, out_path)
+            else:
+                logger.info('Not downloading {0} because it already exists.'.format(filename))
             downloaded.append(out_path)
             continue
         
