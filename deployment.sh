@@ -34,6 +34,7 @@ while read url; do
 	if [ $remote_size != $local_size ]; then
 		remote_changed="true"
 	fi
+
 done < <(grep '' data/urls.txt)
 
 echo "Checking if src has changed..."
@@ -51,7 +52,6 @@ rebuild_orm="$db_structure_diff$rebuild_riksdagen"
 
 echo "Creating postgres images and containers"
 #Get the postgres image id, if it does not exist, create it
-'s/demokratikollen\/nginx.+latest.+([a-z0-9]{12}).*/\1/gp'
 postgres_image_id=$(sudo docker images | sed -nr 's/demokratikollen\/postgres.+latest.+([a-z0-9]{12}).*/\1/gp')
 
 if [ -z $postgres_image_id ]; then
@@ -59,7 +59,7 @@ if [ -z $postgres_image_id ]; then
 fi
 
 #Get the postgres container id, if it does not exist create it
-postgres_container_id=$(sudo docker ps | sed -nr 's/([0-9a-z]{12}).+postgres$/\1/gp')
+postgres_container_id=$(sudo docker ps | sed -nr 's/([0-9a-z]{12}).+postgres/\1/gp')
 
 if [ -z $postgres_container_id ]; then
     sudo docker run -d --name postgres demokratikollen/postgres
@@ -73,7 +73,7 @@ if [ -z $mongodb_image_id ]; then
 	sudo docker build -t demokratikollen/mongo docker/mongo
 fi
 
-mongodb_container_id=$(sudo docker ps | sed -nr 's/([0-9a-z]{12}).+mongo$/\1/gp')
+mongodb_container_id=$(sudo docker ps | sed -nr 's/([0-9a-z]{12}).+mongo/\1/gp')
 
 if [ -z $mongo_container_id ]; then
     sudo docker run -d --name mongo demokratikollen/mongo
@@ -96,7 +96,7 @@ if [ -z $webapp_image_id ]; then
 fi
 
 #Get the webapp container id. Start it if it is not already started
-webapp_container_id=$(sudo docker ps | sed -nr 's/([0-9a-z]{12}).+webapp$/\1/gp')
+webapp_container_id=$(sudo docker ps | sed -nr 's/([0-9a-z]{12}).+webapp/\1/gp')
 
 if [ -z $webapp_container_id ]; then
     sudo docker start webapp
@@ -119,7 +119,7 @@ if [ -z $nginx_image_id ]; then
 fi
 
 #Get the webapp container id. Start it if it is not already started
-nginx_container_id=$(sudo docker ps | sed -nr 's/([0-9a-z]{12}).+webapp$/\1/gp')
+nginx_container_id=$(sudo docker ps | sed -nr 's/([0-9a-z]{12}).+webapp/\1/gp')
 
 if [ -z $nginx_container_id ]; then
     sudo docker run -d -p 80:80 --name nginx --link webapp:webapp demokratikollen/nginx 
