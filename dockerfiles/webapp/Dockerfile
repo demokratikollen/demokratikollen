@@ -4,7 +4,7 @@ MAINTAINER joharohl <johan@rohlen.net>
 
 COPY . /usr/src/apps/demokratikollen
 WORKDIR /usr/src/apps/demokratikollen
-RUN pip install -r requirements.txt
+RUN pip install -r requirements.txt -q
 
 ENV PYTHONPATH /usr/src/apps
 
