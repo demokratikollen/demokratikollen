@@ -88,13 +88,8 @@ sudo docker rmi $webapp_image_id
 #Build the new image
 sudo docker build -t demokratikollen/webapp docker/webapp
 
-#while read cmd; do
-#	sudo docker $cmd
-#done < <(grep '' docker/webapp/setup) 
-
 #create the final container
-deamon=$(cat docker/webapp/deamon)
-sudo docker $deamon
+sudo docker create --name webapp --env-file=docker/webapp/envs --link postgres:postgres --link mongo:mongo --volume /home/wercker/data:/data demokratikollen/webapp:latest gunicorn demokratikollen.www.app:app
 
 #start the container
 webapp_container_id=$(sudo docker start webapp)

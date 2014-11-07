@@ -1,1 +1,0 @@
-create --name webapp --env-file=docker/webapp/envs --link postgres:postgres --link mongo:mongo  demokratikollen/webapp:latest python /usr/src/apps/demokratikollen/www/run.py
