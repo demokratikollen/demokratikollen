@@ -8,6 +8,16 @@ build:
         - pip-install:
             requirements_file: "demokratikollen/requirements/dev.txt"
             pip_command: pip3.4
+        - script:
+            name: run behave tests
+            cwd: demokratikollen/www/
+            code: |
+                behave
+        - script:
+            name: run python tests
+            cwd: demokratikollen/www/
+            code: |
+                nosetests specs
 deploy:
     steps:
         - add-to-known_hosts:
