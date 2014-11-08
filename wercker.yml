@@ -1,4 +1,7 @@
 box: wercker/python
+services:
+  - wercker/mongodb@1.0.1
+  - wercker/postgresql@0.0.4
 
 build:
     steps:
@@ -12,6 +15,14 @@ build:
             name: Add the pyton path env.
             code: |
                 export PYTHONPATH=$WERCKER_SOURCE_DIR
+        - script:
+            name: Add the postgresql server url
+            code: |
+                export DATABASE_URL=$WERCKER_POSTGRESQL_URL
+        - script:
+            name: Add the mongodb server url
+            code: |
+                export MONGO_DATABASE_URL=$MONGODB_URL
         - script:
             name: run behave tests
             cwd: demokratikollen/www/
