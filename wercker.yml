@@ -9,6 +9,10 @@ build:
             requirements_file: "demokratikollen/requirements/dev.txt"
             pip_command: pip3.4
         - script:
+            name: Add the pyton path env.
+            code: |
+                export PYTHONPATH=$WERCKER_SOURCE_DIR
+        - script:
             name: run behave tests
             cwd: demokratikollen/www/
             code: |
