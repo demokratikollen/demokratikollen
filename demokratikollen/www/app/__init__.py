@@ -19,6 +19,7 @@ def create_app(testing=False):
     app.config.from_object('demokratikollen.www.config')
 
     if testing:
+        print("Running Test env.")
         app.config['TESTING'] = True
         app.config['SQLALCHEMY_DATABASE_URI'] = os.environ['TEST_DATABASE_URL']
 
