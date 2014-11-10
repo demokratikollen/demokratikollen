@@ -3,8 +3,8 @@ from flask import Blueprint, request, render_template, \
                   flash, g, session, redirect, url_for
 
 # Import the database object from the main app module
-from demokratikollen.www.app import db
 from demokratikollen.www.app.helpers.cache import cache
+from demokratikollen.www.app.helpers.db import db
 
 # Define the blueprint: 'auth', set its url prefix: app.url/auth
 mod_static = Blueprint('static', __name__, url_prefix='/')
@@ -16,5 +16,6 @@ def index():
     return render_template("/static/index.html", header_home_class = 'active')
 
 @mod_static.route('kontakt')
+@cache.cached()
 def contact():
-	return render_template("/static/contact.html")
+	return render_template("/static/contact.html", header_contact_class='active')

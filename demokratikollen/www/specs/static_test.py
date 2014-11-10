@@ -1,22 +1,29 @@
-import demokratikollen.www.app as demo
-from nose.tools import *
+import os
+from flask.ext.testing import TestCase
+from unittest.mock import MagicMock
+from mock import patch
 
-class TestStatic:
+from demokratikollen.www.app import create_app
+from demokratikollen.www.app.mod_static import controllers
 
-    @classmethod
-    def setup_class(self):
-        demo.app.config['TESTING'] = True
-        self.demo = demo.app.test_client()
+class TestRoutes(TestCase):
 
-    @classmethod
-    def teardown_class(self):
-        print("quitting...")
+    def create_app(self):
+        return create_app(testing=True)
 
-    #Check if all members route works.
-    def test_route_basic(self):
-        response = self.demo.get('/')
-        eq_(response.status_code, 200)
-    def test_route_indexed(self):
-        response = self.demo.get('/kontakt')
-        eq_(response.status_code, 200)
+    #Check some basic stuff for the index route.
+    def test_route_index(self):
+        response = self.client.get('/')
+        self.assert_200(response)
+        self.assert_context('header_home_class', 'active')
+        self.assertTemplateUsed('/static/index.html')
 
+    def test_route_contact(self):
+        response = self.client.get('/kontakt')
+        self.assert_200(response)
+        self.assert_context('header_contact_class','active')
+        self.assertTemplateUsed('/static/contact.html')
+
+
+
+    
