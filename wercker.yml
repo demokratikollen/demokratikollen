@@ -19,6 +19,7 @@ build:
             name: Add the postgresql server url
             code: |
                 export TEST_DATABASE_URL=$WERCKER_POSTGRESQL_URL
+                export DATABASE_URL=$WERCKER_POSTGRESQL_URL
         - script:
             name: Add the mongodb server url
             code: |
