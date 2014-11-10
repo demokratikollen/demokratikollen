@@ -89,7 +89,7 @@ sudo docker rmi $webapp_image_id
 sudo docker build -t demokratikollen/webapp docker/webapp
 
 #create the final container
-sudo docker create --name webapp --env-file=docker/webapp/envs --link postgres:postgres --link mongo:mongo --volume /home/wercker/data:/data demokratikollen/webapp:latest gunicorn -c /usr/src/apps/demokratikollen/gunicorn_config.py demokratikollen.www.app:app
+sudo docker create --name webapp --env-file=docker/webapp/envs --link postgres:postgres --link mongo:mongo --volume /home/wercker/data:/data demokratikollen/webapp:latest gunicorn -c /usr/src/apps/demokratikollen/gunicorn_config.py demokratikollen.www.gunicorn_production:app
 
 #start the container
 webapp_container_id=$(sudo docker start webapp)
