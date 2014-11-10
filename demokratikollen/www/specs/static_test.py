@@ -1,7 +1,6 @@
 import os
 from flask.ext.testing import TestCase
 from unittest.mock import MagicMock
-from mock import patch
 
 from demokratikollen.www.app import create_app
 from demokratikollen.www.app.mod_static import controllers
