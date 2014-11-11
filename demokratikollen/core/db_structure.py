@@ -237,6 +237,6 @@ def create_db_structure(engine, do_not_confirm=False):
 
     Base.metadata.create_all(engine)
 
-
 if __name__ == '__main__':
     pass
+

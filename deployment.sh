@@ -101,6 +101,7 @@ fi
 if [ -n "$rebuild_orm" ]; then
 	sudo docker exec $webapp_container_id python populate_orm.py
 	sudo docker exec $webapp_container_id python compute_party_votes.py
+	sudo docker exec $webapp_container_id python calculations/party_covoting.py	
 fi
 
 echo "Creating nginx images and containers"
