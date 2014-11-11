@@ -202,6 +202,21 @@ class PolledPoint(CommitteeReportPoint):
 #########################
 
 class PartyVote(Base):
+
+    def __init__(self, **kwargs):
+        super().__init__(**kwargs)
+        nyes = kwargs['num_yes']
+        nno = kwargs['num_no']
+        nabstain = kwargs['num_abstain']
+        if nyes > nno and nyes > nabstain:
+            self.vote_option = 'Ja'
+        elif nno > nyes and nno > nabstain:
+            self.vote_option = 'Nej'
+        elif nabstain > nno and nabstain > nyes:
+            self.vote_option = 'Avstår'
+        else:
+            self.vote_option = 'Frånvarande'
+
     __tablename__ = 'party_votes'
     id = Column(Integer, primary_key=True)
     party_id = Column(Integer, ForeignKey('parties.id'))
@@ -210,6 +225,7 @@ class PartyVote(Base):
     num_no = Column(Integer)
     num_abstain = Column(Integer)
     num_absent = Column(Integer)
+    vote_option = Column(VoteOptionsType)
 
     def __repr__(self):
         return '{}: {}'.format(self.member.__repr__(),self.vote_option.__repr__())
