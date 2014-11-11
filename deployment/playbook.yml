@@ -1,0 +1,9 @@
+- hosts: demokratikollen
+  vars:
+      app_name: demokratikollen
+      venv_dir: ~/.virtualenv
+  roles:
+      - postgresql
+      - mongodb
+      - webapp
+      - nginx
