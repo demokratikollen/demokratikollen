@@ -2,7 +2,6 @@
   vars:
       app_name: demokratikollen
       venv_dir: ~/.virtualenv
-      node_version: "0.10.33"
 
   roles:
       - setup
