@@ -18,9 +18,10 @@
   with_items:
       - grunt-cli
 
-- name: Install Bootstrap and Compass
+- name: Install some Ruby gems
   gem: name={{item}} state=present
   with_items:
       - bootstrap-sass
       - compass
+      - bundler
 
