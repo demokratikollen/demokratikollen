@@ -19,6 +19,7 @@
       - grunt-cli
 
 - name: Install some Ruby gems
+  sudo: yes
   gem: name={{item}} state=present
   with_items:
       - bootstrap-sass
