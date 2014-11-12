@@ -40,3 +40,4 @@ demokratikollen/data/*
 demokratikollen/demokratikollen-compass/fonts/bootstrap*
 demokratikollen/demokratikollen-compass/javascripts/bootstrap*
 demokratikollen/demokratikollen-compass/stylesheets
+**/.sass-cache/
