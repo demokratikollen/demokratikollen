@@ -1,4 +1,7 @@
 box: wercker/python
+services:
+  - wercker/mongodb@1.0.1
+  - wercker/postgresql@0.0.4
 
 build:
     steps:
@@ -8,6 +11,29 @@ build:
         - pip-install:
             requirements_file: "demokratikollen/requirements/dev.txt"
             pip_command: pip3.4
+        - script:
+            name: Add the pyton path env.
+            code: |
+                export PYTHONPATH=$WERCKER_SOURCE_DIR
+        - script:
+            name: Add the postgresql server url
+            code: |
+                export TEST_DATABASE_URL=$WERCKER_POSTGRESQL_URL
+                export DATABASE_URL=$WERCKER_POSTGRESQL_URL
+        - script:
+            name: Add the mongodb server url
+            code: |
+                export MONGO_DATABASE_URL=$MONGODB_URL
+        - script:
+            name: run behave tests
+            cwd: demokratikollen/www/
+            code: |
+                behave
+        - script:
+            name: run python tests
+            cwd: demokratikollen/www/
+            code: |
+                nosetests specs
 deploy:
     steps:
         - add-to-known_hosts:

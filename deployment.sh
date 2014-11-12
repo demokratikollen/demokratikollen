@@ -89,7 +89,7 @@ sudo docker rmi $webapp_image_id
 sudo docker build -t demokratikollen/webapp docker/webapp
 
 #create the final container
-sudo docker create --name webapp --env-file=docker/webapp/envs --link postgres:postgres --link mongo:mongo --volume /home/wercker/data:/data demokratikollen/webapp:latest gunicorn demokratikollen.www.app:app
+sudo docker create --name webapp --env-file=docker/webapp/envs --link postgres:postgres --link mongo:mongo --volume /home/wercker/data:/data demokratikollen/webapp:latest gunicorn -c /usr/src/apps/demokratikollen/gunicorn_config.py demokratikollen.www.gunicorn_production:app
 
 #start the container
 webapp_container_id=$(sudo docker start webapp)
@@ -104,19 +104,20 @@ if [ -n "$rebuild_orm" ]; then
 fi
 
 echo "Creating nginx images and containers"
-#Create the nginx image if it does not exist
+#Get the nginx image id.
 nginx_image_id=$(sudo docker images | sed -nr 's/demokratikollen\/nginx.+latest.+([a-z0-9]{12}).*/\1/gp')
-
-if [ -z "$nginx_image_id" ]; then
-    sudo docker build -t demokratikollen/nginx docker/nginx
-fi
-
-#Get the webapp container id. Start it if it is not already started
+#Get the nginx container id. 
 nginx_container_id=$(sudo docker ps | sed -nr 's/([0-9a-z]{12}).+nginx/\1/gp')
 
-if [ -z "$nginx_container_id" ]; then
-    sudo docker run -d -p 80:80 --name nginx --link webapp:webapp demokratikollen/nginx 
-fi
+#kill container and image
+sudo docker rm -f $nginx_container_id
+sudo docker rmi $nginx_image_id
+
+#Create the nginx image (update static files.)
+sudo docker build -t demokratikollen/nginx docker/nginx
+
+#run the nginx server.
+sudo docker run -d -p 80:80 --name nginx --link webapp:webapp demokratikollen/nginx 
 
 #remove old source files
 rm -rf old_src
