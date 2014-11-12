@@ -1,0 +1,4 @@
+- name: Copy the postgres settings files.
+  synchronize: src=./ dest=/home/wercker/docker/postgres/
+  register: sync_result_postgres
+
