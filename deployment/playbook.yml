@@ -1,9 +1,11 @@
 - hosts: demokratikollen
+  remote_user: wercker
+  sudo_user: wercker
   vars:
       app_name: demokratikollen
-      venv_dir: ~/.virtualenv
   roles:
-      - postgresql
-      - mongodb
-      - webapp
-      - nginx
+      - image_creation
+      #- mongodb
+      #- webapp
+      #- nginx
+      #- post-setup
