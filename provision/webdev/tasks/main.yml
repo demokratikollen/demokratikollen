@@ -26,3 +26,5 @@
       - compass
       - bundler
 
+- name: Install bootstrap into Compass project
+  command: compass install bootstrap -c {{compass_dir}}/config.rb --app-dir {{compass_dir}}
