@@ -1,15 +1,26 @@
-- name: Add the nodejs repository.
+- name: Install NodeSource repo
   sudo: yes
-  apt_repository: repo='ppa:chris-lea/node.js' state=present
-  register: result
+  shell: curl -sL https://deb.nodesource.com/setup | bash -
 
-- name: Update apt if we added the repo.
+- name: Install Node.js
   sudo: yes
-  apt: update_cache=yes
-  when: result|changed
+  apt: name=nodejs
 
-- name: Install nodejs
+- name: Set ownership on /usr/local/
   sudo: yes
-  apt: name={{item}} state=installed
+  shell: chown -R {{usr_local_owner}} /usr/local/
+
+- name: Tell npm to install things under /usr/local
+  command: npm config set prefix "/usr/local"
+
+- name: Install Node.js packages
+  npm: state=present global=yes name={{item}}
   with_items:
-      - nodejs
+      - grunt-cli
+
+- name: Install Bootstrap and Compass
+  gem: name={{item}} state=present
+  with_items:
+      - bootstrap-sass
+      - compass
+
