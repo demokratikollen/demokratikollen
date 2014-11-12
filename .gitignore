@@ -34,3 +34,9 @@ demokratikollen/data/*
 *.sql
 !demokratikollen/data/create_tables.sql
 !demokratikollen/data/urls.txt
+
+
+#compass
+demokratikollen/demokratikollen-compass/fonts/bootstrap*
+demokratikollen/demokratikollen-compass/javascripts/bootstrap*
+demokratikollen/demokratikollen-compass/stylesheets
