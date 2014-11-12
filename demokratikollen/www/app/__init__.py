@@ -1,41 +1,49 @@
 # Import flask and template operators
 from flask import Flask, render_template
 
-# Import extensions
-from flask.ext.sqlalchemy import SQLAlchemy
-
+#import helpers
 from demokratikollen.www.app.helpers.cache import cache
+from demokratikollen.www.app.helpers.db import db
 
-import sys
 import os
-sys.path.insert(0,os.path.dirname(os.path.dirname(os.path.dirname(__file__))))
-from demokratikollen.core.db_structure import *
 
-# Define the WSGI application object
-app = Flask(__name__, static_url_path='/')
+#App Factory to facilitate testing.
+def create_app(testing=False):
+    app = Flask(__name__, static_url_path='/')
 
-# Configurations
-app.config.from_object('demokratikollen.www.config')
+    #Load the basic config.
+    app.config.from_object('demokratikollen.www.config')
+    
+    #If we require testing. change some configs.
+    if testing:
+        print("Running Test env.")
+        app.config['TESTING'] = True
+        app.config['SQLALCHEMY_DATABASE_URI'] = os.environ['TEST_DATABASE_URL']
+        cache.config['CACHE_TYPE'] = 'null'
 
-#init the cache
-cache.init_app(app)
+    #init the cache
+    cache.init_app(app)
 
-# Define the database object which is imported
-# by modules and controllers
-db = SQLAlchemy(app)
+    #inti the db
+    db.init_app(app)
 
-# Sample HTTP error handling
-@app.errorhandler(404)
-def not_found(error):
-    return render_template('404.html'), 404
+    # 404 error handling
+    @app.errorhandler(404)
+    def not_found(error):
+        return render_template('404.html'), 404
 
-# Import a module / component using its blueprint handler variable (mod_auth)
-from .mod_static.controllers import mod_static as static_module
-from .mod_members.controllers import mod_members as members_module
-from .mod_figures.controllers import mod_figures as figures_module
+    # Import a module / component using its blueprint handler variable
+    from .mod_static.controllers import mod_static as static_module
 
-# Register blueprint(s)
-app.register_blueprint(static_module)
-app.register_blueprint(members_module)
-app.register_blueprint(figures_module)
-# ..
+    # Register blueprint(s)
+    app.register_blueprint(static_module)
+
+    return app
+
+
+
+
+
+
+
+

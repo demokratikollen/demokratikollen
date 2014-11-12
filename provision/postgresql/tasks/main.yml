@@ -22,6 +22,7 @@
   postgresql_db: name={{ item }}
   with_items:
     - '{{ db_name }}'
+    - test
     - riksdagen
 
 - name: Create User
@@ -36,6 +37,7 @@
   with_items:
     - '{{ db_name }}'
     - riksdagen
+    - test
 
 - name: Set DATABASE_USER in env
   lineinfile: dest=~/.bashrc state=present line='export {{ item.key }}="{{ item.value }}"'
@@ -45,3 +47,4 @@
     - {key: 'DATABASE_URL', value: 'postgresql://{{db_user}}:{{db_password}}@localhost:5432/{{db_name}}'}
     - {key: 'DATABASE_NAME', value: '{{ db_name }}'}
     - {key: 'DATABASE_RIKSDAGEN_URL', value: 'postgresql://{{db_user}}:{{db_password}}@localhost:5432/riksdagen'}
+    - {key: 'TEST_DATABASE_URL', value: 'postgresql://{{db_user}}:{{db_password}}@localhost:5432/test'}
