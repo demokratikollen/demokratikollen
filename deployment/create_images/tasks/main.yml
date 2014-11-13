@@ -1,6 +1,6 @@
 - name: Fire shell script for creating a new postgres image
   shell: bash docker/postgres/create_image.sh
-  when: diff_postgres_schema.stderr != '' or diff_postgres_schema.stdout != ''
+  when: diff_riksdagen.stderr != '' or diff_riksdagen.stdout != ''
   ignore_errors: True
 
 #- name: Fire shell script for creating a new webapp container
