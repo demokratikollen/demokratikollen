@@ -20,7 +20,7 @@
 
 - name: Install some Ruby gems
   sudo: yes
-  gem: name={{item}} state=present
+  gem: name={{item}} state=present user_install=no
   with_items:
       - bootstrap-sass
       - compass
@@ -28,3 +28,4 @@
 
 - name: Install bootstrap into Compass project
   command: compass install bootstrap -c {{compass_dir}}/config.rb --app-dir {{compass_dir}}
+  ignore_errors: True
