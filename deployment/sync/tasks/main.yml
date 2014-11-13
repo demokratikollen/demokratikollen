@@ -1,4 +1,11 @@
-- name: Copy the postgres settings files.
-  synchronize: src=./ dest=/home/wercker/docker/postgres/
-  register: sync_result_postgres
+- name: Copy the docker related files.
+  synchronize: src=./ dest=/home/wercker/docker/
 
+- name: Copy the source to the webapp
+  synchronize: src=../demokratikollen/ dest=/home/wercker/docker/webapp/demokratikollen/
+
+- name: Copy the source to the bgtask 
+  synchronize: src=../demokratikollen/ dest=/home/wercker/docker/bgtasks/demokratikollen/
+
+- name: Remove the www folder from bgtask
+  shell: rm -rf docker/bgtasks/demokratikollen/www
