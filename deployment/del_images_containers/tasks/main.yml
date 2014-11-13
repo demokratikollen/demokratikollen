@@ -1,0 +1,4 @@
+- name: Fire shell script for removing an old postgres image
+  shell: bash docker/postgres/delete_images_and_containers.sh
+  when: diff_postgres_schema.stderr != '' or diff_postgres_schema.stdout != ''
+  ignore_errors: True

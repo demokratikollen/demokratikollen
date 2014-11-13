@@ -1,0 +1,19 @@
+- name: Check if the postgres schema changed. (rebuild postgres image)
+  shell: diff docker/postgres/setup-dbs.sh docker_old/postgres/setup-dbs.sh
+  register: diff_postgres_schema
+  ignore_errors: True
+
+- name: Check if urls.txt has changed. (redo data_import)
+  shell: diff docker/bgtasks/urls.txt docker_old/bgtasks/urls.txt
+  register: diff_urls
+  ignore_errors: True
+
+- name: Check if any of core stuff changed (Redo calculations)
+  shell: diff -r docker/bgtasks/demokratikollen docker_old/bgtasks/demokratikollen
+  register: diff_core
+  ignore_errors: True
+
+- name: Check if db_structure changed. (Rebuild orm)
+  shell: diff docker/bgtasks/demokratikollen/core/db_structure.py docker_old/bgtasks/demokratikollen/core/db_structure.py
+  register: diff_db_structure
+  ignore_errors: True
