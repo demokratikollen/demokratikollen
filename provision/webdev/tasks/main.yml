@@ -27,7 +27,7 @@
       - sass
 
 - name: Install Node.js packages for design stuff
-  command: chdir={{design_dir}} npm install
+  command: chdir={{design_dir}} npm install --no-bin-links
 
 - name: Install Bower packages for design stuff
   command: chdir={{design_dir}} bower install
