@@ -1,6 +1,10 @@
 @import "sass/_custom-bootstrap-variables.scss";
 @import "bower_components/bootstrap-sass-official/assets/stylesheets/_bootstrap.scss";
 
+$navbar-brand-font-size: 27px;
+$navbar-brand-font-size-xs: 20px;
+
+
 #navbar {
     @extend .navbar,.navbar-inverse,.navbar-static-top;
 
@@ -9,21 +13,34 @@
 
         div:first-child {
             @extend .navbar-header;
+
             a.brand {
+
                 @extend .navbar-brand,.navbar-left;
 
-                font-size: 27px;
-                vertical-align: middle;
-                padding-left: 0px;
+                font-size: $navbar-brand-font-size;
+                @media (max-width: $screen-xs-max) {
+                    font-size: $navbar-brand-font-size-xs;
+                }
+                padding: 0px;
                 font-family: 'Roboto Slab',sans-serif;
                 font-weight: 700;
                 color: white;
-                line-height:0px;
+                vertical-align: middle;
 
                 span.period {
                     font-family: 'Open Sans';
                     color:orange;
-                    font-size: 50px;
+                    font-size: 2*$navbar-brand-font-size;
+                    @media (max-width: $screen-xs-max) {
+                        font-size: 2*$navbar-brand-font-size-xs;
+                    }
+                }
+
+
+                line-height: $navbar-brand-font-size;
+                @media (max-width: $screen-xs-max) {
+                    line-height: 30px;
                 }
             }
         }
