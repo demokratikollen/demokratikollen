@@ -22,25 +22,20 @@ $navbar-brand-font-size-xs: 20px;
                 @media (max-width: $screen-xs-max) {
                     font-size: $navbar-brand-font-size-xs;
                 }
-                padding: 0px;
+                padding: 0;
                 font-family: 'Roboto Slab',sans-serif;
                 font-weight: 700;
                 color: white;
-                vertical-align: middle;
+                line-height: $navbar-height;
 
                 span.period {
+                    line-height: 0;
                     font-family: 'Open Sans';
-                    color:orange;
-                    font-size: 2*$navbar-brand-font-size;
+                    color: orange;
+                    font-size: 2 * $navbar-brand-font-size;
                     @media (max-width: $screen-xs-max) {
-                        font-size: 2*$navbar-brand-font-size-xs;
+                        font-size: 2 * $navbar-brand-font-size-xs;
                     }
-                }
-
-
-                line-height: $navbar-brand-font-size;
-                @media (max-width: $screen-xs-max) {
-                    line-height: 30px;
                 }
             }
         }
