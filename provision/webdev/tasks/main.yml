@@ -13,19 +13,21 @@
 - name: Tell npm to install things under /usr/local
   command: npm config set prefix "/usr/local"
 
-- name: Install Node.js packages
+- name: Install global Node.js packages
   npm: state=present global=yes name={{item}}
   with_items:
       - grunt-cli
+      - bower
+      - node-sass
 
 - name: Install some Ruby gems
   sudo: yes
   gem: name={{item}} state=present user_install=no
   with_items:
-      - bootstrap-sass
-      - compass
-      - bundler
+      - sass
 
-- name: Install bootstrap into Compass project
-  command: compass install bootstrap -c {{compass_dir}}/config.rb --app-dir {{compass_dir}}
-  ignore_errors: True
+- name: Install Node.js packages for design stuff
+  command: chdir={{design_dir}} npm install
+
+- name: Install Bower packages for design stuff
+  command: chdir={{design_dir}} bower install

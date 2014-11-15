@@ -9,6 +9,7 @@ build/
 bin/
 local/
 ghostdriver.log
+**/npm-debug.log
 
 #cache
 demokratikollen/www/cache
@@ -36,8 +37,9 @@ demokratikollen/data/*
 !demokratikollen/data/urls.txt
 
 
-#compass
-demokratikollen/demokratikollen-compass/fonts/bootstrap*
-demokratikollen/demokratikollen-compass/javascripts/bootstrap*
-demokratikollen/demokratikollen-compass/stylesheets
+# design stuff
+demokratikollen/www/design/bower_components
+demokratikollen/www/design/node_modules
+*.css.map
+demokratikollen/www/design/**/*.log
 **/.sass-cache/
