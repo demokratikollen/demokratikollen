@@ -2,14 +2,14 @@
 @import "bower_components/bootstrap-sass-official/assets/stylesheets/_bootstrap.scss";
 
 $navbar-brand-font-size: 27px;
-$navbar-brand-font-size-xs: 20px;
+$navbar-brand-font-size-xs: 22px;
 
 
 #navbar {
     @extend .navbar,.navbar-inverse,.navbar-static-top;
 
     .column.brand-and-menu-toggle {
-        @extend .col-sm-5,.col-md-3;
+        @extend .col-sm-6,.col-md-3;
 
         div:first-child {
             @extend .navbar-header;
@@ -42,7 +42,7 @@ $navbar-brand-font-size-xs: 20px;
     }
 
     .column.menu-search {
-        @extend .col-sm-7,.col-md-5,.col-md-push-4;
+        @extend .col-sm-6,.col-md-5,.col-md-push-4;
 
         div:first-child {
             @extend  .navbar-collapse;
@@ -50,6 +50,7 @@ $navbar-brand-font-size-xs: 20px;
 
         form {
             @extend .navbar-form,.navbar-right;
+            width: 100%;
 
             .input-group {
                 .input-group-addon {
@@ -83,6 +84,15 @@ $navbar-brand-font-size-xs: 20px;
 
 
     .menu {
+    }
+}
+
+#width-test {
+    @extend .container;
+    .one-unit {
+        @extend .col-xs-1;
+        border-left: 1px solid #000;
+        border-right: 1px solid #000;
     }
 }
 

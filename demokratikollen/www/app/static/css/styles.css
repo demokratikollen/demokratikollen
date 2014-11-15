@@ -1313,24 +1313,24 @@ pre {
   max-height: 340px;
   overflow-y: scroll; }
 
-.container {
+.container, #width-test {
   margin-right: auto;
   margin-left: auto;
   padding-left: 15px;
   padding-right: 15px; }
-  .container:before, .container:after {
+  .container:before, #width-test:before, .container:after, #width-test:after {
     content: " ";
     display: table; }
-  .container:after {
+  .container:after, #width-test:after {
     clear: both; }
   @media (min-width: 768px) {
-    .container {
+    .container, #width-test {
       width: 750px; } }
   @media (min-width: 992px) {
-    .container {
+    .container, #width-test {
       width: 970px; } }
   @media (min-width: 1200px) {
-    .container {
+    .container, #width-test {
       width: 1170px; } }
 
 .container-fluid {
@@ -1353,16 +1353,16 @@ pre {
   .row:after {
     clear: both; }
 
-.col-xs-1, .col-sm-1, .col-md-1, .col-lg-1, .col-xs-2, .col-sm-2, .col-md-2, .col-lg-2, .col-xs-3, .col-sm-3, .col-md-3, #navbar .column.brand-and-menu-toggle, .col-lg-3, .col-xs-4, .col-sm-4, .col-md-4, #navbar .column.menu-links, .col-lg-4, .col-xs-5, .col-sm-5, #navbar .column.brand-and-menu-toggle, .col-md-5, #navbar .column.menu-search, .col-lg-5, .col-xs-6, .col-sm-6, .col-md-6, .col-lg-6, .col-xs-7, .col-sm-7, #navbar .column.menu-search, .col-md-7, .col-lg-7, .col-xs-8, .col-sm-8, .col-md-8, .col-lg-8, .col-xs-9, .col-sm-9, .col-md-9, .col-lg-9, .col-xs-10, .col-sm-10, .col-md-10, .col-lg-10, .col-xs-11, .col-sm-11, .col-md-11, .col-lg-11, .col-xs-12, .col-sm-12, #navbar .column.menu-links, .col-md-12, .col-lg-12 {
+.col-xs-1, #width-test .one-unit, .col-sm-1, .col-md-1, .col-lg-1, .col-xs-2, .col-sm-2, .col-md-2, .col-lg-2, .col-xs-3, .col-sm-3, .col-md-3, #navbar .column.brand-and-menu-toggle, .col-lg-3, .col-xs-4, .col-sm-4, .col-md-4, #navbar .column.menu-links, .col-lg-4, .col-xs-5, .col-sm-5, .col-md-5, #navbar .column.menu-search, .col-lg-5, .col-xs-6, .col-sm-6, #navbar .column.brand-and-menu-toggle, #navbar .column.menu-search, .col-md-6, .col-lg-6, .col-xs-7, .col-sm-7, .col-md-7, .col-lg-7, .col-xs-8, .col-sm-8, .col-md-8, .col-lg-8, .col-xs-9, .col-sm-9, .col-md-9, .col-lg-9, .col-xs-10, .col-sm-10, .col-md-10, .col-lg-10, .col-xs-11, .col-sm-11, .col-md-11, .col-lg-11, .col-xs-12, .col-sm-12, #navbar .column.menu-links, .col-md-12, .col-lg-12 {
   position: relative;
   min-height: 1px;
   padding-left: 15px;
   padding-right: 15px; }
 
-.col-xs-1, .col-xs-2, .col-xs-3, .col-xs-4, .col-xs-5, .col-xs-6, .col-xs-7, .col-xs-8, .col-xs-9, .col-xs-10, .col-xs-11, .col-xs-12 {
+.col-xs-1, #width-test .one-unit, .col-xs-2, .col-xs-3, .col-xs-4, .col-xs-5, .col-xs-6, .col-xs-7, .col-xs-8, .col-xs-9, .col-xs-10, .col-xs-11, .col-xs-12 {
   float: left; }
 
-.col-xs-1 {
+.col-xs-1, #width-test .one-unit {
   width: 8.33333%; }
 
 .col-xs-2 {
@@ -1516,7 +1516,7 @@ pre {
   margin-left: 100%; }
 
 @media (min-width: 768px) {
-  .col-sm-1, .col-sm-2, .col-sm-3, .col-sm-4, .col-sm-5, #navbar .column.brand-and-menu-toggle, .col-sm-6, .col-sm-7, #navbar .column.menu-search, .col-sm-8, .col-sm-9, .col-sm-10, .col-sm-11, .col-sm-12, #navbar .column.menu-links {
+  .col-sm-1, .col-sm-2, .col-sm-3, .col-sm-4, .col-sm-5, .col-sm-6, #navbar .column.brand-and-menu-toggle, #navbar .column.menu-search, .col-sm-7, .col-sm-8, .col-sm-9, .col-sm-10, .col-sm-11, .col-sm-12, #navbar .column.menu-links {
     float: left; }
 
   .col-sm-1 {
@@ -1531,13 +1531,13 @@ pre {
   .col-sm-4 {
     width: 33.33333%; }
 
-  .col-sm-5, #navbar .column.brand-and-menu-toggle {
+  .col-sm-5 {
     width: 41.66667%; }
 
-  .col-sm-6 {
+  .col-sm-6, #navbar .column.brand-and-menu-toggle, #navbar .column.menu-search {
     width: 50%; }
 
-  .col-sm-7, #navbar .column.menu-search {
+  .col-sm-7 {
     width: 58.33333%; }
 
   .col-sm-8 {
@@ -3251,7 +3251,7 @@ tbody.collapse.in {
     .nav > li > a, #navbar .column.menu-links .menu-links > li > a {
       position: relative;
       display: block;
-      padding: 10px 15px; }
+      padding: 5px 10px; }
       .nav > li > a:hover, #navbar .column.menu-links .menu-links > li > a:hover, .nav > li > a:focus, #navbar .column.menu-links .menu-links > li > a:focus {
         text-decoration: none;
         background-color: #eeeeee; }
@@ -3429,10 +3429,13 @@ tbody.collapse.in {
     #navbar .column.menu-links .navbar-fixed-bottom div:first-child {
       max-height: 200px; } }
 
-.container > .navbar-header, #navbar .column.brand-and-menu-toggle .container > div:first-child,
+.container > .navbar-header, #width-test > .navbar-header, #navbar .column.brand-and-menu-toggle .container > div:first-child, #navbar .column.brand-and-menu-toggle #width-test > div:first-child,
 .container > .navbar-collapse,
+#width-test > .navbar-collapse,
 #navbar .column.menu-search .container > div:first-child,
+#navbar .column.menu-search #width-test > div:first-child,
 #navbar .column.menu-links .container > div:first-child,
+#navbar .column.menu-links #width-test > div:first-child,
 .container-fluid > .navbar-header,
 #navbar .column.brand-and-menu-toggle .container-fluid > div:first-child,
 .container-fluid > .navbar-collapse,
@@ -3441,10 +3444,13 @@ tbody.collapse.in {
   margin-right: -15px;
   margin-left: -15px; }
   @media (min-width: 768px) {
-    .container > .navbar-header, #navbar .column.brand-and-menu-toggle .container > div:first-child,
+    .container > .navbar-header, #width-test > .navbar-header, #navbar .column.brand-and-menu-toggle .container > div:first-child, #navbar .column.brand-and-menu-toggle #width-test > div:first-child,
     .container > .navbar-collapse,
+    #width-test > .navbar-collapse,
     #navbar .column.menu-search .container > div:first-child,
+    #navbar .column.menu-search #width-test > div:first-child,
     #navbar .column.menu-links .container > div:first-child,
+    #navbar .column.menu-links #width-test > div:first-child,
     .container-fluid > .navbar-header,
     #navbar .column.brand-and-menu-toggle .container-fluid > div:first-child,
     .container-fluid > .navbar-collapse,
@@ -3491,7 +3497,7 @@ tbody.collapse.in {
   .navbar-brand > img, #navbar .column.brand-and-menu-toggle div:first-child a.brand > img {
     display: block; }
   @media (min-width: 768px) {
-    .navbar > .container .navbar-brand, #navbar > .container .navbar-brand, .navbar > .container #navbar .column.brand-and-menu-toggle div:first-child a.brand, #navbar .column.brand-and-menu-toggle div:first-child .navbar > .container a.brand, #navbar > .container .column.brand-and-menu-toggle div:first-child a.brand, .navbar > .container-fluid .navbar-brand, #navbar > .container-fluid .navbar-brand, .navbar > .container-fluid #navbar .column.brand-and-menu-toggle div:first-child a.brand, #navbar .column.brand-and-menu-toggle div:first-child .navbar > .container-fluid a.brand, #navbar > .container-fluid .column.brand-and-menu-toggle div:first-child a.brand {
+    .navbar > .container .navbar-brand, #navbar > .container .navbar-brand, .navbar > #width-test .navbar-brand, #navbar > #width-test .navbar-brand, .navbar > .container #navbar .column.brand-and-menu-toggle div:first-child a.brand, #navbar .column.brand-and-menu-toggle div:first-child .navbar > .container a.brand, #navbar > .container .column.brand-and-menu-toggle div:first-child a.brand, .navbar > #width-test #navbar .column.brand-and-menu-toggle div:first-child a.brand, #navbar .column.brand-and-menu-toggle div:first-child .navbar > #width-test a.brand, #navbar > #width-test .column.brand-and-menu-toggle div:first-child a.brand, .navbar > .container-fluid .navbar-brand, #navbar > .container-fluid .navbar-brand, .navbar > .container-fluid #navbar .column.brand-and-menu-toggle div:first-child a.brand, #navbar .column.brand-and-menu-toggle div:first-child .navbar > .container-fluid a.brand, #navbar > .container-fluid .column.brand-and-menu-toggle div:first-child a.brand {
       margin-left: -15px; } }
 
 .navbar-toggle, #menu-toggle {
@@ -4013,14 +4019,14 @@ a.badge:hover, a.badge:focus {
     font-weight: 200; }
   .jumbotron > hr {
     border-top-color: #d5d5d5; }
-  .container .jumbotron, .container-fluid .jumbotron {
+  .container .jumbotron, #width-test .jumbotron, .container-fluid .jumbotron {
     border-radius: 6px; }
-  .jumbotron .container {
+  .jumbotron .container, .jumbotron #width-test {
     max-width: 100%; }
   @media screen and (min-width: 768px) {
     .jumbotron {
       padding: 48px 0; }
-      .container .jumbotron, .container-fluid .jumbotron {
+      .container .jumbotron, #width-test .jumbotron, .container-fluid .jumbotron {
         padding-left: 60px;
         padding-right: 60px; }
       .jumbotron h1,
@@ -5416,7 +5422,7 @@ button.close {
   line-height: 50px; }
   @media (max-width: 767px) {
     #navbar .column.brand-and-menu-toggle div:first-child a.brand {
-      font-size: 20px; } }
+      font-size: 22px; } }
   #navbar .column.brand-and-menu-toggle div:first-child a.brand span.period {
     line-height: 0;
     font-family: 'Open Sans';
@@ -5424,9 +5430,15 @@ button.close {
     font-size: 54px; }
     @media (max-width: 767px) {
       #navbar .column.brand-and-menu-toggle div:first-child a.brand span.period {
-        font-size: 40px; } }
+        font-size: 44px; } }
+#navbar .column.menu-search form {
+  width: 100%; }
 #navbar .column.menu-links .menu-links a {
   font-size: 16px;
   font-weight: 600; }
+
+#width-test .one-unit {
+  border-left: 1px solid #000;
+  border-right: 1px solid #000; }
 
 /*# sourceMappingURL=styles.css.map */
