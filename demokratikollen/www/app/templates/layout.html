@@ -8,23 +8,8 @@
 
     <link href="http://netdna.bootstrapcdn.com/bootstrap/3.0.0/css/bootstrap-glyphicons.css" rel="stylesheet">
     <link href="{{ url_for('static', filename='css/styles.css') }}" rel="stylesheet">
-    <link href='http://fonts.googleapis.com/css?family=Open+Sans:400italic,700italic,700,400|Roboto+Slab:400,700' rel='stylesheet' type='text/css'>
+    <link href='http://fonts.googleapis.com/css?family=Open+Sans:400italic,700italic,700,400,600|Roboto+Slab:400,700' rel='stylesheet' type='text/css'>
     <style>
-
-      .navbar-header .navbar-brand {
-        font-size: 27px;
-        vertical-align: middle;
-        padding-left: 0px;
-        font-family: 'Roboto Slab','Open Sans',sans-serif;
-        font-weight: 700;
-        color: white;
-        line-height:0px;
-      }
-      .navbar-brand span.period {
-        font-family: 'Open Sans';
-        color:orange;
-        font-size: 50px;
-      }
       .navbar-form{
         width: 100%;
       }
@@ -45,15 +30,15 @@
     <![endif]-->
   </head>
   <body>
-    <nav class="navbar navbar-inverse navbar-static-top" role="navigation">
-      <div class="navbar-inner">
+    <nav id="navbar" role="navigation">
+      <div>
         <div class="container">
           <div class="row">
-            <div class="col-sm-5 col-md-3">
+            <div class="column brand-and-menu-toggle">
               <!-- Brand and toggle get grouped for better mobile display -->
-              <div class="navbar-header">
-                <a class="navbar-brand navbar-left" href="#">Demokratikollen<span class="period">.</span></a>
-                <button type="button" class="navbar-toggle collapsed navbar-right" data-toggle="collapse" data-target=".navbar-collapse">
+              <div>
+                <a class="brand" href="#">Demokratikollen<span class="period">.</span></a>
+                <button id="menu-toggle" type="button collapsed" data-toggle="collapse" data-target=".collapse">
                   <span class="sr-only">Visa/dölj navigering</span>
                   <span class="icon-bar"></span>
                   <span class="icon-bar"></span>
@@ -64,21 +49,20 @@
 
 
             <!-- Collect the nav links, forms, and other content for toggling -->
-            <div class="col-sm-7 col-md-5 col-md-push-4">
-              <div class="collapse navbar-collapse">
-                <form class="navbar-form navbar-right" role="search">
+            <div class="column menu-search">
+              <div class="collapse">
+                <form role="search">
                   <div class="input-group">
-                    <span class="input-group-addon"><span class="glyphicon glyphicon-search" aria-hidden="true"></span></span>
-                    <input type="text" class="form-control" placeholder="Sök">
-                    <!-- <span class="search-clear glyphicon glyphicon-remove-sign"></span> -->
+                    <span class="input-group-addon"><span aria-hidden="true"></span></span>
+                    <input type="text" placeholder="Sök">
                   </div><!-- /input-group -->
                 </form>
               </div>
             </div><!-- end columns -->
-            <div class="col-md-4 col-sm-12 col-md-pull-5">
-              <div class="collapse navbar-collapse">
-                <ul class="nav navbar-nav navbar-left">
-                  <li class="active"><a href="#">Riksdagen <span class="sr-only">(aktiv)</span></a></li>
+            <div class="column menu-links">
+              <div class="collapse">
+                <ul class="menu-links">
+                  <li class="active"><a href="#">Riksdagen<span class="sr-only"> (du är här)</span></a></li>
                   <li><a href="#">Partierna</a></li>
                   <li><a href="#">Förslagen</a></li>
                 </ul>

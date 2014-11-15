@@ -1,2 +1,80 @@
 @import "sass/_custom-bootstrap-variables.scss";
 @import "bower_components/bootstrap-sass-official/assets/stylesheets/_bootstrap.scss";
+
+#navbar {
+    @extend .navbar,.navbar-inverse,.navbar-static-top;
+
+    .column.brand-and-menu-toggle {
+        @extend .col-sm-5,.col-md-3;
+
+        div:first-child {
+            @extend .navbar-header;
+            a.brand {
+                @extend .navbar-brand,.navbar-left;
+
+                font-size: 27px;
+                vertical-align: middle;
+                padding-left: 0px;
+                font-family: 'Roboto Slab',sans-serif;
+                font-weight: 700;
+                color: white;
+                line-height:0px;
+
+                span.period {
+                    font-family: 'Open Sans';
+                    color:orange;
+                    font-size: 50px;
+                }
+            }
+        }
+    }
+
+    .column.menu-search {
+        @extend .col-sm-7,.col-md-5,.col-md-push-4;
+
+        div:first-child {
+            @extend  .navbar-collapse;
+        }
+
+        form {
+            @extend .navbar-form,.navbar-right;
+
+            .input-group {
+                .input-group-addon {
+                    span {
+                        @extend .glyphicon,.glyphicon-search;
+                    }
+                }
+
+                input {
+                    @extend .form-control;
+                }
+            }
+        }
+    }
+
+    .column.menu-links {
+        @extend .col-md-4,.col-sm-12,.col-md-pull-5;
+
+        div:first-child {
+            @extend  .navbar-collapse;
+        }
+
+        .menu-links {
+            @extend .nav,.navbar-nav,.navbar-left;
+            a {
+                font-size: 16px;
+                font-weight: 600;
+            }
+        }
+    }
+
+
+    .menu {
+    }
+}
+
+#menu-toggle {
+    @extend .navbar-toggle;
+    @extend .navbar-right;
+}
