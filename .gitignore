@@ -8,7 +8,7 @@ include/
 build/
 bin/
 local/
-app/www/ghostdriver.log
+ghostdriver.log
 
 #cache
 demokratikollen/www/cache
