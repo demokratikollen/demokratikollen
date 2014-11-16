@@ -8,7 +8,7 @@ from demokratikollen.core.utils import postgres as pg_utils
 import datetime as dt
 import json
 from pymongo import ASCENDING
-
+from copy import deepcopy
 def main():
     
     engine = create_engine(pg_utils.engine_url())
@@ -51,7 +51,7 @@ def main():
         print('================================')
         print('{} vs {}: {} conflicting votes'.format(partyA.abbr,partyB.abbr, num_conflicting))
 
-        output_parties = dict()
+        output_parties = list()
         for party in parties:
             agree_query = s.query(v1, v2, v3, PolledPoint) \
                                 .filter(PolledPoint.id == v1.polled_point_id) \
@@ -64,8 +64,7 @@ def main():
                                 .filter(v3.polled_point_id == v2.polled_point_id) \
                                 .filter(v3.party_id == party.id)
 
-            party_biases_list = list()
-            start_new = True
+            party_bias = list()
             for (k, interval) in enumerate(intervals):
 
                 agree_query_interval = agree_query.filter(PolledPoint.poll_date >= interval[0], PolledPoint.poll_date < interval[1])
@@ -74,27 +73,24 @@ def main():
                 agreeB = agree_query_interval.filter(v3.vote_option == v2.vote_option).count()
 
                 if agreeA + agreeB > 10:
-                    if start_new:
-                        party_biases = list()
-                        start_new = False
-                    
-                    party_biases.append( (interval[2], float(agreeB - agreeA)/float(agreeA + agreeB)))
+                    party_bias.append( (k, float(agreeB - agreeA)/float(agreeA + agreeB)))
                 else:
-                    if not start_new:
-                        party_biases_list.append(party_biases)
-                        start_new = True
-            if not start_new:
-                party_biases_list.append(party_biases)
+                    party_bias.append( (k, float('NaN')))
 
-            if party_biases_list:
-                print('{}...'.format(party.abbr))
-
-                output_parties[str(party.id)] = party_biases_list 
+            print('{}...'.format(party.abbr))
+            output_parties.append(dict(
+                                        id=party.id,
+                                        abbr=party.abbr,
+                                        data=party_bias)) 
         
         print('Dumping to MongoDB.')
-        output_parties_reverse = {key: [[(t,-x) for (t,x) in l] for l in ll] for (key, ll) in output_parties.items()}
-        output_top = dict(partyA = partyA.id, partyB = partyB.id, parties = output_parties)
-        output_top_reverse = dict(partyA = partyB.id, partyB = partyA.id, parties = output_parties_reverse)
+        output_parties_reverse = deepcopy(output_parties)
+        for item in output_parties_reverse:
+            item['data'] = [(k,-x) for (k,x) in item['data']]
+
+        yticklabels=[name for (start, stop, name) in intervals]
+        output_top = dict(partyA = partyA.id, partyB = partyB.id, parties = output_parties,yticklabels=yticklabels)
+        output_top_reverse = dict(partyA = partyB.id, partyB = partyA.id, parties = output_parties_reverse, yticklabels=yticklabels)
         mongo_collection.update(dict(partyA = partyA.id, partyB = partyB.id), output_top, upsert=True)
         mongo_collection.update(dict(partyA = partyB.id, partyB = partyA.id), output_top_reverse, upsert=True)
 
