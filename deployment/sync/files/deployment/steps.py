@@ -108,9 +108,6 @@ def remove_containers(base_dir, logger, files_changed):
     except Exception as e:
         logger.error("Something went wrong with docker: {0} ".format(e))
         sys.exit(1)
-    
-def remove_orphaned_images_and_containers(base_dir, logger):
-    raise NotImplemented
 
 def create_containers(base_dir, logger, files_changed):
 
@@ -144,12 +141,52 @@ def create_containers(base_dir, logger, files_changed):
     params.set_params(p)
 
 def start_containers(base_dir, logger, files_changed):
-    raise NotImplemented
+    #start containers except nginx
+    def start_container(name):
+        logger.info("Starting container: {0}".format(name))
+
+        if name in ['webapp', 'bgtasks']:
+            links = [(p['curr_containers']['postgres'],'postgres'), (p['curr_containers']['mongo'], 'mongo')]
+            cli.start(container=p['curr_containers'][name], links=links)
+        else:
+            cli.start(container=p['curr_containers'][name])
+
+    cli = Client(base_url='unix://var/run/docker.sock')
+    p = params.get_params()
+
+    try:
+        if files_changed:
+            start_container('postgres')
+            start_container('mongo')
+            start_container('bgtasks')
+
+        start_container('webapp')
+    except Exception as e:
+        logger.error("Something went wrong with docker: {0} ".format(e))
+        sys.exit(1)
+
+def switch_nginx_servers(base_dir, logger):
+    cli = Client(base_url='unix://var/run/docker.sock')
+    p = params.get_params()
+
+    try:
+        if p['prev_containers']['nginx']:
+            cli.stop(container=p['prev_containers']['nginx'])
+
+        link = [(p['curr_containers']['webapp'],'webapp')]
+        port = {80: 81}
+        cli.start(container=p['prev_containers']['nginx'], links=link, port_bindings=port)
+    except Exception as e:
+        logger.error("Something went wrong with docker: {0} ".format(e))
+        sys.exit(1)
 
 def populate_riksdagen(base_dir, logger):
     raise NotImplemented
 
 def run_calculations(base_dir, logger):
+    raise NotImplemented
+
+def remove_orphaned_images_and_containers(base_dir, logger):
     raise NotImplemented
 
 def post_deployment(base_dir, logger):

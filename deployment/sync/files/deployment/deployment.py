@@ -14,6 +14,8 @@ files_changed = steps.verify_changes(base_dir, log)
 #Depending on what changed. create new containers and start them.
 steps.create_images(base_dir, log, files_changed)
 steps.create_containers(base_dir, log, files_changed)
+steps.start_containers(base_dir, log, files_changed)
+steps.switch_nginx_servers(base_dir,log)
 steps.remove_containers(base_dir, log, files_changed)
 steps.remove_images(base_dir, log, files_changed)
 steps.post_deployment(base_dir,log)
