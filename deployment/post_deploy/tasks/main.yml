@@ -1,5 +1,0 @@
-- name: Copy the old docker files to a new place for diffing next deploy.
-  shell: rm -rf docker_old && cp -r docker docker_old
-
-- name: Remove the current dockerfiles
-  shell: rm -rf docker

@@ -1,7 +1,7 @@
 #!/bin/bash
 
 #Check which name we should use
-if [ -a /home/wercker/cids/postgres_one ]; then
+if [ -a /home/wercker/iids/postgres_one ]; then
 	name="postgres_two"
 else
 	name="postgres_one"

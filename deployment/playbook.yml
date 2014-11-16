@@ -5,11 +5,7 @@
       app_name: demokratikollen
   roles:
       - sync
-      - create_images
-      - start_containers
-      - del_images_containers
-      - post_deploy
-      #- mongodb
+      - start_deploy
       #- webapp
       #- nginx
       #- post-setup
