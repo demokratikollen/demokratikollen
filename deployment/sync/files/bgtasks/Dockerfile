@@ -9,3 +9,5 @@ ENV PYTHONPATH /usr/src/apps
 ENV DATABASE_URL postgresql://demokratikollen@postgres:5432/demokratikollen
 ENV DATABASE_RIKSDAGEN_URL postgresql://demokratikollen@postgres:5432/riksdagen
 ENV MONGO_DATABASE_URL mongodb://mongo:27017/demokratikollen
+
+CMD python loop.py
