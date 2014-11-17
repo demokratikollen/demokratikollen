@@ -204,10 +204,14 @@ def populate_orm(base_dir, logger):
     p = params.get_params()
 
     logger.info("Starting populate_orm on {0}".format(p['curr_containers']['bgtasks']))
-    s = cli.execute(p['curr_containers']['bgtasks'], 'python import_data.py populate_orm.py', stream=True)
 
-    for bytes in s:
-        logger.info(bytes)
+    try:
+        s = cli.execute(p['curr_containers']['bgtasks'], 'python populate_orm.py', stream=True)
+
+        for bytes in s:
+            logger.info(bytes)
+    except Exception as e:
+        logger.error("Something went wrong during the orm population, continuing anyway: {0}".format(e))
 
 def run_calculations(base_dir, logger):
     cli = Client(base_url='unix://var/run/docker.sock')
@@ -218,10 +222,13 @@ def run_calculations(base_dir, logger):
     for cmd in commands:
         logger.info("Starting {0} on {1}".format(p['curr_containers']['bgtasks']))
 
-        s = cli.execute(p['curr_containers']['bgtasks'], cmd, stream=True)
+        try: 
+            s = cli.execute(p['curr_containers']['bgtasks'], cmd, stream=True)
 
-        for bytes in s:
-            logger.info(bytes)
+            for bytes in s:
+                logger.info(bytes)
+        except Exception as e:
+            logger.error("Something went wrong during calculation {0}, continuing anyway: {1}".format(cmd, e))
 
 
 def remove_orphaned_images_and_containers(base_dir, logger):
