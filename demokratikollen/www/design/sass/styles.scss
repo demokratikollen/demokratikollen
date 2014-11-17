@@ -1,102 +1,97 @@
-@import "sass/_custom-bootstrap-variables.scss";
-@import "bower_components/bootstrap-sass-official/assets/stylesheets/_bootstrap.scss";
+@import "sass/custom-bootstrap-variables";
+@import "bower_components/bootstrap-sass-official/assets/stylesheets/bootstrap";
 
-$navbar-brand-font-size: 27px;
-$navbar-brand-font-size-xs: 22px;
+$logo-font-size: 27px;
+$logo-font-size-xs: 22px;
+
+@mixin xs-font-size($xs-size,$default-size) {
+  font-size: $default-size;
+  @media (max-width: $screen-xs-max) {
+    font-size: $xs-size;
+  }
+}
 
 
 #navbar {
-    @extend .navbar,.navbar-inverse,.navbar-static-top;
+  @extend .navbar,.navbar-inverse,.navbar-static-top;
 
-    .column.brand-and-menu-toggle {
-        @extend .col-sm-6,.col-md-3;
+  .column.brand-and-menu-toggle {
+    @extend .col-sm-6,.col-md-3;
 
-        div:first-child {
-            @extend .navbar-header;
+    div:first-child {
+      @extend .navbar-header;
 
-            a.brand {
+      a.brand {
+        @extend .navbar-brand,.navbar-left;
 
-                @extend .navbar-brand,.navbar-left;
+        @include xs-font-size($logo-font-size-xs,$logo-font-size);
+        padding: 0;
+        font-family: 'Roboto Slab',sans-serif;
+        font-weight: 700;
+        color: white;
+        line-height: $navbar-height;
 
-                font-size: $navbar-brand-font-size;
-                @media (max-width: $screen-xs-max) {
-                    font-size: $navbar-brand-font-size-xs;
-                }
-                padding: 0;
-                font-family: 'Roboto Slab',sans-serif;
-                font-weight: 700;
-                color: white;
-                line-height: $navbar-height;
-
-                span.period {
-                    line-height: 0;
-                    font-family: 'Open Sans';
-                    color: orange;
-                    font-size: 2 * $navbar-brand-font-size;
-                    @media (max-width: $screen-xs-max) {
-                        font-size: 2 * $navbar-brand-font-size-xs;
-                    }
-                }
-            }
+        span.period {
+          line-height: 0;
+          font-family: 'Open Sans';
+          color: orange;
+          @include xs-font-size(2 * $logo-font-size-xs, 2 * $logo-font-size);
         }
+      }
+    }
+  }
+
+  .column.menu-search {
+    @extend .col-sm-6,.col-md-5,.col-md-push-4;
+
+    div:first-child {
+      @extend  .navbar-collapse;
     }
 
-    .column.menu-search {
-        @extend .col-sm-6,.col-md-5,.col-md-push-4;
+    form {
+      @extend .navbar-form,.navbar-right;
 
-        div:first-child {
-            @extend  .navbar-collapse;
+      .input-group {
+        .input-group-addon {
+          span {
+            @extend .glyphicon,.glyphicon-search;
+          }
         }
 
-        form {
-            @extend .navbar-form,.navbar-right;
-            width: 100%;
-
-            .input-group {
-                .input-group-addon {
-                    span {
-                        @extend .glyphicon,.glyphicon-search;
-                    }
-                }
-
-                input {
-                    @extend .form-control;
-                }
-            }
+        input {
+          @extend .form-control;
         }
+      }
+    }
+  }
+
+  .column.menu-links {
+    @extend .col-md-4,.col-sm-12,.col-md-pull-5;
+
+    div:first-child {
+      @extend  .navbar-collapse;
     }
 
-    .column.menu-links {
-        @extend .col-md-4,.col-sm-12,.col-md-pull-5;
-
-        div:first-child {
-            @extend  .navbar-collapse;
-        }
-
-        .menu-links {
-            @extend .nav,.navbar-nav,.navbar-left;
-            a {
-                font-size: 16px;
-                font-weight: 600;
-            }
-        }
+    .menu-links {
+      @extend .nav,.navbar-nav,.navbar-left;
+      a {
+        font-size: 16px;
+        font-weight: 600;
+      }
     }
-
-
-    .menu {
-    }
+  }
 }
 
 #width-test {
-    @extend .container;
-    .one-unit {
-        @extend .col-xs-1;
-        border-left: 1px solid #000;
-        border-right: 1px solid #000;
-    }
+  @extend .container;
+  .one-unit {
+    @extend .col-xs-1;
+    border-left: 1px solid #000;
+    border-right: 1px solid #000;
+  }
 }
 
 #menu-toggle {
-    @extend .navbar-toggle;
-    @extend .navbar-right;
+  @extend .navbar-toggle;
+  @extend .navbar-right;
 }
