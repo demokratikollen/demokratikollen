@@ -9,7 +9,7 @@ import os
 
 #App Factory to facilitate testing.
 def create_app(testing=False):
-    app = Flask(__name__, static_url_path='', static_path='static')
+    app = Flask(__name__, static_url_path='', static_folder='static')
 
     #Load the basic config.
     app.config.from_object('demokratikollen.www.config')
