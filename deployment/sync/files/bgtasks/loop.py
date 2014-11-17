@@ -1,4 +1,4 @@
 import time
 
 while True:
-  sleep(60)
+  time.sleep(60)

@@ -41,10 +41,14 @@ def remote_files(data_dir, urls_file):
         filename = os.path.split(urlparts.path)[1]
         out_path = os.path.abspath(os.path.join(data_dir, filename))
 
-        local_size = os.path.getsize(out_path)
-        response = urllib.request.urlopen(url)
-        remote_size = int(response.getheader('Content-Length'))
-        if local_size != remote_size:
+        try:
+            local_size = os.path.getsize(out_path)
+            response = urllib.request.urlopen(url)
+            remote_size = int(response.getheader('Content-Length'))
+            if local_size != remote_size:
+                return True
+        except:
             return True
+
 
     return False

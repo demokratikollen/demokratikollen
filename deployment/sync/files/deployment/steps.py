@@ -90,7 +90,7 @@ def remove_containers(base_dir, logger, files_changed):
     def remove_container(name):
         if p['prev_containers'][name]:
             logger.info("Removing container: {0}".format(p['prev_containers'][name]))
-            cli.remove_container(container=p['prev_containers'][name])
+            cli.remove_container(container=p['prev_containers'][name],v=True,force=True)
 
     cli = Client(base_url='unix://var/run/docker.sock')
     p = params.get_params()
@@ -120,7 +120,10 @@ def create_containers(base_dir, logger, files_changed):
         image_name = p['curr_images'][name]
 
         logger.info("Creating container: {0}".format(p['curr_containers'][name]))
-        cli.create_container(image=image_name, name=p['curr_containers'][name], detach=True)
+        if name == 'bgtasks':
+            cli.create_container(image=image_name, name=p['curr_containers'][name], detach=True, volumes=['/data'])
+        else:
+            cli.create_container(image=image_name, name=p['curr_containers'][name], detach=True)
 
     cli = Client(base_url='unix://var/run/docker.sock')
     p = params.get_params()
@@ -145,9 +148,13 @@ def start_containers(base_dir, logger, files_changed):
     def start_container(name):
         logger.info("Starting container: {0}".format(name))
 
-        if name in ['webapp', 'bgtasks']:
+        if name == 'webapp':
             links = [(p['curr_containers']['postgres'],'postgres'), (p['curr_containers']['mongo'], 'mongo')]
             cli.start(container=p['curr_containers'][name], links=links)
+        elif name == 'bgtasks':
+            links = [(p['curr_containers']['postgres'],'postgres'), (p['curr_containers']['mongo'], 'mongo')]
+            volumes = {'/home/wercker/data': {'bind': '/data', 'ro': False}}
+            cli.start(container=p['curr_containers'][name], links=links, binds=volumes)
         else:
             cli.start(container=p['curr_containers'][name])
 
@@ -171,20 +178,51 @@ def switch_nginx_servers(base_dir, logger):
 
     try:
         if p['prev_containers']['nginx']:
+            logger.info("Stopping existing ngninx container: {0}".format(p['prev_containers']['nginx']))
             cli.stop(container=p['prev_containers']['nginx'])
 
+        logger.info("Starting nginx container: {0}".format(p['curr_containers']['nginx']))
         link = [(p['curr_containers']['webapp'],'webapp')]
         port = {80: 81}
-        cli.start(container=p['prev_containers']['nginx'], links=link, port_bindings=port)
+        cli.start(container=p['curr_containers']['nginx'], links=link, port_bindings=port)
     except Exception as e:
         logger.error("Something went wrong with docker: {0} ".format(e))
         sys.exit(1)
 
 def populate_riksdagen(base_dir, logger):
-    raise NotImplemented
+    cli = Client(base_url='unix://var/run/docker.sock')
+    p = params.get_params()
+
+    logger.info("Starting import_data on {0}".format(p['curr_containers']['bgtasks']))
+    s = cli.execute(p['curr_containers']['bgtasks'], 'python import_data.py auto data/urls.txt /data --wipe', stream=True)
+
+    for bytes in s:
+        logger.info(bytes)
+
+def populate_orm(base_dir, logger):
+    cli = Client(base_url='unix://var/run/docker.sock')
+    p = params.get_params()
+
+    logger.info("Starting populate_orm on {0}".format(p['curr_containers']['bgtasks']))
+    s = cli.execute(p['curr_containers']['bgtasks'], 'python import_data.py populate_orm.py', stream=True)
+
+    for bytes in s:
+        logger.info(bytes)
 
 def run_calculations(base_dir, logger):
-    raise NotImplemented
+    cli = Client(base_url='unix://var/run/docker.sock')
+    p = params.get_params()
+
+    commands = ['python compute_party_votes.py',
+                'python calculations/party_covoting.py']
+    for cmd in commands:
+        logger.info("Starting {0} on {1}".format(p['curr_containers']['bgtasks']))
+
+        s = cli.execute(p['curr_containers']['bgtasks'], cmd, stream=True)
+
+        for bytes in s:
+            logger.info(bytes)
+
 
 def remove_orphaned_images_and_containers(base_dir, logger):
     raise NotImplemented
