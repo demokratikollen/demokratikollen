@@ -1,6 +1,7 @@
 #!/bin/python
 
 import logger
+import logging
 import steps
 import time
 import os
@@ -25,8 +26,9 @@ if pid != 0:
 
 base_dir = '/home/wercker/'
 
-# Get a logger.
-log = logger.get_logger(base_dir)
+ # Get a logger.
+logger.setup_logging(base_dir)
+log = logging.getLogger(__name__)
 
 #The first step is to check if stuff have changed. If something changed all database images has to be replaced.
 files_changed = steps.verify_changes(base_dir, log)

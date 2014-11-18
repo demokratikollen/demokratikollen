@@ -220,7 +220,7 @@ def run_calculations(base_dir, logger):
     commands = ['python compute_party_votes.py',
                 'python calculations/party_covoting.py']
     for cmd in commands:
-        logger.info("Starting {0} on {1}".format(p['curr_containers']['bgtasks']))
+        logger.info("Starting {0} on {1}".format(cmd, p['curr_containers']['bgtasks']))
 
         try: 
             s = cli.execute(p['curr_containers']['bgtasks'], cmd, stream=True)
