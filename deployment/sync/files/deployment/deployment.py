@@ -7,12 +7,22 @@ import time
 import os
 import sys
 
+base_dir = '/home/wercker/'
+lock_file = os.path.join(base_dir, 'deploy.lock')
+# Check if the lockfile exists
+if os.os.path.isfile(lock_file):
+    print("Lockfile exists. Either a deploy is running or the last deploy failed somehow. Exiting...")
+    sys.exit(1)
+else:
+    #touch lockfile
+    with open(lock_file, 'a'):
+        os.utime(lock_file, None)
+
+# Start demonizing
 pid = os.fork()
 
-
 if pid != 0:
-	print("Forking...Watch deployment.log for logging")
-	sys.exit(0)
+    sys.exit(0)
 
 os.chdir('/')
 os.setsid() 
@@ -20,11 +30,10 @@ os.umask(0)
 
 pid = os.fork()
 if pid != 0:
-	print("Forking...Watch deployment.log for logging")
-	sys.exit(0)
+    print("Forking...Watch deployment.log for logging")
+    sys.exit(0)
 
 
-base_dir = '/home/wercker/'
 
  # Get a logger.
 logger.setup_logging(base_dir)
@@ -49,3 +58,6 @@ steps.switch_nginx_servers(base_dir,log)
 steps.remove_containers(base_dir, log, files_changed)
 steps.remove_images(base_dir, log, files_changed)
 steps.post_deployment(base_dir,log)
+
+#Remove lock_file
+os.remove(lock_file)
