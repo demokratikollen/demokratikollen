@@ -1,7 +1,7 @@
 - name: Check if lock-file exists
   stat: path=/home/wercker/deploy.lock
   register: lock
-- failed: msg="Lockfile exists. Either a deploy is running or the last deploy failed somehow. Exiting..."
+- fail: msg="Lockfile exists. Either a deploy is running or the last deploy failed somehow. Exiting..."
   when: lock.stat.exists
 
 - name: Copy the docker related files.
