@@ -183,7 +183,7 @@ def switch_nginx_servers(base_dir, logger):
 
         logger.info("Starting nginx container: {0}".format(p['curr_containers']['nginx']))
         link = [(p['curr_containers']['webapp'],'webapp')]
-        port = {80: 81}
+        port = {80: 80}
         cli.start(container=p['curr_containers']['nginx'], links=link, port_bindings=port)
     except Exception as e:
         logger.error("Something went wrong with docker: {0} ".format(e))
