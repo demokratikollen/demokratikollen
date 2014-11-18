@@ -41,13 +41,6 @@ deploy:
         - add-ssh-key:
             keyname: DO_KEY
         - script:
-            name: transfer application
-            code: |
-                cd $WERCKER_SOURCE_DIR
-                pwd
-                ls -la
-                rsync -zr --exclude '.git' --exclude 'provision' . wercker@146.185.188.12:~/src
-        - script:
-            name: Do provisioning
-            code: |
-                ssh wercker@146.185.188.12 'cp src/deployment.sh . ; sudo supervisorctl start deployment'
+            name: Deployment
+            code: | 
+                ansible-playbook -v -i deployment/inventory deployment/playbook.yml
