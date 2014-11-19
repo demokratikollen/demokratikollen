@@ -159,6 +159,7 @@ class CommitteeReport(Document):
     id = Column(Integer, ForeignKey('documents.id'), primary_key=True)
     committee_id = Column(Integer, ForeignKey('committees.id'))
     points = relationship('CommitteeReportPoint', backref='report')
+    proposals = relationship('Proposal', backref='committee_report')
 
     __mapper_args__ = {
         'polymorphic_identity':'committee_report',
@@ -196,6 +197,41 @@ class PolledPoint(CommitteeReportPoint):
     __mapper_args__ = {
         'polymorphic_identity':'polled_point'
     }
+
+
+#########################
+# Proposals
+#########################
+
+class Proposal(Document):
+    __tablename__ = 'proposals'
+    id = Column(Integer, ForeignKey('documents.id'), primary_key=True)
+    decision = Column(Enum('Avslag','Bifall','Delvis bifall','Okänt',name='decision_outcomes'))
+
+    __mapper_args__ = {
+        'polymorphic_identity':'proposal'
+    }
+
+# Association table needed for many-to-many relationships (members-proposals)
+association_member_proposal = Table('association_member_proposal', Base.metadata,
+    Column('member_id', Integer, ForeignKey('members.id')),
+    Column('member_proposal_id', Integer, ForeignKey('member_proposals.id'))
+)
+
+class MemberProposal(Proposal):
+    __tablename__ = 'member_proposals'
+    id = Column(Integer, ForeignKey('proposals.id'), primary_key=True)
+    subtype = Column(Enum('Enskild motion','Kommittémotion','Följdmotion',
+                            'Partimotion','Flerpartimotion','Okänt',
+                            name='decision_outcomes'))
+    signatories = relationship('Member',
+                                secondary=association_member_proposal,
+                                backref='proposals')
+
+    __mapper_args__ = {
+        'polymorphic_identity':'member_proposal'
+    }
+
 
 #########################
 # Calculated data
