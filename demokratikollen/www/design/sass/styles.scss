@@ -21,7 +21,7 @@ $logo-font-size-xs: 22px;
   @extend .navbar,.navbar-inverse,.navbar-static-top;
 
   .column.brand-and-menu-toggle {
-    @extend .col-sm-6,.col-md-3;
+    @extend .col-sm-5,.col-md-3;
 
     div:first-child {
       @extend .navbar-header;
@@ -51,7 +51,7 @@ $logo-font-size-xs: 22px;
   }
 
   .column.menu-search {
-    @extend .col-sm-6,.col-md-5,.col-md-push-4;
+    @extend .col-sm-7,.col-md-5,.col-md-push-4;
 
     div:first-child {
       @extend  .navbar-collapse;
@@ -82,6 +82,8 @@ $logo-font-size-xs: 22px;
         @include no-border-or-shadow();
 
         .input-group-addon {
+          display: table-cell;
+          width: 1% !important;
           span {
             @extend .glyphicon,.glyphicon-search;
           }
