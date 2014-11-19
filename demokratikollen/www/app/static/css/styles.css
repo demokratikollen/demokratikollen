@@ -5438,7 +5438,8 @@ button.close {
   #navbar .column.menu-search .navbar-collapse.collapsing form, #navbar .column.menu-search div.collapsing:first-child form,
   #navbar .column.menu-search .navbar-collapse.in form,
   #navbar .column.menu-search div.in:first-child form {
-    padding: 5px 0; }
+    padding: 5px 0;
+    width: auto; }
     #navbar .column.menu-search .navbar-collapse.collapsing form .input-group, #navbar .column.menu-search div.collapsing:first-child form .input-group,
     #navbar .column.menu-search .navbar-collapse.in form .input-group,
     #navbar .column.menu-search div.in:first-child form .input-group {
@@ -5446,7 +5447,8 @@ button.close {
 #navbar .column.menu-search form {
   border: none;
   -webkit-box-shadow: none;
-  box-shadow: none; }
+  box-shadow: none;
+  width: 100%; }
   #navbar .column.menu-search form .input-group {
     border: none;
     -webkit-box-shadow: none;
