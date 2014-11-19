@@ -80,7 +80,7 @@ s.commit()
 
 # Select only betänkanden from dokument
 print("Adding committee reports.")
-c.execute("""SELECT dok_id,rm,beteckning,organ,publicerad,titel,dokument_url_text,hangar_id FROM dokument WHERE doktyp='bet'""")
+c.execute("""SELECT dok_id,rm,beteckning,organ,publicerad,titel,dokument_url_text,hangar_id FROM dokument WHERE doktyp='bet' AND relaterat_id=''""")
 reports = {}
 for dok_id,rm,bet,organ,publ,titel,dok_url,hangar_id in c:
     committee = s.query(Committee).filter_by(abbr=organ).first()
