@@ -11,6 +11,11 @@ $logo-font-size-xs: 22px;
   }
 }
 
+@mixin no-border-or-shadow() {
+  border:none;
+  @include box-shadow(none);
+}
+
 
 #navbar {
   @extend .navbar,.navbar-inverse,.navbar-static-top;
@@ -38,6 +43,10 @@ $logo-font-size-xs: 22px;
           @include xs-font-size(2 * $logo-font-size-xs, 2 * $logo-font-size);
         }
       }
+
+      button {
+        margin-right: 0;
+      }
     }
   }
 
@@ -48,10 +57,28 @@ $logo-font-size-xs: 22px;
       @extend  .navbar-collapse;
     }
 
+    // Classes that are added to collapsed menu
+    .navbar-collapse.collapsing,
+    .navbar-collapse.in {
+      form {
+        // Classes are not removed if window resized with open menu
+        // Styles must only be applied to small screens
+        @media (max-width: $grid-float-breakpoint) {
+          padding: 5px 0;
+          .input-group {
+            padding: 0;
+          }
+        }
+      }
+    }
+
     form {
-      @extend .navbar-form,.navbar-right;
+      @extend .navbar-form,.nav,.navbar-nav,.navbar-right;
+      @include no-border-or-shadow();
 
       .input-group {
+        @include no-border-or-shadow();
+
         .input-group-addon {
           span {
             @extend .glyphicon,.glyphicon-search;
