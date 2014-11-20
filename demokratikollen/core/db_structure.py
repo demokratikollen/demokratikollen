@@ -222,10 +222,13 @@ class PolledPoint(CommitteeReportPoint):
 # Proposals
 #########################
 
+decision_outcomes = Enum('Avslag','Bifall','Delvis bifall','Okänt',name='decision_outcomes')
+
 class Proposal(Document):
     __tablename__ = 'proposals'
     id = Column(Integer, ForeignKey('documents.id'), primary_key=True)
-    decision = Column(Enum('Avslag','Bifall','Delvis bifall','Okänt',name='decision_outcomes'))
+    committee_recommendation = Column(decision_outcomes)
+    decision = Column(decision_outcomes)
 
     __mapper_args__ = {
         'polymorphic_identity':'proposal'
@@ -250,6 +253,16 @@ class MemberProposal(Proposal):
     __mapper_args__ = {
         'polymorphic_identity':'member_proposal'
     }
+
+class GovernmentProposal(Proposal):
+    __tablename__ = 'government_proposals'
+    id = Column(Integer, ForeignKey('proposals.id'), primary_key=True)
+    ministry_id = Column(Integer, ForeignKey('ministries.id'))
+
+    __mapper_args__ = {
+        'polymorphic_identity':'government_proposal'
+    }
+        
 
 
 #########################

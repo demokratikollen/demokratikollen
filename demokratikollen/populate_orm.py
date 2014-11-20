@@ -144,7 +144,19 @@ for intressent_id,fr,to,roll,abbr,g_name in c:
                 group=groups[(abbr,g_name)]))
 # s.commit()
 
+print("Adding member proposals.")
+c.execute("""SELECT d.hangar_id,d.dok_id,d.rm,d.beteckning,d.organ,d.publicerad,d.titel,d.dokument_url_text,f.utskottet,f.kammaren,d.subtyp
+                FROM dokument AS d JOIN dokforslag AS f ON f.hangar_id=d.hangar_id WHERE doktyp='mot' AND relaterat_id=''""")
+for intressent_id,fr,to,roll,abbr,g_name in c:
+    s.add(MinistryAppointment(
+                member=members[intressent_id],
+                start_date=fr.date(),
+                end_date=to.date(),
+                role=roll,
+                group=groups[(abbr,g_name)]))
 
+
+print("Adding committee report points")
 c.execute("""SELECT rm,bet,punkt,rubrik,beslutstyp,votering_id FROM dokutskottsforslag""")
 for rm,bet,punkt,rubrik,beslutstyp,votering_id in c:
     try:
