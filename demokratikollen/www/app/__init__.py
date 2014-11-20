@@ -8,7 +8,7 @@ from demokratikollen.www.app.helpers.db import db
 import os
 
 #App Factory to facilitate testing.
-def create_app(testing=False):
+def create_app(testing=False, caching=True):
     app = Flask(__name__, static_url_path='', static_folder='static')
 
     #Load the basic config.
@@ -19,6 +19,9 @@ def create_app(testing=False):
         print("Running Test env.")
         app.config['TESTING'] = True
         app.config['SQLALCHEMY_DATABASE_URI'] = os.environ['TEST_DATABASE_URL']
+        cache.config['CACHE_TYPE'] = 'null'
+
+    if not caching:
         cache.config['CACHE_TYPE'] = 'null'
 
     #init the cache
