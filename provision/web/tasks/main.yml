@@ -3,7 +3,30 @@
   apt: pkg={{ item }} state=installed
   with_items:
       - nginx
-      - phantomjs
+
+- name: Install PhantomJS dependencies
+  sudo: yes
+  apt: pkg={{ item }} state=installed
+  with_items:
+      - libc6
+      - libfontconfig1
+      - libfreetype6
+      - libgcc1
+      - libjpeg8
+      - libpng12-0
+      - libstdc++6
+      - zlib1g
+
+- name: Get phantomJS bin.                                     
+  get_url: url=https://bitbucket.org/ariya/phantomjs/downloads/phantomjs-1.9.8-linux-i686.tar.bz2 dest=/tmp
+
+- name: Unpack PhantomJS
+  sudo: yes
+  shell: tar -xvf /tmp/phantomjs-1.9.8-linux-i686.tar.bz2 -C /usr/local/lib
+
+- name: PhantomJS Symbolic link.
+  sudo: yes
+  shell: ln -fs /usr/local/lib/phantomjs-1.9.8-linux-i686/bin/phantomjs /usr/bin/phantomjs
 
 - name: Copy nginx config.
   sudo: yes

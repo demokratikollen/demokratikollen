@@ -9,7 +9,7 @@ import os
 
 #App Factory to facilitate testing.
 def create_app(testing=False):
-    app = Flask(__name__, static_url_path='/')
+    app = Flask(__name__, static_url_path='', static_folder='static')
 
     #Load the basic config.
     app.config.from_object('demokratikollen.www.config')
@@ -33,10 +33,10 @@ def create_app(testing=False):
         return render_template('404.html'), 404
 
     # Import a module / component using its blueprint handler variable
-    from .mod_static.controllers import mod_static as static_module
+    from .routes import data
 
     # Register blueprint(s)
-    app.register_blueprint(static_module)
+    app.register_blueprint(data.data_blueprint)
 
     return app
 
