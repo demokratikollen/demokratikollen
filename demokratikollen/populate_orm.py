@@ -45,13 +45,12 @@ print("Adding groups, committees, and parties.")
 for abbr,name in c:
     if name in parties:
         g = Party(name=name,abbr=abbr)
-        group_type = "party"
-    elif 'utskottet' in name:
+    elif 'tskottet' in name:
         g = Committee(name=name,abbr=abbr)
-        group_type = "committee"
+    elif 'epartement' in name:
+        g = Ministry(name=name,abbr=abbr)
     else:
         g = Group(name=name,abbr=abbr)
-        group_type = "group"
     groups[(abbr,name)] = g
 
 # Manually add 'Kammaren', and parties not in 'personuppdrag'
@@ -92,7 +91,7 @@ for dok_id,rm,bet,organ,publ,titel,dok_url,hangar_id in c:
             title=titel,
             text_url=dok_url,
             committee=committee))
-s.commit()
+# s.commit()
 
 pbar = InitBar(title="Adding votes")
 pbar(0)
@@ -101,7 +100,7 @@ c.execute("SELECT COUNT(*) FROM votering WHERE avser='sakfrågan'")
 num_votes = c.fetchone()[0]
 c_named = source_conn.cursor("named")
 c_named.itersize = 50000
-c_named.execute("SELECT votering_id,intressent_id,beteckning,rm,punkt,rost,datum FROM votering WHERE avser='sakfrågan' ORDER BY votering_id")
+c_named.execute("SELECT votering_id,intressent_id,beteckning,rm,punkt,rost,datum FROM votering WHERE avser='sakfrågan' ORDER BY votering_id LIMIT 100")
 for i,(votering_id,intressent_id,beteckning,rm,punkt,rost,datum) in enumerate(c_named):
     if votering_id not in polls:
         date = datum.date()
@@ -116,9 +115,9 @@ for i,(votering_id,intressent_id,beteckning,rm,punkt,rost,datum) in enumerate(c_
                 vote_option=rost,polled_point=polls[votering_id]))
 
 del pbar
-s.commit()
+# s.commit()
 
-# # Add kammaruppdrag
+# Add kammaruppdrag
 print("Adding chamber appointments.")
 c.execute("""SELECT intressent_id,ordningsnummer,"from",tom,status,roll_kod FROM personuppdrag WHERE typ='kammaruppdrag' AND ordningsnummer!=0""")
 for intressent_id,ordningsnummer,fr,to,stat,roll in c:
@@ -131,7 +130,20 @@ for intressent_id,ordningsnummer,fr,to,stat,roll in c:
                 end_date=to.date(),
                 status=status,
                 role=role))
-s.commit()
+# s.commit()
+
+# Add ministry (departement) appointments
+print("Adding ministry appointments.")
+c.execute("""SELECT intressent_id,"from",tom,roll_kod,organ_kod,uppgift FROM personuppdrag WHERE uppgift LIKE '%epartement%'""")
+for intressent_id,fr,to,roll,abbr,g_name in c:
+    s.add(MinistryAppointment(
+                member=members[intressent_id],
+                start_date=fr.date(),
+                end_date=to.date(),
+                role=roll,
+                group=groups[(abbr,g_name)]))
+# s.commit()
+
 
 c.execute("""SELECT rm,bet,punkt,rubrik,beslutstyp,votering_id FROM dokutskottsforslag""")
 for rm,bet,punkt,rubrik,beslutstyp,votering_id in c:

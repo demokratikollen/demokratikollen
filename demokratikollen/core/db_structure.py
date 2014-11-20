@@ -1,5 +1,5 @@
 # -*- coding: utf-8 -*-
-from sqlalchemy import Column, String, Integer, ForeignKey, create_engine
+from sqlalchemy import Table, Column, String, Integer, ForeignKey, create_engine
 from sqlalchemy.types import Date, Enum, DateTime
 from sqlalchemy.orm import relationship, backref, sessionmaker
 from sqlalchemy.ext.declarative import declarative_base
@@ -77,6 +77,15 @@ class ChamberAppointment(Appointment):
     def __repr__(self):
         return 'Chair {}: {} {} {}-{}: {}'.format(self.chair,self.status,self.role,self.start_date,self.end_date,self.member)    
 
+class MinistryAppointment(GroupAppointment):
+    __tablename__ = 'ministry_appointments'
+    id = Column(Integer, ForeignKey('group_appointments.id'), primary_key=True)
+    role = Column(String(250))
+
+    __mapper_args__ = {
+        'polymorphic_identity':'ministry_appointment'
+    }
+
 #########################
 # Groups
 #########################
@@ -102,6 +111,16 @@ class Committee(Group):
 
     __mapper_args__ = {
         'polymorphic_identity':'committee'
+    }
+
+
+class Ministry(Group):
+    __tablename__ = 'ministries'
+    id = Column(Integer, ForeignKey('groups.id'), primary_key=True)
+    proposals = relationship('GovernmentProposal', backref='ministry')
+
+    __mapper_args__ = {
+        'polymorphic_identity':'ministry'
     }
 
 
