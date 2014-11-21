@@ -1,0 +1,33 @@
+- name: Install NodeSource repo
+  sudo: yes
+  shell: curl -sL https://deb.nodesource.com/setup | bash -
+
+- name: Install Node.js
+  sudo: yes
+  apt: name=nodejs
+
+- name: Set ownership on /usr/local/
+  sudo: yes
+  shell: chown -R {{usr_local_owner}} /usr/local/
+
+- name: Tell npm to install things under /usr/local
+  command: npm config set prefix "/usr/local"
+
+- name: Install global Node.js packages
+  npm: state=present global=yes name={{item}}
+  with_items:
+      - grunt-cli
+      - bower
+      - node-sass
+
+- name: Install some Ruby gems
+  sudo: yes
+  gem: name={{item}} state=present user_install=no
+  with_items:
+      - sass
+
+- name: Install Node.js packages for design stuff
+  command: chdir={{design_dir}} npm install --no-bin-links
+
+- name: Install Bower packages for design stuff
+  command: chdir={{design_dir}} bower install

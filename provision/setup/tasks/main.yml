@@ -7,6 +7,8 @@
   apt: pkg={{ item }} state=installed
   with_items:
       - unzip
+      - ruby-dev
+      - git-core
 
 - name: Copy config files
   copy: src={{item.file}} dest={{item.path}}

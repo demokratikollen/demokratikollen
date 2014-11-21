@@ -1,77 +1,113 @@
 <!DOCTYPE html>
-<html>
+<html lang="sv">
   <head>
-    {% block head %}
     <meta charset="utf-8">
-    <title>Demokratikollen - {% block title %}{% endblock %}</title>
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>Bootstrap 101 Template</title>
 
-    <link href="{{ url_for('static', filename='css/nv.d3.css') }}" rel="stylesheet">
+    <link href="{{ url_for('static', filename='css/styles.css') }}" rel="stylesheet">
+    <link href='http://fonts.googleapis.com/css?family=Open+Sans:400italic,700italic,700,400,600|Roboto+Slab:400,700' rel='stylesheet' type='text/css'>
 
-    <!-- Bootstrap core CSS -->
-    <link href="{{ url_for('static', filename='css/bootstrap.min.css') }}" rel="stylesheet">
-
-    <!-- Custom styles for this template -->
-    <link href="{{ url_for('static', filename='css/jumbotron-narrow.css') }}" rel="stylesheet">
-
-
-    <script src="{{ url_for('static', filename='js/jquery.min.js') }}"></script>
-    <script src="{{ url_for('static', filename='js/bootstrap.min.js') }}"></script>
-
-    <script src="{{ url_for('static', filename='js/d3.min.js') }}"></script>
-    <script src="{{ url_for('static', filename='js/nv.d3.min.js') }}"></script>
-
-    <!-- HTML5 shim and Respond.js IE8 support of HTML5 elements and media queries -->
+    <!-- HTML5 shim and Respond.js for IE8 support of HTML5 elements and media queries -->
+    <!-- WARNING: Respond.js doesn't work if you view the page via file:// -->
     <!--[if lt IE 9]>
       <script src="https://oss.maxcdn.com/html5shiv/3.7.2/html5shiv.min.js"></script>
       <script src="https://oss.maxcdn.com/respond/1.4.2/respond.min.js"></script>
     <![endif]-->
-   {% endblock %}
   </head>
-
   <body>
+    <nav id="navbar" role="navigation">
+      <div>
+        <div class="container">
+          <div class="row">
+            <div class="column brand-and-menu-toggle">
+              <!-- Brand and toggle get grouped for better mobile display -->
+              <div>
+                <a class="brand" href="#">Demokratikollen<span class="period">.</span></a>
+                <button id="menu-toggle" type="button collapsed" data-toggle="collapse" data-target=".collapse">
+                  <span class="sr-only">Visa/dölj navigering</span>
+                  <span class="icon-bar"></span>
+                  <span class="icon-bar"></span>
+                  <span class="icon-bar"></span>
+                </button>
+              </div>
+            </div><!-- end columns -->
 
 
+            <!-- Collect the nav links, forms, and other content for toggling -->
+            <div class="column menu-search">
+              <div class="collapse">
+                <form role="search">
+                  <div class="input-group">
+                    <span class="input-group-addon"><span aria-hidden="true"></span></span>
+                    <input type="text" placeholder="Sök">
+                  </div><!-- /input-group -->
+                </form>
+              </div>
+            </div><!-- end columns -->
+            <div class="column menu-links">
+              <div class="collapse">
+                <ul class="menu-links">
+                  <li class="active"><a href="#">Riksdagen<span class="sr-only"> (du är här)</span></a></li>
+                  <li><a href="#">Partierna</a></li>
+                  <li><a href="#">Förslagen</a></li>
+                </ul>
+              </div>
+            </div><!-- end columns -->
+          </div><!-- /.row -->
+        </div><!-- /.container -->
+      </div><!-- /.navbar-inner -->
+    </nav>
+    <div id="width-test">
+      <div class="one-unit">1</div>
+      <div class="one-unit">2</div>
+      <div class="one-unit">3</div>
+      <div class="one-unit">4</div>
+      <div class="one-unit">5</div>
+      <div class="one-unit">6</div>
+      <div class="one-unit">7</div>
+      <div class="one-unit">8</div>
+      <div class="one-unit">9</div>
+      <div class="one-unit">10</div>
+      <div class="one-unit">11</div>
+      <div class="one-unit">12</div>
+
+    </div>
     <div class="container">
-      <div class="header">
-       {% block header %}
-        <ul class="nav nav-pills pull-right">
-          <li class="{{header_home_class}}"><a href="/">Hem</a></li>
-          <li class="dropdown {{header_members_class}}">
-            <a class="dropdown-toggle" data-toggle="dropdown" href="#">Ledamöter</a>
-            <ul class="dropdown-menu" role="menu">
-              <li class="{{header_member_search_class}}"><a href="#">Sök</a></li>
-              <li class="{{header_member_riksdagen_class}}"><a href="#">Riksdagen</a></li>
-            </ul>
-            </li>
+      <p>Pellentesque habitant morbi tristique senectus et netus et malesuada fames ac turpis egestas. Vestibulum tortor quam, feugiat vitae, ultricies eget, tempor sit amet, ante. Donec eu libero sit amet quam egestas semper. Aenean ultricies mi vitae est. Mauris placerat eleifend leo.</p>
 
-          <li class="dropdown {{header_figures_class}}">
-            <a class="dropdown-toggle" data-toggle="dropdown" href="#">
-              Figures <span class="caret"></span>
-            </a>
-            <ul class="dropdown-menu" role="menu">
-              <li class="{{header_partipiskan_class}}"><a href="#">Partipiskan</a></li>
-              <li class="{{header_voteringsfrekvens_class}}"><a href="#">Voteringsfrekvens</a></li>
-            </ul>
-          </li>
+      <p>Pellentesque habitant morbi tristique senectus et netus et malesuada fames ac turpis egestas. Vestibulum tortor quam, feugiat vitae, ultricies eget, tempor sit amet, ante. Donec eu libero sit amet quam egestas semper. Aenean ultricies mi vitae est. Mauris placerat eleifend leo.</p>
 
-          <li class="{{header_contact_class}}"><a href="#">Kontakt</a></li>
-        </ul>
-        <h3 class="text-muted">Demokratikollen</h3>
-       {% endblock %}
-      </div>
+      <p>Pellentesque habitant morbi tristique senectus et netus et malesuada fames ac turpis egestas. Vestibulum tortor quam, feugiat vitae, ultricies eget, tempor sit amet, ante. Donec eu libero sit amet quam egestas semper. Aenean ultricies mi vitae est. Mauris placerat eleifend leo.</p>
 
-      {% block content %}
-      {% endblock %}
+      <p>Pellentesque habitant morbi tristique senectus et netus et malesuada fames ac turpis egestas. Vestibulum tortor quam, feugiat vitae, ultricies eget, tempor sit amet, ante. Donec eu libero sit amet quam egestas semper. Aenean ultricies mi vitae est. Mauris placerat eleifend leo.</p>
 
-      <div class="footer">
-        {% block footer %}
-        <p>&copy; Demokratikollen 2014</p>
-        {% endblock %}
-      </div>
+      <p>Pellentesque habitant morbi tristique senectus et netus et malesuada fames ac turpis egestas. Vestibulum tortor quam, feugiat vitae, ultricies eget, tempor sit amet, ante. Donec eu libero sit amet quam egestas semper. Aenean ultricies mi vitae est. Mauris placerat eleifend leo.</p>
 
-    </div> <!-- /container -->
-    {% block scripts_end %}
-    {% endblock %}
+      <p>Pellentesque habitant morbi tristique senectus et netus et malesuada fames ac turpis egestas. Vestibulum tortor quam, feugiat vitae, ultricies eget, tempor sit amet, ante. Donec eu libero sit amet quam egestas semper. Aenean ultricies mi vitae est. Mauris placerat eleifend leo.</p>
+
+      <p>Pellentesque habitant morbi tristique senectus et netus et malesuada fames ac turpis egestas. Vestibulum tortor quam, feugiat vitae, ultricies eget, tempor sit amet, ante. Donec eu libero sit amet quam egestas semper. Aenean ultricies mi vitae est. Mauris placerat eleifend leo.</p>
+
+      <p>Pellentesque habitant morbi tristique senectus et netus et malesuada fames ac turpis egestas. Vestibulum tortor quam, feugiat vitae, ultricies eget, tempor sit amet, ante. Donec eu libero sit amet quam egestas semper. Aenean ultricies mi vitae est. Mauris placerat eleifend leo.</p>
+
+      <p>Pellentesque habitant morbi tristique senectus et netus et malesuada fames ac turpis egestas. Vestibulum tortor quam, feugiat vitae, ultricies eget, tempor sit amet, ante. Donec eu libero sit amet quam egestas semper. Aenean ultricies mi vitae est. Mauris placerat eleifend leo.</p>
+
+      <p>Pellentesque habitant morbi tristique senectus et netus et malesuada fames ac turpis egestas. Vestibulum tortor quam, feugiat vitae, ultricies eget, tempor sit amet, ante. Donec eu libero sit amet quam egestas semper. Aenean ultricies mi vitae est. Mauris placerat eleifend leo.</p>
+
+      <p>Pellentesque habitant morbi tristique senectus et netus et malesuada fames ac turpis egestas. Vestibulum tortor quam, feugiat vitae, ultricies eget, tempor sit amet, ante. Donec eu libero sit amet quam egestas semper. Aenean ultricies mi vitae est. Mauris placerat eleifend leo. Quisque sit amet est et sapien ullamcorper pharetra. Vestibulum erat wisi, condimentum sed, commodo vitae, ornare sit amet, wisi. Aenean fermentum, elit eget tincidunt condimentum, eros ipsum rutrum orci, sagittis tempus lacus enim ac dui. Donec non enim in turpis pulvinar facilisis. Ut felis. Praesent dapibus, neque id cursus faucibus, tortor neque egestas augue, eu vulputate magna eros eu erat. Aliquam erat volutpat. Nam dui mi, tincidunt quis, accumsan porttitor, facilisis luctus, metus</p>
+
+      <p>Pellentesque habitant morbi tristique senectus et netus et malesuada fames ac turpis egestas. Vestibulum tortor quam, feugiat vitae, ultricies eget, tempor sit amet, ante. Donec eu libero sit amet quam egestas semper. Aenean ultricies mi vitae est. Mauris placerat eleifend leo. Quisque sit amet est et sapien ullamcorper pharetra. Vestibulum erat wisi, condimentum sed, commodo vitae, ornare sit amet, wisi. Aenean fermentum, elit eget tincidunt condimentum, eros ipsum rutrum orci, sagittis tempus lacus enim ac dui. Donec non enim in turpis pulvinar facilisis. Ut felis. Praesent dapibus, neque id cursus faucibus, tortor neque egestas augue, eu vulputate magna eros eu erat. Aliquam erat volutpat. Nam dui mi, tincidunt quis, accumsan porttitor, facilisis luctus, metus</p>
+
+      <p>Pellentesque habitant morbi tristique senectus et netus et malesuada fames ac turpis egestas. Vestibulum tortor quam, feugiat vitae, ultricies eget, tempor sit amet, ante. Donec eu libero sit amet quam egestas semper. Aenean ultricies mi vitae est. Mauris placerat eleifend leo. Quisque sit amet est et sapien ullamcorper pharetra. Vestibulum erat wisi, condimentum sed, commodo vitae, ornare sit amet, wisi. Aenean fermentum, elit eget tincidunt condimentum, eros ipsum rutrum orci, sagittis tempus lacus enim ac dui. Donec non enim in turpis pulvinar facilisis. Ut felis. Praesent dapibus, neque id cursus faucibus, tortor neque egestas augue, eu vulputate magna eros eu erat. Aliquam erat volutpat. Nam dui mi, tincidunt quis, accumsan porttitor, facilisis luctus, metus</p>
+
+      <p>Pellentesque habitant morbi tristique senectus et netus et malesuada fames ac turpis egestas. Vestibulum tortor quam, feugiat vitae, ultricies eget, tempor sit amet, ante. Donec eu libero sit amet quam egestas semper. Aenean ultricies mi vitae est. Mauris placerat eleifend leo. Quisque sit amet est et sapien ullamcorper pharetra. Vestibulum erat wisi, condimentum sed, commodo vitae, ornare sit amet, wisi. Aenean fermentum, elit eget tincidunt condimentum, eros ipsum rutrum orci, sagittis tempus lacus enim ac dui. Donec non enim in turpis pulvinar facilisis. Ut felis. Praesent dapibus, neque id cursus faucibus, tortor neque egestas augue, eu vulputate magna eros eu erat. Aliquam erat volutpat. Nam dui mi, tincidunt quis, accumsan porttitor, facilisis luctus, metus</p>
+
+    </div>
+
+    <!-- jQuery (necessary for Bootstrap's JavaScript plugins) -->
+    <script src="https://ajax.googleapis.com/ajax/libs/jquery/1.11.1/jquery.min.js"></script>
+    <!-- Latest compiled and minified JavaScript -->
+    <script src="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.1/js/bootstrap.min.js"></script>
   </body>
 </html>
-
