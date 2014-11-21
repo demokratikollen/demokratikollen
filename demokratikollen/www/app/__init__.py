@@ -33,8 +33,8 @@ def create_app(testing=False):
         return render_template('404.html'), 404
 
     # Import a module / component using its blueprint handler variable
-    from demokratikollen.www.app.routes import data, pages
-    blueprints = (data.data_blueprint, pages.basic_blueprint)
+    from demokratikollen.www.app.views import data, pages
+    blueprints = (data.blueprint, pages.blueprint)
 
     # Register blueprint(s)
     for b in blueprints:
