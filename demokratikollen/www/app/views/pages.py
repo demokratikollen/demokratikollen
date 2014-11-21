@@ -27,8 +27,8 @@ def parties():
     return render_template("/parties/index.html")
 
 @blueprint.route('/forslagen', methods=['GET'])
-def issues():
-    return render_template("/issues/index.html")
+def proposals():
+    return render_template("/proposals/index.html")
 
 @blueprint.route('/om', methods=['GET'])
 def about():
