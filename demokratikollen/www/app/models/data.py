@@ -10,8 +10,8 @@ def gender_json(date,party=''):
                 join(Party). \
                 filter(ChamberAppointment.role=='Riksdagsledamot'). \
                 filter(ChamberAppointment.start_date <= date). \
-                filter(ChamberAppointment.end_date >= date)
-
+                filter(ChamberAppointment.end_date >= date) .\
+                distinct(Member.id)
     if party:
         members = members.filter(Party.abbr==party)
 
@@ -23,6 +23,9 @@ def gender_json(date,party=''):
         else:
             response['statistics']['n_males'] += 1
         response['statistics']['total'] += 1
+
+    # sort the data on party. 
+    response['data'] = sorted(response['data'], key=lambda k: k['party'])
 
     return response
 
