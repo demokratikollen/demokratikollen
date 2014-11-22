@@ -1,0 +1,88 @@
+{% extends "layout.html" %}
+{% block title %}Riksdagen{% endblock %}
+{% block head %}
+{{ super() }}
+
+<style>
+
+svg#gender_svg line {
+  stroke: black;
+  stroke-width: 5px;
+}
+
+svg#gender_svg circle{
+  stroke: black;
+  stroke-width: 5px;
+  fill: none;
+}
+</style>
+
+<script type="text/javascript">
+
+RD = {
+  Setup: function() {
+    var canvas = d3.select('svg#gender_svg');
+
+    var padding = RD.max_width - 4* RD.gender_radius;
+    var middle_padding = 2/3*padding;
+    var outer_padding = (padding - middle_padding)/2;
+
+    var female_g = canvas
+                .append('g')
+                .attr("id", "female")
+                .attr('transform', "translate(" + (RD.gender_radius + outer_padding)
+                                                + ","
+                                                + (RD.gender_radius + 10)
+                                                + ")");
+
+    var male_g = canvas
+                .append('g')
+                .attr('id', 'male')
+                .attr('transform', 'translate(' + (outer_padding + 2*RD.gender_radius + middle_padding + RD.gender_radius)
+                                                + ','
+                                                + (RD.gender_radius + 50)
+                                                + ')');
+        
+
+    var symbol_length = 0.5*RD.gender_radius;
+
+    female_g.append("circle").attr("r", RD.gender_radius);
+    female_g.append('line').attr('x1',0)
+                           .attr('x2',0)
+                           .attr('y1',RD.gender_radius)
+                           .attr('y2',RD.gender_radius+symbol_length);
+    female_g.append('line').attr('x1',-symbol_length/2)
+                           .attr('x2',symbol_length/2)
+                           .attr('y1',RD.gender_radius+symbol_length/2)
+                           .attr('y2',RD.gender_radius+symbol_length/2);
+
+    var trig45 = 0.70710678118
+    male_g.append('circle').attr('r', RD.gender_radius);
+    male_g.append('line').attr('x1',trig45*RD.gender_radius)
+                         .attr('x2',trig45*(RD.gender_radius+symbol_length))
+                         .attr('y1',-trig45*RD.gender_radius)
+                         .attr('y2',-trig45*(RD.gender_radius + symbol_length));
+
+    male_g.append('line').attr('x1',trig45*(RD.gender_radius+symbol_length))
+                         .attr('x2',trig45*(RD.gender_radius+symbol_length)-symbol_length/2)
+                         .attr('y1',-trig45*(RD.gender_radius+symbol_length))
+                         .attr('y2',-trig45*(RD.gender_radius+symbol_length));
+
+    male_g.append('line').attr('x1',trig45*(RD.gender_radius+symbol_length))
+                         .attr('x2',trig45*(RD.gender_radius+symbol_length))
+                         .attr('y1',-trig45*(RD.gender_radius+symbol_length)-2.5)
+                         .attr('y2',-trig45*(RD.gender_radius+symbol_length)+symbol_length/2);
+  },
+  gender_radius: 220,
+  max_width: 1150
+};
+$(RD.Setup)
+
+</script>
+{% endblock %}
+
+{% block content %}
+    <div class="container" id="gender_div">
+      <svg id="gender_svg" class='canvas' viewBox='0 0 1140 600' preserveAspectRatio="xMinYMin meet"></svg>
+    </div>
+{% endblock %}

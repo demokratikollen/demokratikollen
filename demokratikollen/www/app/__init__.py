@@ -36,10 +36,11 @@ def create_app(testing=False, caching=True):
         return render_template('404.html'), 404
 
     # Import a module / component using its blueprint handler variable
-    from .routes import data
+    from .routes import data, riksdagen
 
     # Register blueprint(s)
     app.register_blueprint(data.data_blueprint)
+    app.register_blueprint(riksdagen.riksdagen_blueprint)
 
     return app
 
