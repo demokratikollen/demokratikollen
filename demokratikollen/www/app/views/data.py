@@ -1,7 +1,7 @@
-from flask import Blueprint, request
+from flask import Blueprint, request, jsonify
 from demokratikollen.www.app.models import data
 
-from datetime import date
+import datetime
 
 blueprint = Blueprint('data', __name__, url_prefix='/data')
 
@@ -12,9 +12,10 @@ def gender_json():
     party = request.args.get('party','')
     
     #Check if the party exists
-    if party and party not in get_parties():
+    parties = data.get_parties()
+    if party and party not in parties:
         msg = "Partiförkortningen existerar ej. Möjliga är: <br>"
-        for p in get_parties():
+        for p in parties:
             msg = msg + p + "<br>"
         return msg, 400
 
@@ -30,7 +31,3 @@ def gender_json():
     json = data.gender_json(date=date,party=party)
 
     return jsonify(json)
-
-@cache.cached(3600*24)
-def get_parties():
-    return [r[0] for r in db.session.query(Party.abbr).all()]
