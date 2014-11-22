@@ -18,7 +18,7 @@ blueprint = Blueprint('pages', __name__)
 def index():
     return render_template("/index.html")
 
-@blueprint.route('/riksdagen', methods=['GET'])
+@blueprint.route('/riksdagen/', methods=['GET'])
 def parliament():
     return render_template("/parliament/index.html")
 
