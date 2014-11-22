@@ -17,7 +17,7 @@ class Member(Base):
     birth_year = Column(Integer)
     gender = Column(String(10))
     image_url = Column(String(250))
-    party_id = Column(Integer, ForeignKey('parties.id'))
+    party_id = Column(Integer, ForeignKey('groups.id'))
     votes = relationship('Vote', backref='member')
     appointments = relationship('Appointment', backref='member')
 
@@ -43,8 +43,6 @@ class Appointment(Base):
     }
 
 class GroupAppointment(Appointment):
-    __tablename__ = 'group_appointments'
-    id = Column(Integer, ForeignKey('appointments.id'), primary_key=True)
     group_id = Column(Integer, ForeignKey('groups.id'))
 
     __mapper_args__ = {
@@ -52,9 +50,6 @@ class GroupAppointment(Appointment):
     }
 
 class CommitteeAppointment(Appointment):
-    __tablename__ = 'committee_appointments'
-    id = Column(Integer, ForeignKey('appointments.id'), primary_key=True)
-    committee_id = Column(Integer, ForeignKey('committees.id'))
 
     __mapper_args__ = {
         'polymorphic_identity':'committee_appointment'
@@ -63,7 +58,7 @@ class CommitteeAppointment(Appointment):
 
 class ChamberAppointment(Appointment):
     __tablename__ = 'chamber_appointments'
-    id = Column(Integer, ForeignKey('appointments.id'), primary_key=True)
+    id = Column(Integer,ForeignKey('appointments.id'),primary_key=True)
     status = Column(Enum('Ledig','Tjänstgörande',name='chamber_appointment_statuses'))
     role = Column(Enum('Riksdagsledamot','Ersättare',name='chamber_appointment_roles'))
     chair = Column(Integer)
@@ -79,7 +74,7 @@ class ChamberAppointment(Appointment):
 
 class MinistryAppointment(GroupAppointment):
     __tablename__ = 'ministry_appointments'
-    id = Column(Integer, ForeignKey('group_appointments.id'), primary_key=True)
+    id = Column(Integer,ForeignKey('appointments.id'),primary_key=True)
     role = Column(String(250))
 
     __mapper_args__ = {
@@ -105,8 +100,6 @@ class Group(Base):
 
 
 class Committee(Group):
-    __tablename__ = 'committees'
-    id = Column(Integer, ForeignKey('groups.id'), primary_key=True)
     reports = relationship('CommitteeReport', backref='committee')
 
     __mapper_args__ = {
@@ -115,9 +108,7 @@ class Committee(Group):
 
 
 class Ministry(Group):
-    __tablename__ = 'ministries'
-    id = Column(Integer, ForeignKey('groups.id'), primary_key=True)
-    proposals = relationship('GovernmentProposal', backref='ministry')
+    proposals = relationship('GovernmentProposal', primaryjoin="Ministry.id==GovernmentProposal.ministry_id")
 
     __mapper_args__ = {
         'polymorphic_identity':'ministry'
@@ -125,8 +116,6 @@ class Ministry(Group):
 
 
 class Party(Group):
-    __tablename__ = 'parties'
-    id = Column(Integer, ForeignKey('groups.id'), primary_key=True)
     members = relationship('Member', backref='party')
 
     __mapper_args__ = {
@@ -145,7 +134,7 @@ class Vote(Base):
     __tablename__ = 'votes'
     id = Column(Integer, primary_key=True)
     member_id = Column(Integer, ForeignKey('members.id'))
-    polled_point_id = Column(Integer, ForeignKey('polled_points.id'))
+    polled_point_id = Column(Integer, ForeignKey('committee_report_points.id'))
     vote_option = Column(VoteOptionsType)
 
     def __repr__(self):
@@ -176,9 +165,9 @@ class Document(Base):
 class CommitteeReport(Document):
     __tablename__ = 'committee_reports'
     id = Column(Integer, ForeignKey('documents.id'), primary_key=True)
-    committee_id = Column(Integer, ForeignKey('committees.id'))
+    committee_id = Column(Integer, ForeignKey('groups.id'))
     points = relationship('CommitteeReportPoint', backref='report')
-    proposals = relationship('Proposal', backref='committee_report')
+    proposals = relationship('Proposal',primaryjoin='CommitteeReport.id==Proposal.committee_report_id')
 
     __mapper_args__ = {
         'polymorphic_identity':'committee_report',
@@ -198,19 +187,14 @@ class CommitteeReportPoint(Base):
     } 
 
 class AcclaimedPoint(CommitteeReportPoint):
-    __tablename__ = "acclaimed_points"
-    id = Column(Integer, ForeignKey('committee_report_points.id'), primary_key=True)
 
     __mapper_args__ = {
         'polymorphic_identity':'acclaimed_point'
     }
 
 class PolledPoint(CommitteeReportPoint):
-    __tablename__ = "polled_points"
-    id = Column(Integer, ForeignKey('committee_report_points.id'), primary_key=True)
     poll_date = Column(Date)
     votes = relationship('Vote', backref='polled_point')
-
     r_votering_id = Column(String(250))
 
     __mapper_args__ = {
@@ -227,6 +211,8 @@ decision_outcomes = Enum('Avslag','Bifall','Delvis bifall','Okänt',name='decisi
 class Proposal(Document):
     __tablename__ = 'proposals'
     id = Column(Integer, ForeignKey('documents.id'), primary_key=True)
+    committee_report_id = Column(Integer,ForeignKey('committee_reports.id'))
+    committee_report = relationship('CommitteeReport',foreign_keys="[Proposal.committee_report_id]")
     committee_recommendation = Column(decision_outcomes)
     decision = Column(decision_outcomes)
 
@@ -237,15 +223,13 @@ class Proposal(Document):
 # Association table needed for many-to-many relationships (members-proposals)
 association_member_proposal = Table('association_member_proposal', Base.metadata,
     Column('member_id', Integer, ForeignKey('members.id')),
-    Column('member_proposal_id', Integer, ForeignKey('member_proposals.id'))
+    Column('member_proposal_id', Integer, ForeignKey('proposals.id'))
 )
 
 class MemberProposal(Proposal):
-    __tablename__ = 'member_proposals'
-    id = Column(Integer, ForeignKey('proposals.id'), primary_key=True)
     subtype = Column(Enum('Enskild motion','Kommittémotion','Följdmotion',
                             'Partimotion','Flerpartimotion','Okänt',
-                            name='decision_outcomes'))
+                            name='member_proposal_types'))
     signatories = relationship('Member',
                                 secondary=association_member_proposal,
                                 backref='proposals')
@@ -255,9 +239,8 @@ class MemberProposal(Proposal):
     }
 
 class GovernmentProposal(Proposal):
-    __tablename__ = 'government_proposals'
-    id = Column(Integer, ForeignKey('proposals.id'), primary_key=True)
-    ministry_id = Column(Integer, ForeignKey('ministries.id'))
+    ministry_id = Column(Integer, ForeignKey('groups.id'))
+    ministry = relationship('Ministry',foreign_keys="[GovernmentProposal.ministry_id]")
 
     __mapper_args__ = {
         'polymorphic_identity':'government_proposal'
@@ -287,8 +270,8 @@ class PartyVote(Base):
 
     __tablename__ = 'party_votes'
     id = Column(Integer, primary_key=True)
-    party_id = Column(Integer, ForeignKey('parties.id'))
-    polled_point_id = Column(Integer, ForeignKey('polled_points.id'))
+    party_id = Column(Integer, ForeignKey('groups.id'))
+    polled_point_id = Column(Integer, ForeignKey('committee_report_points.id'))
     num_yes = Column(Integer)
     num_no = Column(Integer)
     num_abstain = Column(Integer)
