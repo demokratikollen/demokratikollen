@@ -1,4 +1,119 @@
 {% extends "parties/base.html" %}
 {% block content %}
-Detta är startsidan under menyval "Partierna"
+
+<div class="row">
+    <div class="col-lg-8">
+        <div id="party-bias"></div>        
+    </div>
+</div>
+    
+{% endblock %}
+{% block styles %}
+<style>
+
+.axis path, .axis line {
+  fill: none;
+  stroke: #000;
+  shape-rendering: crispEdges;
+}
+.axis text {
+  font-size: 11px;
+}
+path.line {
+  fill:none;
+  stroke-width: 2px;
+}
+circle.marker {
+  fill:#ffffff;
+  pointer-events: 'none';
+  stroke-width: '2px';
+}
+
+</style> 
+{% endblock %}
+
+{% block scripts %}
+
+<script type="text/javascript">
+
+party_bias = {
+    setup: function(){
+
+        yticklabels = {{ party_bias_yticklabels | tojson | safe }};
+        parties = {{ party_bias_parties | tojson | safe}};
+
+        partyColors = {"S": "#ED1B34", "M": "#52BDEC", "SD": "#FBC700", 
+                      "MP": "#53A045", "C": "#016A3A", "V": "#D9291C",
+                      "FP": "#004B92", "KD": "#073192"};
+
+        var margin = {top: 20, right: 20, bottom: 30, left: 60},
+            width = 300 - margin.left - margin.right,
+            height =400 - margin.top - margin.bottom;
+
+        var svg = d3.select("#party-bias").append("svg")
+            .attr("width", width + margin.left + margin.right)
+            .attr("height", height + margin.top + margin.bottom)
+          .append("g")
+            .attr("transform", "translate(" + margin.left + "," + margin.top + ")");
+
+        var x = d3.scale.linear()
+            .domain([-1.1,1.1])
+            .range([0, width]);
+
+        var y = d3.scale.ordinal()
+            .domain(d3.range(yticklabels.length))
+            .rangePoints([height, 0]);
+
+        var yAxis = d3.svg.axis()
+            .scale(y)
+            .tickFormat(function(d, i) { return yticklabels[d]; })
+            .orient("left");
+
+        var line = d3.svg.line()
+            .x(function(d,i) { return x(d[1]); })
+            .y(function(d,i) { return y(d[0]); })
+            .defined(function(d,i) { return !isNaN(d[1]); });
+
+        var paths = svg.selectAll( "path" )
+          .data(parties);
+
+        paths.enter().append("path");
+
+        paths
+          .classed({"line":true})
+          .style("stroke", function(d){return partyColors[d.abbr];})
+          .attr("d", function(d){return line(d.data);});
+
+
+        var marker_groups = svg.selectAll(".marker-group")
+          .data(parties);
+
+        marker_groups.enter().append("g");
+
+        marker_groups
+          .classed({"marker-group":true});
+
+        var markers = marker_groups.selectAll("circle")
+          .data(function(d){return d.data.filter(function(x){return !isNaN(x[1]);})});
+
+        markers.enter().append("circle");
+
+        markers
+          .classed({"marker":true})
+          .attr("cx", line.x())
+          .attr("cy", line.y())
+          .attr('r', 4)
+          .style('stroke', function(d){return partyColors[this.parentNode.__data__.abbr];});
+
+        svg.append("g")
+            .attr("class", "y axis")
+            .call(yAxis);
+        
+        return this;
+    } // setup
+}
+
+$(party_bias.setup());
+</script>  
+
 {% endblock %}

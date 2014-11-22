@@ -9,6 +9,10 @@ def step_impl(context):
 def step_impl(context):
     context.driver.get("http://127.0.0.1:5555/om")
 
+@given('You browse to the parties page')
+def step_impl(context):
+    context.driver.get("http://127.0.0.1:5555/partierna")
+
 @then('The page title should be "{title}"')
 def step_impl(context, title):
     eq_(context.driver.title, title)
