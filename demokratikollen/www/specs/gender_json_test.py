@@ -6,7 +6,7 @@ from unittest.mock import MagicMock
 
 from demokratikollen.www.app.helpers.db import db
 from demokratikollen.www.app import create_app
-from demokratikollen.www.app.controllers import data
+from demokratikollen.www.app.models import data
 from demokratikollen.core.db_structure import Member, ChamberAppointment, Base, Party
 
 d = date(2014,1,1)

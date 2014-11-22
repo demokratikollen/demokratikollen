@@ -4,7 +4,7 @@ from flask.ext.testing import TestCase
 from unittest.mock import MagicMock, Mock, patch
 
 from demokratikollen.www.app import create_app
-from demokratikollen.www.app.routes import data
+from demokratikollen.www.app.views import data
 
 
 class TestRoutesDataGender(TestCase):
@@ -13,7 +13,7 @@ class TestRoutesDataGender(TestCase):
 
     def setUp(self):
         data.data.gender_json = Mock(return_value=dict(data=[{'test': 1}]))
-        data.get_parties = Mock(return_value=['M'])
+        data.data.get_parties = Mock(return_value=['M'])
 
     def test_gender_json(self):
         response = self.client.get('/data/gender.json')
