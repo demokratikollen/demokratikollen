@@ -115,41 +115,27 @@ P = {
     var date = new Date();
     date.setTime(date_seconds*1000);
 
+    P.FetchData(date);
+  },
+  FetchData: function(date) {
+
+    var dataUrl = '';
+    var dataGenerationFunction = null;
     switch(P.page) {
-    case 'parliament':
-        P.FetchParliamentData(date,'');
+      case 'gender':
+        dataUrl = '/data/gender.json';
+        dataGenerationFunction = P.GenerateGenderPositions;
         break;
-    case 'gender':
-        P.FetchGenderData(date,'');
+      case 'parliament':
+        dataUrl = '/data/gender.json';
+        dataGenerationFunction = P.GenerateChairsPositions;
         break;
     }
-  },
-  FetchGenderData: function(date, party) {
 
-      date = typeof date !== 'undefined' ? date : '';
-      dateString = date.toISOString().slice(0,10)
-      party = typeof party !== 'undefined' ? party : '';
+    dateString = date.toISOString().slice(0,10)
 
-      d3.json("/data/gender.json?party=" + party + "&date=" + dateString, function(error, root) {
-
-        var data = {'name': 'root', 'children': root.data};
-
-        P.GenerateGenderPositions(data);
-
-        P.DrawMemberNodes(data.children);
-
-        //P.DrawGenderCircles('kvinna', root.statistics.n_females, female_data);
-        //P.DrawGenderCircles('man', root.statistics.n_males, male_data);
-
-      });
-  },
-  FetchParliamentData: function(date) {
-
-      date = typeof date !== 'undefined' ? date : '';
-      dateString = date.toISOString().slice(0,10)
-
-      d3.json("/data/parliament.json?date=" + dateString, function(error, data) {
-        P.GenerateChairsPositions(data);
+    d3.json(dataUrl + "?date=" + dateString, function(error, data) {
+        dataGenerationFunction(data.data);
         P.DrawMemberNodes(data.data);
       });
   },
@@ -186,11 +172,12 @@ P = {
     nodes.selectAll('circle').data(data).transition().attr("r", function(d) { return d.r; });
   },
   GenerateGenderPositions: function(data) {
+    
     var padding = 5;
     var circle_radius = 10;
     
-    female_data = {'name': 'root', 'children': data.children.filter(function (el) { return el.gender === 'kvinna' } )};
-    male_data = {'name': 'root', 'children': data.children.filter(function (el) { return el.gender === 'man' } )};
+    female_data = {'name': 'root', 'children': data.filter(function (el) { return el.gender === 'kvinna' } )};
+    male_data = {'name': 'root', 'children': data.filter(function (el) { return el.gender === 'man' } )};
 
     var pack = d3.layout.pack()
           .size([P.gender_radius, P.gender_radius])
@@ -229,7 +216,7 @@ P = {
     var p = 5;
     var k = (nrm*nrm +nrm)/2;
 
-    var nc = data.data.length;
+    var nc = data.length;
 
     var x0 = P.max_width/2;
     var y0 = P.max_height;
@@ -252,9 +239,9 @@ P = {
       sum_n += rows[i].n;
     }
 
-    if(sum_n > data.statistics.n_members)
+    if(sum_n > nc)
       rows[nr-1].n--;
-    if(sum_n < data.statistics.n_members)
+    if(sum_n < nc)
       rows[nr-1].n++;
 
     //calculate positions for each circle. indexing should be per column, not row. Modify incoming data.
@@ -283,9 +270,9 @@ P = {
       current_circle_index[min_angle_row]++;
 
       //add the position to the data.
-      data.data[i].x = x0 + x;
-      data.data[i].y = y0 + y;
-      data.data[i].r = rc;
+      data[i].x = x0 + x;
+      data[i].y = y0 + y;
+      data[i].r = rc;
     } 
   },
   gender_radius: 220,
