@@ -10,7 +10,7 @@ import sys
 base_dir = '/home/wercker/'
 lock_file = os.path.join(base_dir, 'deploy.lock')
 # Check if the lockfile exists
-if os.os.path.isfile(lock_file):
+if os.path.isfile(lock_file):
     print("Lockfile exists. Either a deploy is running or the last deploy failed somehow. Exiting...")
     sys.exit(1)
 else:
