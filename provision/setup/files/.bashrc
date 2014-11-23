@@ -118,6 +118,10 @@ gunicorn_debug() {
     gunicorn --reload --debug --log-file=- demokratikollen.www.gunicorn_production:app
 }
 
+gunicorn_debug_nocache() {
+    gunicorn --reload --debug --log-file=- demokratikollen.www.gunicorn_no_cache:app
+}
+
 werkzeug_debug() {
     python /home/vagrant/demokratikollen/www/run.py
 }
