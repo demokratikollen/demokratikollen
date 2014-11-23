@@ -31,3 +31,21 @@ def gender_json():
     json = data.gender_json(date=date,party=party)
 
     return jsonify(json)
+
+# Set the route and accepted methods
+@blueprint.route('/parliament.json', methods=['GET'])
+def parliament_json():
+    str_date = request.args.get('date', '')
+
+    # Check if the date supplied is ok.
+    if not str_date:
+        date = datetime.date.today()
+    else:
+        try:
+            date = datetime.datetime.strptime(str_date, '%Y-%m-%d').date()
+        except ValueError:
+            return "Felaktig datumparameter. Formatet är: ÅÅ-MM-DD", 400
+
+    json = data.parliament_json(date=date)
+
+    return jsonify(json)

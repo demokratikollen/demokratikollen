@@ -29,6 +29,26 @@ def gender_json(date,party=''):
 
     return response
 
+def parliament_json(date):
+
+    members = db.session.query(Member.id, Party.abbr). \
+                join(ChamberAppointment). \
+                join(Party). \
+                filter(ChamberAppointment.role=='Riksdagsledamot'). \
+                filter(ChamberAppointment.start_date <= date). \
+                filter(ChamberAppointment.end_date >= date) .\
+                distinct(Member.id)
+   
+    response = {'statistics': {'n_members': 0}, 'data': [], }
+    for member in members.all():
+        response['data'].append(dict(member_id=member[0],party=member[1]))
+        response['statistics']['n_members'] += 1
+
+    # sort the data on party. 
+    response['data'] = sorted(response['data'], key=lambda k: k['party'])
+
+    return response
+
 @cache.cached(3600*24)
 def get_parties():
     return [r[0] for r in db.session.query(Party.abbr).all()]
