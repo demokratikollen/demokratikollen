@@ -118,11 +118,6 @@ gunicorn_debug() {
     gunicorn --reload --debug --log-file=- demokratikollen.www.gunicorn_production:app
 }
 
-gunicorn_debug_nocache() {
-    #do things with parameters like $1 such as
-    gunicorn --reload --debug --log-file=- demokratikollen.www.gunicorn_testing:app
-}
-
 werkzeug_debug() {
     python /home/vagrant/demokratikollen/www/run.py
 }
