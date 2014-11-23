@@ -26,7 +26,7 @@ def gender_json():
         try:
             date = datetime.datetime.strptime(str_date, '%Y-%m-%d').date()
         except ValueError:
-            return "Felaktig datumparameter. Formatet är: ÅÅ-MM-DD", 400
+            return "Felaktig datumparameter. Formatet är: ÅÅÅÅ-MM-DD", 400
 
     json = data.gender_json(date=date,party=party)
 
