@@ -24,11 +24,11 @@ build:
             name: Add the mongodb server url
             code: |
                 export MONGO_DATABASE_URL=$MONGODB_URL
-        - script:
-            name: run behave tests
-            cwd: demokratikollen/www/
-            code: |
-                behave
+#        - script:
+#            name: run behave tests
+#            cwd: demokratikollen/www/
+#            code: |
+#                behave
         - script:
             name: run python tests
             cwd: demokratikollen/www/
