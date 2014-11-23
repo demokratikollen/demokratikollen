@@ -1,4 +1,5 @@
-from demokratikollen.www.app.helpers.db import db, PartyVote, PolledPoint, Party, Member, ChamberAppointment
+from demokratikollen.www.app.helpers.db import db
+from demokratikollen.core.db_structure import Party
 from demokratikollen.core.utils.mongodb import MongoDBDatastore
 
 import datetime as dt
