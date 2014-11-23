@@ -117,19 +117,20 @@ P = {
 
     switch(P.page) {
     case 'parliament':
-        P.FetchParliamentData(date.toLocaleDateString(),'');
+        P.FetchParliamentData(date,'');
         break;
     case 'gender':
-        P.FetchGenderData(date.toLocaleDateString(),'');
+        P.FetchGenderData(date,'');
         break;
     }
   },
   FetchGenderData: function(date, party) {
 
       date = typeof date !== 'undefined' ? date : '';
+      dateString = date.toISOString().slice(0,10)
       party = typeof party !== 'undefined' ? party : '';
 
-      d3.json("/data/gender.json?party=" + party + "&date=" + date, function(error, root) {
+      d3.json("/data/gender.json?party=" + party + "&date=" + dateString, function(error, root) {
 
         var data = {'name': 'root', 'children': root.data};
 
@@ -145,8 +146,9 @@ P = {
   FetchParliamentData: function(date) {
 
       date = typeof date !== 'undefined' ? date : '';
+      dateString = date.toISOString().slice(0,10)
 
-      d3.json("/data/parliament.json?date=" + date, function(error, data) {
+      d3.json("/data/parliament.json?date=" + dateString, function(error, data) {
         P.GenerateChairsPositions(data);
         P.DrawMemberNodes(data.data);
       });
