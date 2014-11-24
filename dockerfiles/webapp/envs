@@ -1,3 +1,0 @@
-DATABASE_URL=postgresql://demokratikollen@postgres:5432/demokratikollen
-DATABASE_RIKSDAGEN_URL=postgresql://demokratikollen@postgres:5432/riksdagen
-MONGO_DATABASE_URL=mongodb://mongo:27017/demokratikollen

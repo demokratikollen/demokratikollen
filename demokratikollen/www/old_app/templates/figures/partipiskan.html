@@ -1,12 +1,9 @@
 {% extends "layout.html" %}
 {% block title %}Partipiskan{% endblock %}
 {% block head %}
-  <link href="{{ url_for('static', filename='css/nv.d3.css') }}" rel="stylesheet">
-  <script src="{{ url_for('static', filename='js/d3.min.js') }}"></script>
-  <script src="{{ url_for('static', filename='js/nv.d3.min.js') }}"></script>
+{{ super() }}
 
-  {{ super() }}
-  <script type="text/javascript">
+<script type="text/javascript">
 
 nv.addGraph(function() {
  

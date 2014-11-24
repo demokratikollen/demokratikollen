@@ -20,25 +20,33 @@ mod_figures = Blueprint('figures', __name__, url_prefix='/figures')
 
 @mod_figures.route('/party_bias/<partyA_abbr>_vs_<partyB_abbr>.<string:format>')
 def party_bias(partyA_abbr, partyB_abbr, format):
-    if format == 'html':
-        return "Not implemented"
-    if format == 'json':
-        #@cache.memoize()
-        def get_data():
-            s=db.session
-            A_id = s.query(Party.id).filter(Party.abbr==partyA_abbr).one()[0]
-            B_id = s.query(Party.id).filter(Party.abbr==partyB_abbr).one()[0]
+    #@cache.memoize()
+    def get_data():
+        s=db.session
+        A_id = s.query(Party.id).filter(Party.abbr==partyA_abbr).one()[0]
+        B_id = s.query(Party.id).filter(Party.abbr==partyB_abbr).one()[0]
 
-            mdb = MongoDBDatastore()
-            mongodb = mdb.get_mongodb_database() 
-            mongo_collection = mongodb.party_covoting
+        mdb = MongoDBDatastore()
+        mongodb = mdb.get_mongodb_database() 
+        mongo_collection = mongodb.party_covoting
 
-            record= mongo_collection.find_one({"partyA": A_id, "partyB": B_id})
-            del record['_id']
-            return record
+        record= mongo_collection.find_one({"partyA": A_id, "partyB": B_id})
+        del record['_id']
+        return record
 
     data = get_data()
-    return json.jsonify(data)
+    if not data:
+        return render_template('404.html'), 404
+
+
+    if format == 'html':
+        parties = data['parties']
+        yticklabels = data['yticklabels']
+        return render_template('figures/party_bias.html', 
+                                    parties=parties, 
+                                    yticklabels=yticklabels)
+    if format == 'json':
+        return json.jsonify(data)
 
 
 
@@ -86,7 +94,7 @@ def voteringsfrekvens(format):
         return render_template('404.html'), 404
 
 @mod_figures.route('/partipiskan', methods=['GET'])
-@cache.cached()
+#@cache.cached()
 def partipiskan():
 
     s = db.session
@@ -118,7 +126,7 @@ def partipiskan():
             data['values'].append( dict(label=party.abbr, value=num_piska/num_polls) )
 
 
-
+    print(data)
 
     return render_template("/figures/partipiskan.html",
                             header_figures_class='active',

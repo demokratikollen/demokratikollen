@@ -1,0 +1,11 @@
+- hosts: demokratikollen
+  remote_user: wercker
+  sudo_user: wercker
+  vars:
+      app_name: demokratikollen
+  roles:
+      - sync
+      - start_deploy
+      #- webapp
+      #- nginx
+      #- post-setup
