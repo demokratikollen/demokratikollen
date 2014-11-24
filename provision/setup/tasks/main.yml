@@ -15,5 +15,11 @@
   with_items:
       - {file: '.bashrc', path: '~/.bashrc'}
 
+- name: Copy db dump file.
+  copy: src='create_test_dumps.sh' dest='~/create_test_dumps.sh'
+
 - name: Set base path for git repo
   lineinfile: dest=~/.bashrc state=present line='export REPO_PATH="/vagrant"'
+
+- name: Add DEVELOPMENT env.
+  lineinfile: dest=~/.bashrc state=present line='export DEVELOPMENT=1'
