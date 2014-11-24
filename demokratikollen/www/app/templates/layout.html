@@ -1,7 +1,7 @@
 ﻿<!DOCTYPE html>
 <html lang="sv">
   <head>
-    {% block head %}
+    {% block head -%}
     <meta charset="utf-8">
     <meta http-equiv="X-UA-Compatible" content="IE=edge">
     <meta name="viewport" content="width=device-width, initial-scale=1">
@@ -16,10 +16,8 @@
       <script src="https://oss.maxcdn.com/html5shiv/3.7.2/html5shiv.min.js"></script>
       <script src="https://oss.maxcdn.com/respond/1.4.2/respond.min.js"></script>
     <![endif]-->
-  {% endblock %}
-
-  {% block styles %}
-  {% endblock %}
+    {%- endblock %}
+    {% block styles %}{% endblock %}
   </head>
   <body>
     <nav id="navbar" role="navigation">
@@ -74,9 +72,8 @@
     <footer>
     <a href="/om">Om demokratikollen</a>
     </footer>
-
-    {% block scripts %}
+    {%- block scripts %}
     <script src="{{ url_for('static', filename='js/dependencies.min.js') }}"></script>
-    {% endblock %}
+    {%- endblock %}
   </body>
 </html>
