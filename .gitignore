@@ -31,11 +31,15 @@ demokratikollen/www/cache
 
 # Data
 demokratikollen/data/*
-*.sql
 !demokratikollen/data/create_tables.sql
 !demokratikollen/data/urls.txt
+
+!demokratikollen/data/dumps
+demokratikollen/data/dumps/*
 !demokratikollen/data/dumps/postgres_dump.sql.gz
 !demokratikollen/data/dumps/mongodb_dump.tar.gz
+
+*.sql
 
 # design stuff
 demokratikollen/www/design/bower_components

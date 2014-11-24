@@ -1,2 +1,5 @@
 # Unix-style line endings for everything
 * text eol=lf
+
+# keep the dumps as binary.
+demokratikollen/data/dumps/* -text
