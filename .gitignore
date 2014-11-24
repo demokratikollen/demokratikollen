@@ -41,5 +41,6 @@ demokratikollen/data/*
 demokratikollen/www/design/bower_components
 demokratikollen/www/design/node_modules
 *.*.map
+demokratikollen/www/app/static/css/images/
 demokratikollen/www/design/**/*.log
 **/.sass-cache/
