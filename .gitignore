@@ -40,6 +40,6 @@ demokratikollen/data/*
 # design stuff
 demokratikollen/www/design/bower_components
 demokratikollen/www/design/node_modules
-*.css.map
+*.*.map
 demokratikollen/www/design/**/*.log
 **/.sass-cache/

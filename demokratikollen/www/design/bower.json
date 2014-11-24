@@ -11,6 +11,8 @@
     "tests"
   ],
   "devDependencies": {
-    "bootstrap-sass-official": "~3.3.1"
+    "bootstrap-sass-official": "~3.3.1",
+    "d3": "~3.4.13",
+    "jquery-ui-slider-pips": "~1.7.2"
   }
 }
