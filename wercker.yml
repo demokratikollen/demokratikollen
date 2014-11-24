@@ -27,9 +27,9 @@ build:
             name: Recreate the databases.
             cwd: demokratikollen/data/dumps
             code: |
-                echo "$WERCKER_POSTGRES_HOST:$WERCKER_POSTGRESQL_PORT:$WERCKER_POSTGRESQL_DATABASE:$WERCKER_POSTGRESQL_USERNAME:$WERCKER_POSTGRESQL_PASSWORD" > ~/.pgpass
+                echo "$WERCKER_POSTGRESQL_HOST:$WERCKER_POSTGRESQL_PORT:$WERCKER_POSTGRESQL_DATABASE:$WERCKER_POSTGRESQL_USERNAME:$WERCKER_POSTGRESQL_PASSWORD" > ~/.pgpass
                 chmod 0600 ~/.pgpass
-                gunzip -c dumps/postgres_dump.sql.gz | psql -h $WERCKER_POSTGRES_HOST -p $WERCKER_POSTGRESQL_PORT -U $WERCKER_POSTGRESQL_USERNAME $WERCKER_POSTGRESQL_DATABASE
+                gunzip -c postgres_dump.sql.gz | psql -h $WERCKER_POSTGRESQL_HOST -p $WERCKER_POSTGRESQL_PORT -U $WERCKER_POSTGRESQL_USERNAME $WERCKER_POSTGRESQL_DATABASE
                 tar -xvf mongodb_dump.tar.gz
                 mongorestore --host $WERCKER_MONGO_HOST --port $WERCKER_MONGO_PORT -u $WERCKER_MONGO_USER -p $WERCKER_MONGO_PASSWORD -d $WERCKER_MONGO_DATABASE mongodb_dump
         - script:
