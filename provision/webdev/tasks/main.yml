@@ -16,9 +16,9 @@
 - name: Install global Node.js packages
   npm: state=present global=yes name={{item}}
   with_items:
-      - grunt-cli
+      - gulp
       - bower
-      - node-sass
+      # - node-sass
 
 - name: Install some Ruby gems
   sudo: yes
@@ -26,8 +26,14 @@
   with_items:
       - sass
 
+- name: Symlink package.json for npm dev dependencies
+  file: src={{design_dir}}/package.json dest=~/package.json state=link
+
 - name: Install Node.js packages for design stuff
-  command: chdir={{design_dir}} npm install --no-bin-links
+  command: chdir=~/ npm install
 
 - name: Install Bower packages for design stuff
   command: chdir={{design_dir}} bower install
+
+- name: Run gulp to provide front-end dependencies
+  command: chdir={{design_dir}} gulp all
