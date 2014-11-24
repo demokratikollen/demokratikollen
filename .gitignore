@@ -30,7 +30,6 @@ demokratikollen/www/cache
 *~
 
 # Data
-data/
 demokratikollen/data/*
 *.sql
 !demokratikollen/data/create_tables.sql
