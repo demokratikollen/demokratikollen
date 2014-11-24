@@ -105,7 +105,7 @@ GenderObject: {
         P.GenderObject.data = data;
         P.GenderObject.GeneratePositions();
         P.GenderObject.DrawFigLabels();
-        //P.DrawMemberNodes(P.GenderObject);
+        P.DrawMemberNodes(P.GenderObject);
     },
     Update: function() {
         if(P.page !== 'gender'){
@@ -116,39 +116,81 @@ GenderObject: {
         P.FetchData(P.GenderObject);
     },
     GeneratePositions: function () {
-        var data = this.data.data;
+        this.member_node_data = this.data.data;
+        var data = this.member_node_data;
         var nc = data.length;
         //Get the parties and how many objects there is.
         var parties = {};
+        var n_parties = 0;
         for(var i=0; i < nc; i++)
         {
-            if(data[i].party in parties)
-                parties[data[i].party].n_members++;
-            else
+            if(! (data[i].party in parties))
             {
-                parties[data[i].party] = {};
-                parties[data[i].party].n_members = 1;
+                parties[data[i].party] = {'n_males': 0, 'n_females': 0};
+                n_parties++;
             }
+            if(data[i].gender === 'man')
+                parties[data[i].party].n_males++;
+            else
+                parties[data[i].party].n_females++;
                 
         }
-        //Give each party some space depending on size of party.
-        var x_scale = d3.scale.linear().domain([0,nc]).range([0,P.max_width]);
-        var last_x1 = 0;
-        var sum_n = 0;
+        //Give each party some space.
+        var x_scale = d3.scale.linear().domain([0,n_parties]).range([this.side_padding,P.max_width-this.side_padding]);
+        var counter = 0;
         for (var key in parties) {
             if (parties.hasOwnProperty(key)) {
-                sum_n += parties[key].n_members;
-                parties[key].x1 = last_x1;
-                parties[key].x2 = x_scale(sum_n);
-                last_x1 = parties[key].x2;
+                parties[key].x1 = x_scale(counter++);
+                parties[key].x2 = x_scale(counter);
             }
         }
-        console.log(parties)
+
+        //find maximum value.
+        var max_n = 0;
+        for (var key in parties) {
+            if (parties.hasOwnProperty(key)) {
+                max_n = Math.max(Math.max(parties[key].n_males, parties[key].n_females),max_n);
+            }
+        }
+
+        var y_scale = d3.scale.linear().domain([0, max_n-1])
+                              .range([P.max_height-this.bottom_padding, this.bottom_padding]);
+
+
+        var r = 15;//(P.max_height-this.bottom_padding - (max_n-1)*this.circle_padding)/(2*max_n);
+
+        //for each party. generate positions.
+        out_data = [];
+        for (var key in parties) {
+            if (parties.hasOwnProperty(key)) {
+                var parties_data = data.filter(function (el) { return el.party === key });
+                var female_x = parties[key].x1 + (parties[key].x2 - parties[key].x1)/4;
+                var male_x = parties[key].x1 + 3*(parties[key].x2 - parties[key].x1)/4;
+
+                var counter_male = 0;
+                var counter_female = 0;
+                for(var i=0; i < parties_data.length; i++) {
+                    if(parties_data[i].gender === 'man') {
+                        parties_data[i].x = male_x;
+                        parties_data[i].y = y_scale(counter_male++);
+                    }
+                    else {
+                        parties_data[i].x = female_x;
+                        parties_data[i].y = y_scale(counter_female++);
+                    }
+                    parties_data[i].r = r;
+                }
+            }
+        }
+        console.log(data)
     },
     DrawFigLabels: function () {
 
     },
     data: null,
+    side_padding: 50,
+    circle_padding: 5,
+    bottom_padding: 20,
     dataUrl: '/data/gender.json',
     date_string: null,
     member_node_data: null
@@ -219,6 +261,13 @@ DrawMemberNodes: function(obj) {
     .style("stroke-width",'1px')
     .style("fill", function(d) {return P.partyColors[d.party]});
 
+    //Sort the nodes.
+    nodes.sort( function(a , b) { 
+        if(a.y > b.y)
+            return -1; 
+        else return 1;
+    });
+
     //update the position for the olf ones and animate.
     nodes.transition().duration(1000)
     .attr("transform", function(d) { 
@@ -226,6 +275,7 @@ DrawMemberNodes: function(obj) {
         y = d.y;
         return "translate(" + x + "," + y + ")";
     });
+
     
     //update the radius of the circle if needed.
     nodes.selectAll('circle').data(data).transition().attr("r", function(d) { return d.r; });
