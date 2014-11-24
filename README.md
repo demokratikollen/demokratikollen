@@ -82,3 +82,10 @@ To use the datastore add `from utils.mongodb import MongoDBDatastore` and create
 In order to save an object in the datastore call the `store_object(object[any], identifier[string])` method which saves the object in the database. Subsequent calls with the same identifier should overwrite the object. Retrieve objects with the `get_object(identifier)` method. 
 
 The class should be able to store any python object. Storing sqlalchemy objects work but they loose the connection with the session so relationships do not work on retrieved objects. Perhaps there is a way to restore the connection, but for now serialize the data into a dictionary.
+
+## Front-end compilation and dependency handling
+[Gulp](http://gulpjs.com/) is used to compile SASS style sheets, concatenate and minify JS and CSS dependencies, and to copy necessary files (fonts, images, etc.) to the right places.
+
+To run, go to the folder `~/demokratikollen/www/design` and run `gulp all` or run any of the specialized tasks defined in `gulpfile.js` (in the same folder). To modify/add tasks or change dependencies, edit `gulpfile.js`.
+
+To install `npm` packages and add as dependencies go to `~/` and run `npm install <pkg> --save-dev`. The file `~/package.json` is linked to the corresponding file in `~demokratikollen/www/design`, which is tracked in `git`.
