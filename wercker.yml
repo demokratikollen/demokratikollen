@@ -31,7 +31,7 @@ build:
                 chmod 0600 ~/.pgpass
                 gunzip -c postgres_dump.sql.gz | psql -h $WERCKER_POSTGRESQL_HOST -p $WERCKER_POSTGRESQL_PORT -U $WERCKER_POSTGRESQL_USERNAME $WERCKER_POSTGRESQL_DATABASE
                 tar -xvf mongodb_dump.tar.gz
-                mongorestore --host $WERCKER_MONGO_HOST --port $WERCKER_MONGO_PORT -u $WERCKER_MONGO_USER -p $WERCKER_MONGO_PASSWORD -d $WERCKER_MONGO_DATABASE mongodb_dump
+                mongorestore --host $WERCKER_MONGODB_HOST --port $WERCKER_MONGODB_PORT mongodb_dump
         - script:
             name: run behave tests
             cwd: demokratikollen/www/
