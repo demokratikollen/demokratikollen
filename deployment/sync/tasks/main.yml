@@ -18,3 +18,9 @@
 
 - name: Copy the static files to the nginx docker.
   synchronize: src=../demokratikollen/www/app/static/ dest=/home/wercker/docker/nginx/static/
+
+- name: Set cookie secret for the webapp container.
+  lineinfile: dest=/home/wercker/docker/webapp/Dockerfile line='ENV SECRET_KEY {{ lookup("env","SECRET_KEY") }}' state=present
+
+- name: Set CSRF secret for the webapp container.
+  lineinfile: dest=/home/wercker/docker/webapp/Dockerfile line='ENV CSRF_SESSION_KEY {{ lookup("env","CSRF_SESSION_KEY") }}' state=present
