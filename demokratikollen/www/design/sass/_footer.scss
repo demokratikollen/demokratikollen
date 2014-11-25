@@ -13,8 +13,6 @@ $md-tot-top: $navbar-height + $tb-content-padding;
   min-height: 100%;
 
   .container {
-    overflow-y: auto;
-    overflow-x: visible;
     padding-bottom:$footer-height + 20px;
     padding-top: $md-tot-top;
     @media (max-width: $screen-xs-max) {
