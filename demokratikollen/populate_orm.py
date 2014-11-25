@@ -59,7 +59,7 @@ groups['PP'] = Party(name="Piratpartiet",abbr="PP")
 groups['NYD'] = Party(name="Ny demokrati",abbr="NYD")
 for g in groups.values():
     s.add(g)
-s.commit()
+# s.commit()
 
 print("Adding members.")
 c.execute("SELECT fodd_ar,tilltalsnamn,efternamn,kon,parti,intressent_id FROM person")
@@ -75,7 +75,7 @@ for birth_year,first_name,last_name,gender,party_abbr,intressent_id in c:
                                     birth_year=birth_year,gender=gender,party=party,
                                     image_url="http://data.riksdagen.se/filarkiv/bilder/ledamot/{}_192.jpg".format(intressent_id))
     s.add(members[intressent_id])
-s.commit()
+# s.commit()
 
 # Select only betänkanden from dokument
 print("Adding committee reports.")
@@ -166,18 +166,27 @@ for intressent_id,fr,to,roll,abbr,g_name in c:
                 role=roll,
                 group=groups[(abbr,g_name)]))
 
-s.commit()
+# s.commit()
 
-# print("Adding member proposals.")
-# c.execute("""SELECT d.hangar_id,d.dok_id,d.rm,d.beteckning,d.organ,d.publicerad,d.titel,d.dokument_url_text,f.utskottet,f.kammaren,d.subtyp
-#                 FROM dokument AS d JOIN dokforslag AS f ON f.hangar_id=d.hangar_id WHERE doktyp='mot' AND relaterat_id=''""")
-# for intressent_id,fr,to,roll,abbr,g_name in c:
-#     s.add(MinistryAppointment(
-#                 member=members[intressent_id],
-#                 start_date=fr.date(),
-#                 end_date=to.date(),
-#                 role=roll,
-#                 group=groups[(abbr,g_name)]))
+print("Adding member proposals.")
+c.execute("""SELECT hangar_id,dok_id,rm,beteckning,publicerad,titel,
+                            dokument_url_text,subtyp
+                    FROM dokument WHERE doktyp='mot' AND relaterat_id='' LIMIT 1000""")
+m_props = {}
+for hangar_id,dok_id,rm,beteckning,publicerad,titel,dokument_url_text,subtyp in c:
+    if subtyp in ['Enskild motion','Kommittémotion','Följdmotion','Partimotion','Flerpartimotion','Fristående motion']:
+        subtype = subtyp
+    else:
+        subtype = '-'
+    m_props[hangar_id] = MemberProposal(
+                            dok_id=dok_id,
+                            published=publicerad,
+                            session=rm,
+                            code=beteckning,
+                            title=titel,
+                            text_url=dokument_url_text,
+                            subtype=subtype)
+    s.add(m_props[hangar_id])
 
 
 print("Adding committee report points")
