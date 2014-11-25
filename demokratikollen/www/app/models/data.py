@@ -5,15 +5,8 @@ from demokratikollen.core.db_structure import Member, ChamberAppointment, Party
 
 def gender_json(date,party=''):
 
-    members = db.session.query(Member.id, Member.gender, Party.abbr). \
-                join(ChamberAppointment). \
-                join(Party). \
-                filter(ChamberAppointment.role=='Riksdagsledamot'). \
-                filter(ChamberAppointment.start_date <= date). \
-                filter(ChamberAppointment.end_date >= date) .\
-                distinct(Member.id)
-    if party:
-        members = members.filter(Party.abbr==party)
+    members = get_gender_db_statement(date,party);    
+    print(members.all())
 
     response = {'statistics': {'n_males': 0, 'n_females': 0, 'total': 0}, 'data': [], }
     for member in members.all():
@@ -29,15 +22,22 @@ def gender_json(date,party=''):
 
     return response
 
-def parliament_json(date):
-
-    members = db.session.query(Member.id, Party.abbr). \
+def get_gender_db_statement(date, party=''):
+    members = db.session.query(Member.id, Member.gender, Party.abbr). \
                 join(ChamberAppointment). \
                 join(Party). \
                 filter(ChamberAppointment.role=='Riksdagsledamot'). \
                 filter(ChamberAppointment.start_date <= date). \
                 filter(ChamberAppointment.end_date >= date) .\
                 distinct(Member.id)
+    if party:
+        members = members.filter(Party.abbr==party)
+
+    return members
+
+def parliament_json(date):
+
+    members = get_parliament_db_statement(date)
    
     response = {'statistics': {'n_members': 0}, 'data': [], }
     for member in members.all():
@@ -49,6 +49,17 @@ def parliament_json(date):
 
     return response
 
+def get_parliament_db_statement(date):
+    members = db.session.query(Member.id, Party.abbr). \
+                join(ChamberAppointment). \
+                join(Party). \
+                filter(ChamberAppointment.role=='Riksdagsledamot'). \
+                filter(ChamberAppointment.start_date <= date). \
+                filter(ChamberAppointment.end_date >= date) .\
+                distinct(Member.id)
+    return members
+
 @cache.cached(3600*24)
 def get_parties():
     return [r[0] for r in db.session.query(Party.abbr).all()]
+
