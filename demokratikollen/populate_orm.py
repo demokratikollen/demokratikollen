@@ -45,7 +45,7 @@ print("Adding groups, committees, and parties.")
 for abbr,name in c:
     if name in parties:
         g = Party(name=name,abbr=abbr)
-    elif 'tskottet' in name:
+    elif 'tskott' in name:
         g = Committee(name=name,abbr=abbr)
     elif 'epartement' in name:
         g = Ministry(name=name,abbr=abbr)
@@ -119,7 +119,7 @@ del pbar
 
 # Add kammaruppdrag
 print("Adding chamber appointments.")
-c.execute("""SELECT intressent_id,ordningsnummer,"from",tom,status,roll_kod FROM personuppdrag WHERE typ='kammaruppdrag' AND ordningsnummer!=0""")
+c.execute("""SELECT intressent_id,ordningsnummer,"from",tom,status,roll_kod FROM personuppdrag WHERE typ='kammaruppdrag'""")
 for intressent_id,ordningsnummer,fr,to,stat,roll in c:
     role = "Ersättare" if "rsättare" in roll else "Riksdagsledamot"
     status = "Ledig" if "Ledig" in stat else "Tjänstgörande"
@@ -142,6 +142,30 @@ for intressent_id,fr,to,roll,abbr,g_name in c:
                 end_date=to.date(),
                 role=roll,
                 group=groups[(abbr,g_name)]))
+
+# Add committee (utskott) appointments
+print("Adding committee appointments.")
+c.execute("""SELECT intressent_id,"from",tom,roll_kod,organ_kod,uppgift FROM personuppdrag WHERE uppgift LIKE '%utskott%'""")
+for intressent_id,fr,to,roll,abbr,g_name in c:
+    s.add(CommitteeAppointment(
+                member=members[intressent_id],
+                start_date=fr.date(),
+                end_date=to.date(),
+                role=roll,
+                group=groups[(abbr,g_name)]))
+
+# Add other group appointments
+print("Adding other group appointments.")
+c.execute("""SELECT intressent_id,"from",tom,roll_kod,organ_kod,uppgift FROM personuppdrag 
+                WHERE NOT uppgift  LIKE '%utskott%' AND NOT uppgift LIKE '%utskott%' AND organ_kod != 'kam'""")
+for intressent_id,fr,to,roll,abbr,g_name in c:
+    s.add(GroupAppointment(
+                member=members[intressent_id],
+                start_date=fr.date(),
+                end_date=to.date(),
+                role=roll,
+                group=groups[(abbr,g_name)]))
+
 s.commit()
 
 # print("Adding member proposals.")

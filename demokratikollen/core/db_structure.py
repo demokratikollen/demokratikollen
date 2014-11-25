@@ -42,19 +42,12 @@ class Appointment(Base):
         'polymorphic_on':classtype
     }
 
-class GroupAppointment(Appointment):
-    group_id = Column(Integer, ForeignKey('groups.id'))
+class SpeakerAppointment(Appointment):
+    position =  Column(Enum('Talman','Förste vice talman','Andre vice talman','Tredje vice talman',name='spekear_positions'))
 
     __mapper_args__ = {
-        'polymorphic_identity':'group_appointment'
+        'polymorphic_identity':'speaker_appointment'
     }
-
-class CommitteeAppointment(Appointment):
-
-    __mapper_args__ = {
-        'polymorphic_identity':'committee_appointment'
-    }
-
 
 class ChamberAppointment(Appointment):
     __tablename__ = 'chamber_appointments'
@@ -72,10 +65,24 @@ class ChamberAppointment(Appointment):
     def __repr__(self):
         return 'Chair {}: {} {} {}-{}: {}'.format(self.chair,self.status,self.role,self.start_date,self.end_date,self.member)    
 
-class MinistryAppointment(GroupAppointment):
-    __tablename__ = 'ministry_appointments'
+
+class GroupAppointment(Appointment):
+    __tablename__ = 'group_appointments'
     id = Column(Integer,ForeignKey('appointments.id'),primary_key=True)
     role = Column(String(250))
+    group_id = Column(Integer, ForeignKey('groups.id'))
+
+    __mapper_args__ = {
+        'polymorphic_identity':'group_appointment'
+    }
+
+class CommitteeAppointment(GroupAppointment):
+
+    __mapper_args__ = {
+        'polymorphic_identity':'committee_appointment'
+    }
+
+class MinistryAppointment(GroupAppointment):
 
     __mapper_args__ = {
         'polymorphic_identity':'ministry_appointment'
