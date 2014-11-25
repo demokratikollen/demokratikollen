@@ -38,10 +38,6 @@ build:
             code: |
                 behave
         - script:
-            name: clear the postgres database for unittests.
-            code: |
-                psql -h $WERCKER_POSTGRESQL_HOST -p $WERCKER_POSTGRESQL_PORT -U $WERCKER_POSTGRESQL_USERNAME $WERCKER_POSTGRESQL_DATABASE -t -c "select 'drop table \"' || tablename || '\" cascade;' from pg_tables where schemaname='public'" | psql -h $WERCKER_POSTGRESQL_HOST -p $WERCKER_POSTGRESQL_PORT -U $WERCKER_POSTGRESQL_USERNAME $WERCKER_POSTGRESQL_DATABASE
-        - script:
             name: run python tests
             cwd: demokratikollen/www/
             code: |
