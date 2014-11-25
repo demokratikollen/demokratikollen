@@ -65,12 +65,16 @@
       </div><!-- /.navbar-inner -->
     </nav>
 
-    <div class="container">
-      {% block content %}{% endblock %}
+    <div id="content-wrapper">
+      <div class="container">
+        {% block content %}{% endblock %}
+      </div>
     </div>
 
     <footer>
-    <a href="/om">Om demokratikollen</a>
+      <div class="container">
+        <p class="left">&copy; 2014 Demokratikollen</p><p class="right"><a href="/om">Om demokratikollen</a></p>
+      </div>
     </footer>
     {%- block scripts %}
     <script src="{{ url_for('static', filename='js/dependencies.min.js') }}"></script>

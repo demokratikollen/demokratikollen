@@ -4,6 +4,9 @@
 $logo-font-size: 27px;
 $logo-font-size-xs: 22px;
 
+$footer-height: 40px;
+$tb-content-padding:20px;
+
 @mixin xs-font-size($xs-size,$default-size) {
   font-size: $default-size;
   @media (max-width: $screen-xs-max) {
@@ -16,101 +19,11 @@ $logo-font-size-xs: 22px;
   @include box-shadow(none);
 }
 
+@import "navbar";
+@import "footer";
 
-#navbar {
-  @extend .navbar,.navbar-inverse,.navbar-static-top;
-
-  .column.brand-and-menu-toggle {
-    @extend .col-sm-5,.col-md-3;
-
-    div:first-child {
-      @extend .navbar-header;
-
-      a.brand {
-        @extend .navbar-brand,.navbar-left;
-
-        @include xs-font-size($logo-font-size-xs,$logo-font-size);
-        padding: 0;
-        font-family: 'Roboto Slab',sans-serif;
-        font-weight: 700;
-        color: white;
-        line-height: $navbar-height;
-
-        span.period {
-          line-height: 0;
-          font-family: 'Open Sans';
-          color: orange;
-          @include xs-font-size(2 * $logo-font-size-xs, 2 * $logo-font-size);
-        }
-      }
-
-      button {
-        margin-right: 0;
-      }
-    }
-  }
-
-  .column.menu-search {
-    @extend .col-sm-7,.col-md-5,.col-md-push-4;
-
-    div:first-child {
-      @extend  .navbar-collapse;
-    }
-
-    // Classes that are added to collapsed menu
-    .navbar-collapse.collapsing,
-    .navbar-collapse.in {
-      form {
-        // Classes are not removed if window resized with open menu
-        // Styles must only be applied to small screens
-        @media (max-width: $grid-float-breakpoint) {
-          padding: 5px 0;
-          width: auto;
-          .input-group {
-            padding: 0;
-          }
-        }
-      }
-    }
-
-    form {
-      @extend .navbar-form,.nav,.navbar-nav,.navbar-right;
-      @include no-border-or-shadow();
-      width: 100%;
-
-      .input-group {
-        @include no-border-or-shadow();
-
-        .input-group-addon {
-          display: table-cell;
-          width: 1% !important;
-          span {
-            @extend .glyphicon,.glyphicon-search;
-          }
-        }
-
-        input {
-          @extend .form-control;
-        }
-      }
-    }
-  }
-
-  .column.menu-links {
-    @extend .col-md-4,.col-sm-12,.col-md-pull-5;
-
-    div:first-child {
-      @extend  .navbar-collapse;
-    }
-
-    .menu-links {
-      @extend .nav,.navbar-nav,.navbar-left;
-      a {
-        font-size: 16px;
-        font-weight: 600;
-      }
-    }
-  }
+html,body {
+  height: 100%;
 }
 
 #width-test {
