@@ -18,7 +18,6 @@ def create_app(testing=False, caching=True):
     if testing:
         print("Running Test env.")
         app.config['TESTING'] = True
-        app.config['SQLALCHEMY_DATABASE_URI'] = os.environ['TEST_DATABASE_URL']
         cache.config['CACHE_TYPE'] = 'null'
 
     if not caching:
