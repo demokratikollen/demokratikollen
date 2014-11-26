@@ -50,9 +50,10 @@ steps.start_containers(base_dir, log, files_changed)
 log.info("Waiting 30 seconds for things to boot")
 time.sleep(30)
 
-steps.populate_riksdagen(base_dir, log)
-steps.populate_orm(base_dir,log)
-steps.run_calculations(base_dir,log)
+if files_changed:
+	steps.populate_riksdagen(base_dir, log)
+	steps.populate_orm(base_dir,log)
+	steps.run_calculations(base_dir,log)
 
 steps.switch_nginx_servers(base_dir,log)
 steps.remove_containers(base_dir, log, files_changed)
