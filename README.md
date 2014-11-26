@@ -1,3 +1,5 @@
+[![wercker status](https://app.wercker.com/status/02cadd4cc4bbb00d1d69bb0796c0d8e8/m "wercker status")](https://app.wercker.com/project/bykey/02cadd4cc4bbb00d1d69bb0796c0d8e8)
+
 demokratikollen
 ===============
 
