@@ -5,7 +5,9 @@ from selenium.common.exceptions import NoSuchElementException
 @given('you browse to the "{page}" page')
 def step_impl(context, page):
     if page == 'riksdagen':
-      uri = 'riksdagen'
+        uri = 'riksdagen'
+    elif page == 'parties':
+        uri = 'partierna'
     context.driver.get("http://127.0.0.1:5555/" + uri)
 
 @then('The response should contain an element "{css_selector}"')
@@ -23,10 +25,6 @@ def step_impl(context):
 @given('You browse to the about page')
 def step_impl(context):
     context.driver.get("http://127.0.0.1:5555/om")
-
-@given('You browse to the parties page')
-def step_impl(context):
-    context.driver.get("http://127.0.0.1:5555/partierna")
 
 @then('The page title should be "{title}"')
 def step_impl(context, title):
