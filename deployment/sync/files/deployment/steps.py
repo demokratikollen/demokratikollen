@@ -83,7 +83,6 @@ def remove_images(base_dir, logger, files_changed):
         remove_image('nginx')
     except Exception as e:
         logger.error("Something went wrong with docker: {0} ".format(e))
-        sys.exit(1)
 
 def remove_containers(base_dir, logger, files_changed):
 
@@ -107,7 +106,6 @@ def remove_containers(base_dir, logger, files_changed):
         remove_container('nginx')
     except Exception as e:
         logger.error("Something went wrong with docker: {0} ".format(e))
-        sys.exit(1)
 
 def create_containers(base_dir, logger, files_changed):
 
