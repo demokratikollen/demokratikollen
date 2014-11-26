@@ -83,7 +83,7 @@ def remove_images(base_dir, logger, files_changed):
         try:
             remove_image(image)
         except Exception as e:
-        logger.error("Something went wrong with docker, continuing anyway: {0} ".format(e))
+            logger.error("Something went wrong with docker, continuing anyway: {0} ".format(e))
 
 def remove_containers(base_dir, logger, files_changed):
 
