@@ -252,7 +252,7 @@ DrawMemberNodes: function(obj) {
 
     var new_nodes = nodes.enter()
     .append('g').attr("class", 'member_node')
-    .attr("transform", "translate(" + (P.max_width/2) + "," + P.max_height +")");
+    .attr("transform", function(d) { return "translate(" + d.x + "," + (-d.r*4) +")"});
 
     new_nodes.append("title")
     .text(function(d) { return d.member_id });
