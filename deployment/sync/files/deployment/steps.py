@@ -75,9 +75,9 @@ def remove_images(base_dir, logger, files_changed):
 
     # Remove the extra containers if the files changed.
     if files_changed:
-        images_to_remove.append(['postgres', 'mongo','bgtasks')
+        images_to_remove += ['postgres', 'mongo','bgtasks']
     #remove webapp and nginx image if it exists
-    images_to_remove.append(['webapp', 'nginx'])
+    images_to_remove += ['webapp', 'nginx']
 
     for image in images_to_remove:
         try:
@@ -246,6 +246,3 @@ def post_deployment(base_dir, logger):
 
     shutil.rmtree(prev_src_path)
     shutil.copytree(current_src_path, prev_src_path)
-
-
-
