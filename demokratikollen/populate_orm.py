@@ -188,6 +188,12 @@ for hangar_id,dok_id,rm,beteckning,publicerad,titel,dokument_url_text,subtyp in 
                             subtype=subtype)
     s.add(m_props[hangar_id])
 
+print("Adding signatories of member proposals.")
+c.execute("""SELECT d.hangar_id,i.intressent_id FROM dokument AS d 
+                JOIN dokintressent AS i ON i.hangar_id=d.hangar_id 
+                WHERE d.doktyp='mot' LIMIT 1000""")
+for hangar_id,intressent_id in c:
+    m_props[hangar_id].signatories.append(members[intressent_id])
 
 print("Adding committee report points")
 c.execute("""SELECT rm,bet,punkt,rubrik,beslutstyp,votering_id FROM dokutskottsforslag""")
@@ -205,5 +211,6 @@ for rm,bet,punkt,rubrik,beslutstyp,votering_id in c:
     except NoResultFound:
         pass
 
+print("Committing.")
 s.commit()
 source_conn.close()
