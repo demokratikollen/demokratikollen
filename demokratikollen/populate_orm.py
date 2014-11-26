@@ -171,7 +171,7 @@ for intressent_id,fr,to,roll,abbr,g_name in c:
 print("Adding member proposals.")
 c.execute("""SELECT hangar_id,dok_id,rm,beteckning,publicerad,titel,
                             dokument_url_text,subtyp
-                    FROM dokument WHERE doktyp='mot' AND relaterat_id='' LIMIT 1000""")
+                    FROM dokument WHERE doktyp='mot' AND relaterat_id='' ORDER BY hangar_id LIMIT 1000""")
 m_props = {}
 for hangar_id,dok_id,rm,beteckning,publicerad,titel,dokument_url_text,subtyp in c:
     if subtyp in ['Enskild motion','Kommittémotion','Följdmotion','Partimotion','Flerpartimotion','Fristående motion']:
@@ -191,9 +191,124 @@ for hangar_id,dok_id,rm,beteckning,publicerad,titel,dokument_url_text,subtyp in 
 print("Adding signatories of member proposals.")
 c.execute("""SELECT d.hangar_id,i.intressent_id FROM dokument AS d 
                 JOIN dokintressent AS i ON i.hangar_id=d.hangar_id 
-                WHERE d.doktyp='mot' LIMIT 1000""")
+                WHERE d.doktyp='mot' ORDER BY d.hangar_id LIMIT 1000""")
 for hangar_id,intressent_id in c:
     m_props[hangar_id].signatories.append(members[intressent_id])
+
+
+print("Adding points of member proposals.")
+c.execute("""SELECT d.hangar_id,f.utskottet,f.nummer,f.kammaren,f.behandlas_i 
+                FROM dokument AS d 
+                JOIN dokforslag AS f ON f.hangar_id=d.hangar_id 
+                WHERE d.doktyp='mot' ORDER BY d.hangar_id LIMIT 10""")
+for hangar_id,utskottet,nummer,kammaren,behandlas_i in c:
+    decision_options = ['Avslag','Bifall','Delvis bifall']
+    utskottet = utskottet.strip()
+    kammaren = kammaren.strip()
+
+    if kammaren in decision_options:
+        ch_decision = kammaren
+    else:
+        ch_decision = '-'
+
+    if utskottet in decision_options:
+        com_recommendation = utskottet
+    else:
+        print(utskottet)
+        com_recommendation = '-'
+
+    try:
+        rm,bet = behandlas_i.split(':')
+        cr = s.query(CommitteeReport).filter_by(session=rm,code=bet).one()
+        p = ProposalPoint(
+                proposal=m_props[hangar_id],
+                number=nummer,
+                committee_recommendation=com_recommendation,
+                decision=ch_decision,
+                committee_report=cr)
+    except ValueError as e:
+        print("{} cannot be split.".format(behandlas_i))
+        p = ProposalPoint(
+                proposal=m_props[hangar_id],
+                number=nummer,
+                committee_recommendation=com_recommendation,
+                decision=ch_decision)
+
+    s.add(p)
+
+
+print("Adding government proposals.")
+c.execute("""SELECT hangar_id,dok_id,rm,beteckning,publicerad,titel,
+                            dokument_url_text,organ
+                    FROM dokument WHERE doktyp='prop' AND relaterat_id='' AND subtyp='prop'
+                    ORDER BY hangar_id LIMIT 1000""")
+g_props = {}
+for hangar_id,dok_id,rm,beteckning,publicerad,titel,dokument_url_text,organ in c:
+    if subtyp in ['Enskild motion','Kommittémotion','Följdmotion','Partimotion','Flerpartimotion','Fristående motion']:
+        subtype = subtyp
+    else:
+        subtype = '-'
+    try:
+        m = s.query(Ministry).filter(func.lower(Ministry.abbr)==organ.lower()).one()
+        g_props[hangar_id] = GovernmentProposal(
+                                dok_id=dok_id,
+                                published=publicerad,
+                                session=rm,
+                                code=beteckning,
+                                title=titel,
+                                text_url=dokument_url_text,
+                                ministry=m)
+    except NoResultFound as e:
+        print("{} not found.".format(organ))
+        g_props[hangar_id] = GovernmentProposal(
+                                dok_id=dok_id,
+                                published=publicerad,
+                                session=rm,
+                                code=beteckning,
+                                title=titel,
+                                text_url=dokument_url_text)
+    s.add(g_props[hangar_id])
+
+print("Adding points of government proposals.")
+c.execute("""SELECT d.hangar_id,f.utskottet,f.nummer,f.kammaren,f.behandlas_i 
+                FROM dokument AS d 
+                JOIN dokforslag AS f ON f.hangar_id=d.hangar_id 
+                WHERE d.doktyp='prop' AND d.subtyp='prop' ORDER BY d.hangar_id LIMIT 10""")
+for hangar_id,utskottet,nummer,kammaren,behandlas_i in c:
+    decision_options = ['Avslag','Bifall','Delvis bifall']
+    utskottet = utskottet.strip()
+    kammaren = kammaren.strip()
+
+    if kammaren in decision_options:
+        ch_decision = kammaren
+    else:
+        ch_decision = '-'
+
+    if utskottet in decision_options:
+        com_recommendation = utskottet
+    else:
+        print(utskottet)
+        com_recommendation = '-'
+
+    try:
+        rm,bet = behandlas_i.split(':')
+        cr = s.query(CommitteeReport).filter_by(session=rm,code=bet).one()
+        p = ProposalPoint(
+                proposal=g_props[hangar_id],
+                number=nummer,
+                committee_recommendation=com_recommendation,
+                decision=ch_decision,
+                committee_report=cr)
+    except ValueError as e:
+        print("{} cannot be split.".format(behandlas_i))
+        p = ProposalPoint(
+                proposal=g_props[hangar_id],
+                number=nummer,
+                committee_recommendation=com_recommendation,
+                decision=ch_decision)
+
+    s.add(p)
+
 
 print("Adding committee report points")
 c.execute("""SELECT rm,bet,punkt,rubrik,beslutstyp,votering_id FROM dokutskottsforslag""")
