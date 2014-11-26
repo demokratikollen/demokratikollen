@@ -71,18 +71,19 @@ def remove_images(base_dir, logger, files_changed):
     cli = Client(base_url='unix://var/run/docker.sock')
     p = params.get_params()
 
-    try:
-        # Remove the extra containers if the files changed.
-        if files_changed:
-            remove_image('postgres')
-            remove_image('mongo')
-            remove_image('bgtasks')
-    
-        #remove webapp and nginx image if it exists
-        remove_image('webapp')
-        remove_image('nginx')
-    except Exception as e:
-        logger.error("Something went wrong with docker: {0} ".format(e))
+    images_to_remove = []
+
+    # Remove the extra containers if the files changed.
+    if files_changed:
+        images_to_remove.append(['postgres', 'mongo','bgtasks')
+    #remove webapp and nginx image if it exists
+    images_to_remove.append(['webapp', 'nginx'])
+
+    for image in images_to_remove:
+        try:
+            remove_image(image)
+        except Exception as e:
+        logger.error("Something went wrong with docker, continuing anyway: {0} ".format(e))
 
 def remove_containers(base_dir, logger, files_changed):
 
@@ -137,7 +138,6 @@ def create_containers(base_dir, logger, files_changed):
         create_container('nginx')
     except Exception as e:
         logger.error("Something went wrong with docker: {0} ".format(e))
-        sys.exit(1)
 
     params.set_params(p)
 
