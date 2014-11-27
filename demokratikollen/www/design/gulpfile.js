@@ -47,7 +47,7 @@ var style_deps = [
  * Paths for collection/compilation and distribution
  * ======================================================================== */
 var sass_files = work_dir+'sass/*.scss',
-    js_files = work_dir+'javascripts/*.js',
+    js_files = work_dir+'js/*.js',
     css_dist = dist_dir+'css/',
     js_dist = dist_dir+'js/';
 
@@ -73,6 +73,16 @@ gulp.task('styles', function () {
         .pipe(rename({suffix: '.min'}))
         .pipe(sass({loadPath: bs_styles_dir, style: 'compressed'}))
         .pipe(gulp.dest(css_dist));
+});
+
+gulp.task('scripts', function () {
+    return gulp.src(js_files)
+        .pipe(sourcemaps.init({loadMaps: true}))
+        .pipe(concatenate('scripts.js'))
+        .pipe(uglify())
+        .pipe(rename({suffix: '.min'}))
+        .pipe(sourcemaps.write('../js'))
+        .pipe(gulp.dest(js_dist));
 });
 
 
@@ -104,7 +114,8 @@ gulp.task('script-deps', function () {
  * ======================================================================== */
 gulp.task('watch', function() {
     gulp.watch(sass_files, ['styles']);
+    gulp.watch(js_files, ['scripts'])
 });
 
 gulp.task('all',['copy','styles','style-deps','script-deps']);
-gulp.task('default',['styles','watch']);
+gulp.task('default',['styles','scripts','watch']);
