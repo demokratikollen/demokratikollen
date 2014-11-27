@@ -5,7 +5,7 @@ from demokratikollen.core.db_structure import Member, ChamberAppointment, Party
 
 def gender_json(date,party=''):
 
-    members = get_gender_db_statement(date,party);    
+    members = get_gender_db_statement(date,party);
     print(members.all())
 
     response = {'statistics': {'n_males': 0, 'n_females': 0, 'total': 0}, 'data': [], }
@@ -17,7 +17,7 @@ def gender_json(date,party=''):
             response['statistics']['n_males'] += 1
         response['statistics']['total'] += 1
 
-    # sort the data on party. 
+    # sort the data on party.
     response['data'] = sorted(response['data'], key=lambda k: k['party'])
 
     return response
@@ -38,13 +38,13 @@ def get_gender_db_statement(date, party=''):
 def parliament_json(date):
 
     members = get_parliament_db_statement(date)
-   
+
     response = {'statistics': {'n_members': 0}, 'data': [], }
     for member in members.all():
         response['data'].append(dict(member_id=member[0],party=member[1]))
         response['statistics']['n_members'] += 1
 
-    # sort the data on party. 
+    # sort the data on party.
     response['data'] = sorted(response['data'], key=lambda k: k['party'])
 
     return response
@@ -62,4 +62,15 @@ def get_parliament_db_statement(date):
 @cache.cached(3600*24)
 def get_parties():
     return [r[0] for r in db.session.query(Party.abbr).all()]
+
+
+@cache.cached(3600*24)
+def get_members_typeahead():
+    members = db.session.query(Member).all()
+    output = {"d": [{
+                        "full_name": "{} {}".format(m.first_name,m.last_name),
+                        "party": m.party.abbr,
+                        "id": m.id
+                    } for m in members]}
+    return output
 

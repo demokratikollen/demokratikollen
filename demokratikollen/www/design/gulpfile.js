@@ -1,4 +1,4 @@
-/* ========================================================================
+﻿/* ========================================================================
  * Setup
  * ======================================================================== */
 var gulp = require('gulp'),
@@ -35,7 +35,9 @@ var js_deps = [
     jqueryUiSliderPipsDir+'jquery-ui-slider-pips.js',
     // Bootstrap plugins
     bs_scripts_dir+'bootstrap/transition.js',
-    bs_scripts_dir+'bootstrap/collapse.js'
+    bs_scripts_dir+'bootstrap/collapse.js',
+    // Typeahead
+    'bower_components/typeahead.js/dist/typeahead.bundle.js'
 ];
 
 var style_deps = [
