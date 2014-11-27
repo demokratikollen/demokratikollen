@@ -84,7 +84,7 @@ def remove_containers(deploy_settings):
 
     for container in containers_to_remove:
         try:
-            remove_container(image,deploy_settings)
+            remove_container(container,deploy_settings)
         except Exception as e:
             deploy_settings['log'].error("Something went wrong with docker, continuing anyway: {0} ".format(e))
 
