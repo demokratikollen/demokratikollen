@@ -16,10 +16,18 @@ Search = {
 
     $('#main-search input').typeahead(null,{
         name: 'members',
-        displayKey: function(m) {
-          return m.full_name + ' (' + m.party + ')';
-        },
-        source: members.ttAdapter()
+        displayKey: 'full_name',
+        source: members.ttAdapter(),
+        templates: {
+          empty: [
+            '<div class="empty-message">',
+            'Hittade inga ledamöter.',
+            '</div>'
+          ].join('\n'),
+          suggestion: function(d) {
+            return '<p>'+d.full_name+' ('+d.party+')</p>';
+          }
+        }
     }).on('typeahead:selected', function (obj, datum) {
         $('#test').html(datum.full_name);
     });

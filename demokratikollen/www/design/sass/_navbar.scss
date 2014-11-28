@@ -103,6 +103,8 @@
   }
 }
 
+$tt-dropdown-bg-color: #efefef;
+$tt-dropdown-select-color: $gray;
 
 // Search-box styling for real-time search
 span.twitter-typeahead {
@@ -119,7 +121,7 @@ span.twitter-typeahead {
     list-style: none;
     font-size: 14px;
     text-align: left;
-    background-color: #ffffff;
+    background-color: $tt-dropdown-bg-color;
     border: 1px solid #cccccc;
     border: 1px solid rgba(0, 0, 0, 0.15);
     border-radius: $border-radius-base;
@@ -127,6 +129,11 @@ span.twitter-typeahead {
     box-shadow: 0 6px 12px rgba(0, 0, 0, 0.175);
     background-clip: padding-box;
   }
+  .tt-suggestion {
+    padding: 0;
+    margin: 0;
+  }
+
   .tt-suggestion > p {
     display: block;
     padding: 3px 20px;
@@ -134,18 +141,22 @@ span.twitter-typeahead {
     font-weight: normal;
     line-height: 1.42857143;
     color: #333333;
+    background-color: red;
     white-space: nowrap;
+    margin-bottom: 5px !important;
+    margin-top: 5px !important;
   }
+
   .tt-suggestion > p:hover,
   .tt-suggestion > p:focus {
     color: #ffffff;
     text-decoration: none;
     outline: 0;
-    background-color: #428bca;
+    background-color: $tt-dropdown-select-color;
   }
-  .tt-suggestion.tt-cursor {
+  .tt-suggestion.tt-cursor > p {
     color: #ffffff;
-    background-color: #428bca;
+    background-color: $tt-dropdown-select-color;
   }
   width: 100%;
 }
@@ -153,24 +164,26 @@ span.twitter-typeahead {
 .input-group {
   span.twitter-typeahead {
     display: block !important;
-    .tt-dropdown-menu {
-      top: 32px !important;
-    }
+  }
+  .tt-dropdown-menu {
+    top: 32px !important;
   }
 }
 
 .input-group.input-group-lg {
-  span.twitter-typeahead {
-    .tt-dropdown-menu {
-      top: 44px !important;
-    }
+  .tt-dropdown-menu {
+    top: 44px !important;
   }
 }
 .input-group.input-group-sm {
-  span.twitter-typeahead {
-    .tt-dropdown-menu {
-      top: 28px !important;
-    }
+  .tt-dropdown-menu {
+    top: 28px !important;
+  }
+}
+#main-search {
+  .empty-message {
+    padding: 5px 10px !important;
+    text-align: center;
   }
 }
 // .form-group {
