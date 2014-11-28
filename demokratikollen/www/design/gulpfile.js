@@ -7,7 +7,8 @@ var gulp = require('gulp'),
     sourcemaps = require('gulp-sourcemaps'),
     minifyCss = require('gulp-minify-css'),
     rename = require('gulp-rename'),
-    sass = require('gulp-ruby-sass');
+    sass = require('gulp-ruby-sass'),
+    gulpFilter = require('gulp-filter');
 
 var work_dir = '/home/vagrant/demokratikollen/www/design/',
     dist_dir = '/home/vagrant/demokratikollen/www/app/static/';
@@ -69,9 +70,12 @@ gulp.task('copy',['copy-css-images','copy-fonts']);
  * Compilation tasks
  * ======================================================================== */
 gulp.task('styles', function () {
+    var filter = gulpFilter('**/*.css');
     return gulp.src(sass_files)
+        .pipe(sass({loadPath: bs_styles_dir, style:'compressed'}))
+        .pipe(filter)
         .pipe(rename({suffix: '.min'}))
-        .pipe(sass({loadPath: bs_styles_dir, style: 'compressed'}))
+        .pipe(filter.restore())
         .pipe(gulp.dest(css_dist));
 });
 
