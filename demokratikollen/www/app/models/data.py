@@ -1,7 +1,10 @@
 # Import the database object from the main app module
 from demokratikollen.www.app.helpers.db import db
 from demokratikollen.www.app.helpers.cache import cache
-from demokratikollen.core.db_structure import Member, ChamberAppointment, Party
+from demokratikollen.core.db_structure import Member, Appointment, \
+        CommitteeAppointment, ChamberAppointment, Party
+from sqlalchemy import and_
+from datetime import datetime
 
 def gender_json(date,party=''):
 
@@ -66,11 +69,16 @@ def get_parties():
 
 @cache.cached(3600*24)
 def get_members_typeahead():
-    members = db.session.query(Member).all()
+    now = datetime.utcnow()
+    members = db.session.query(Member).join(Appointment) \
+                .filter(and_(Appointment.start_date <= now,Appointment.end_date >= now)).all()
+    print(members[0].appointments)
+
     output = {"d": [{
                         "full_name": "{} {}".format(m.first_name,m.last_name),
                         "party": m.party.abbr,
-                        "id": m.id
+                        "id": m.id,
+                        "tokens": [m.first_name,m.last_name]+[a.group.name for a in m.appointments if isinstance(a,CommitteeAppointment)]
                     } for m in members]}
     return output
 
