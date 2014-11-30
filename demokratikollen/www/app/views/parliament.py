@@ -1,9 +1,9 @@
 from flask import Blueprint, request, jsonify
-from demokratikollen.www.app.models import data
+from demokratikollen.www.app.models import parliament
 
 import datetime
 
-blueprint = Blueprint('data', __name__, url_prefix='/data')
+blueprint = Blueprint('parliament', __name__, url_prefix='/parliament')
 
 # Set the route and accepted methods
 @blueprint.route('/gender.json', methods=['GET'])
@@ -12,7 +12,7 @@ def gender_json():
     party = request.args.get('party','')
     
     #Check if the party exists
-    parties = data.get_parties()
+    parties = parliament.get_parties()
     if party and party not in parties:
         msg = "Partiförkortningen existerar ej. Möjliga är: <br>"
         for p in parties:
@@ -28,7 +28,7 @@ def gender_json():
         except ValueError:
             return "Felaktig datumparameter. Formatet är: ÅÅÅÅ-MM-DD", 400
 
-    json = data.gender_json(date=date,party=party)
+    json = parliament.gender(date=date,party=party)
 
     return jsonify(json)
 
@@ -46,6 +46,6 @@ def parliament_json():
         except ValueError:
             return "Felaktig datumparameter. Formatet är: ÅÅ-MM-DD", 400
 
-    json = data.parliament_json(date=date)
+    json = parliament.parliament(date=date)
 
     return jsonify(json)

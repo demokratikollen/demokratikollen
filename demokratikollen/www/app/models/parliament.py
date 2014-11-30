@@ -3,7 +3,7 @@ from demokratikollen.www.app.helpers.db import db
 from demokratikollen.www.app.helpers.cache import cache
 from demokratikollen.core.db_structure import Member, ChamberAppointment, Party
 
-def gender_json(date,party=''):
+def gender(date,party=''):
 
     members = get_gender_db_statement(date,party);    
     print(members.all())
@@ -35,7 +35,7 @@ def get_gender_db_statement(date, party=''):
 
     return members
 
-def parliament_json(date):
+def parliament(date):
 
     members = get_parliament_db_statement(date)
    

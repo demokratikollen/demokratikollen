@@ -4,7 +4,7 @@ from flask.ext.testing import TestCase
 from unittest.mock import MagicMock, Mock, patch
 
 from demokratikollen.www.app import create_app
-from demokratikollen.www.app.views import data
+from demokratikollen.www.app.views import parliament
 
 
 class TestRoutesDataGenderJson(TestCase):
@@ -13,9 +13,9 @@ class TestRoutesDataGenderJson(TestCase):
 
     @classmethod
     def setUpClass(cls):
-        cls.uri = '/data/gender.json'
-        data.data.gender_json = Mock(return_value=dict(data=[{'test': 1}]))
-        data.data.get_parties = Mock(return_value=['M'])
+        cls.uri = '/parliament/gender.json'
+        parliament.parliament.gender = Mock(return_value=dict(data=[{'test': 1}]))
+        parliament.parliament.get_parties = Mock(return_value=['M'])
 
     def test_basic_route(self):
         response = self.client.get(self.uri)
@@ -26,11 +26,11 @@ class TestRoutesDataGenderJson(TestCase):
         #test that it works with a param
         self.client.get(self.uri + '?date=' + str_date)
         date = datetime.datetime.strptime('2014-01-01', '%Y-%m-%d').date()
-        data.data.gender_json.assert_called_with(date=date,party='')
+        parliament.parliament.gender.assert_called_with(date=date,party='')
 
     def test_no_date(self):
         self.client.get(self.uri)
-        data.data.gender_json.assert_called_with(date=datetime.date.today(),party='')
+        parliament.parliament.gender.assert_called_with(date=datetime.date.today(),party='')
 
     def test_bad_date(self):
         response = self.client.get(self.uri +'?date=not_a_date')
@@ -39,12 +39,12 @@ class TestRoutesDataGenderJson(TestCase):
     def test_party_param(self):
         response = self.client.get(self.uri + '?party=M')
 
-        data.data.gender_json.assert_called_with(date=datetime.date.today(),party='M')
+        parliament.parliament.gender.assert_called_with(date=datetime.date.today(),party='M')
 
     def test_no_party(self):
         response = self.client.get(self.uri + '?party=')
 
-        data.data.gender_json.assert_called_with(date=datetime.date.today(),party='')
+        parliament.parliament.gender.assert_called_with(date=datetime.date.today(),party='')
 
     def test_bad_party(self):
         response = self.client.get(self.uri + '?party=not-a-pary-abbr')
@@ -56,10 +56,10 @@ class TestRoutesDataParliamentJson(TestCase):
 
     @classmethod
     def setUpClass(cls):
-        cls.uri = '/data/parliament.json'
+        cls.uri = '/parliament/parliament.json'
 
-        data.data.parliament_json = Mock(return_value=dict(data=[{'test': 1}]))
-        data.data.get_parties = Mock(return_value=['M'])
+        parliament.parliament.parliament = Mock(return_value=dict(data=[{'test': 1}]))
+        parliament.parliament.get_parties = Mock(return_value=['M'])
 
     def setUp(self):
         pass
@@ -73,11 +73,11 @@ class TestRoutesDataParliamentJson(TestCase):
         #test that it works with a param
         self.client.get(self.uri + '?date=' + str_date)
         date = datetime.datetime.strptime('2014-01-01', '%Y-%m-%d').date()
-        data.data.parliament_json.assert_called_with(date=date)
+        parliament.parliament.parliament.assert_called_with(date=date)
 
     def test_no_date(self):
         self.client.get(self.uri)
-        data.data.parliament_json.assert_called_with(date=datetime.date.today())
+        parliament.parliament.parliament.assert_called_with(date=datetime.date.today())
 
     def test_bad_date(self):
         response = self.client.get(self.uri + '?date=not_a_date')
