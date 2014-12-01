@@ -8,7 +8,8 @@ var gulp = require('gulp'),
     minifyCss = require('gulp-minify-css'),
     rename = require('gulp-rename'),
     sass = require('gulp-ruby-sass'),
-    gulpFilter = require('gulp-filter');
+    gulpFilter = require('gulp-filter'),
+    plumber = require('gulp-plumber');
 
 var work_dir = '/home/vagrant/demokratikollen/www/design/',
     dist_dir = '/home/vagrant/demokratikollen/www/app/static/';
@@ -72,6 +73,7 @@ gulp.task('copy',['copy-css-images','copy-fonts']);
 gulp.task('styles', function () {
     var filter = gulpFilter('**/*.css');
     return gulp.src(sass_files)
+        .pipe(plumber())
         .pipe(sass({loadPath: bs_styles_dir, style:'compressed'}))
         .pipe(filter)
         .pipe(rename({suffix: '.min'}))
@@ -81,6 +83,7 @@ gulp.task('styles', function () {
 
 gulp.task('scripts', function () {
     return gulp.src(js_files)
+        .pipe(plumber())
         .pipe(sourcemaps.init({loadMaps: true}))
         .pipe(concatenate('scripts.js'))
         .pipe(uglify())
@@ -95,6 +98,7 @@ gulp.task('scripts', function () {
  * ======================================================================== */
 gulp.task('style-deps', function () {
     return gulp.src(style_deps)
+        .pipe(plumber())
         .pipe(sourcemaps.init({loadMaps: true}))
         .pipe(concatenate('dependencies.css'))
         .pipe(minifyCss())
@@ -105,6 +109,7 @@ gulp.task('style-deps', function () {
 
 gulp.task('script-deps', function () {
     return gulp.src(js_deps)
+        .pipe(plumber())
         .pipe(sourcemaps.init({loadMaps: true}))
         .pipe(concatenate('dependencies.js'))
         .pipe(uglify())
