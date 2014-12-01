@@ -67,6 +67,7 @@
 
       .search {
         @extend .form-group;
+        width: 100%;
         .search-typeahead {
           @extend .input-group;
           @include no-border-or-shadow();
