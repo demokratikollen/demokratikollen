@@ -1,6 +1,6 @@
 #navbar {
   @extend .navbar,.navbar-inverse,.navbar-static-top;
-  border: 0;
+  @include box-shadow(0 1px 5px 0px #444);
 
   .column.brand-and-menu-toggle {
     @extend .col-sm-5,.col-md-3;
