@@ -35,8 +35,13 @@
   .column.menu-search {
     @extend .col-sm-7,.col-md-5,.col-md-push-4;
 
-    div:first-child {
+    & > div:first-child {
       @extend  .navbar-collapse;
+      overflow-y: visible !important;
+    }
+
+    .navbar-collapse.collapsing {
+      overflow-y: hidden !important
     }
 
     // Classes that are added to collapsed menu
@@ -89,7 +94,7 @@
   .column.menu-links {
     @extend .col-md-4,.col-sm-12,.col-md-pull-5;
 
-    div:first-child {
+    & > div:first-child {
       @extend  .navbar-collapse;
     }
 
@@ -103,8 +108,8 @@
   }
 }
 
-$tt-dropdown-bg-color: #efefef;
-$tt-dropdown-select-color: $gray;
+$tt-dropdown-bg-color: #ffffff;
+$tt-dropdown-select-color: $brand-primary;
 
 // Search-box styling for real-time search
 span.twitter-typeahead {
@@ -112,11 +117,12 @@ span.twitter-typeahead {
     position: absolute;
     top: 100%;
     left: 0;
-    z-index: 1000;
+    z-index: 1000 !important;
     display: none;
     float: left;
     min-width: 160px;
-    padding: 5px 0;
+    padding: 0;
+    padding-top: 5px;
     margin: 2px 0 0;
     list-style: none;
     font-size: 14px;
@@ -125,8 +131,7 @@ span.twitter-typeahead {
     border: 1px solid #cccccc;
     border: 1px solid rgba(0, 0, 0, 0.15);
     border-radius: $border-radius-base;
-    -webkit-box-shadow: 0 6px 12px rgba(0, 0, 0, 0.175);
-    box-shadow: 0 6px 12px rgba(0, 0, 0, 0.175);
+    @include box-shadow(0 6px 12px rgba(0, 0, 0, 0.175));
     background-clip: padding-box;
   }
   .tt-suggestion {
@@ -141,10 +146,9 @@ span.twitter-typeahead {
     font-weight: normal;
     line-height: 1.42857143;
     color: #333333;
-    background-color: red;
     white-space: nowrap;
+    margin-top: 0 !important;
     margin-bottom: 5px !important;
-    margin-top: 5px !important;
   }
 
   .tt-suggestion > p:hover,
