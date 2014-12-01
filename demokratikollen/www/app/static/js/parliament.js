@@ -8,8 +8,8 @@ P = {
         $('#parliament_button').addClass('active');    
     },
     Update: function () {
-        if(P.page !== 'parliament'){
-            P.page = 'parliament';
+        if(P.page !== P.ChairsObject.name){
+            P.page = P.ChairsObject.name;
             P.ChairsObject.SetupFigure();
         }
         P.UpdateDateFromSlider(P.ChairsObject);
@@ -89,10 +89,11 @@ P = {
         P.DrawMemberNodes(P.ChairsObject);
     },
     data: null,
-    dataUrl: '/data/parliament.json',
+    dataUrl: '/parliament/parliament.json',
     date_string: null,
     member_node_data: null,
-    chairs_inner_radius: 220
+    chairs_inner_radius: 220,
+    name: 'parliament'
 },
 GenderObject: {
     SetupFigure: function() {
@@ -108,8 +109,8 @@ GenderObject: {
         P.DrawMemberNodes(P.GenderObject);
     },
     Update: function() {
-        if(P.page !== 'gender'){
-            P.page = 'gender';
+        if(P.page !== P.GenderObject.name){
+            P.page = P.GenderObject.name;
             P.GenderObject.SetupFigure();
         }
         P.UpdateDateFromSlider(P.GenderObject);
@@ -182,7 +183,6 @@ GenderObject: {
                 }
             }
         }
-        console.log(data)
     },
     DrawFigLabels: function () {
 
@@ -191,9 +191,10 @@ GenderObject: {
     side_padding: 50,
     circle_padding: 5,
     bottom_padding: 20,
-    dataUrl: '/data/gender.json',
+    dataUrl: '/parliament/gender.json',
     date_string: null,
-    member_node_data: null
+    member_node_data: null,
+    name: 'gender'
 },
 Setup: function() {
 
@@ -251,7 +252,7 @@ DrawMemberNodes: function(obj) {
     nodes.exit().remove();
 
     var new_nodes = nodes.enter()
-    .append('g').attr("class", 'member_node')
+    .append('g')
     .attr("transform", function(d) { return "translate(" + d.x + "," + (-d.r*4) +")"});
 
     new_nodes.append("title")
@@ -268,7 +269,9 @@ DrawMemberNodes: function(obj) {
         else return 1;
     });
 
-    //update the position for the olf ones and animate.
+    nodes.attr('class', 'member_node '+ obj.name);
+
+    //update the position and animate.
     nodes.transition().duration(1000)
     .attr("transform", function(d) { 
         x = d.x;
