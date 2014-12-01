@@ -121,10 +121,11 @@ span.twitter-typeahead {
     z-index: 1000 !important;
     display: none;
     float: left;
-    min-width: 160px;
+    // min-width: 160px;
+    width: 100%;
     padding: 0;
     padding-top: 5px;
-    margin: 2px 0 0;
+    margin: 5px 0 0;
     list-style: none;
     font-size: 14px;
     text-align: left;

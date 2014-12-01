@@ -1,23 +1,17 @@
 Search = {
   Setup: function() {
-    var members = new Bloodhound({
-      datumTokenizer: Bloodhound.tokenizers.obj.whitespace('full_name'),
-      queryTokenizer: Bloodhound.tokenizers.whitespace,
-      prefetch: {
-        url: "/data/members_search.json",
-        filter: function(obj) {
-          return obj.d;
-        }
-      }
+    var f;
+    $.getJSON( "/data/members_search.json", function( data ) {
+      f = new Fuse(data.d, {keys: ['fullName','party'], threshold:0.2});
     });
 
-    members.initialize();
 
-
-    $('#main-search input').typeahead(null,{
+    $('#main-search input').typeahead({hint:false,minLength:2},{
         name: 'members',
-        displayKey: 'full_name',
-        source: members.ttAdapter(),
+        displayKey: 'fullName',
+        source: function(query,cb) {
+          setTimeout(function(){cb(f.search(query));},0);
+        },
         templates: {
           empty: [
             '<div class="empty-message">',
@@ -25,7 +19,7 @@ Search = {
             '</div>'
           ].join('\n'),
           suggestion: function(d) {
-            return '<p>'+d.full_name+' ('+d.party+')</p>';
+            return '<p>'+d.fullName+' <small>('+d.party+')</small></p>';
           }
         }
     }).on('typeahead:selected', function (obj, datum) {

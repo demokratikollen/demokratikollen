@@ -68,8 +68,8 @@ def get_parties():
 def get_members_typeahead():
     members = db.session.query(Member).all()
     output = {"d": [{
-                        "full_name": "{} {}".format(m.first_name,m.last_name),
-                        "party": m.party.abbr,
+                        "fullName": "{} {}".format(m.first_name,m.last_name),
+                        "party": m.party.name.split()[0],
                         "id": m.id
                     } for m in members]}
     return output
