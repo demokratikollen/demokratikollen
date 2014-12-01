@@ -119,8 +119,7 @@ gunicorn_debug() {
 }
 
 gunicorn_debug_nocache() {
-    #do things with parameters like $1 such as
-    gunicorn --reload --debug --log-file=- demokratikollen.www.gunicorn_testing:app
+    gunicorn --reload --debug --log-file=- demokratikollen.www.gunicorn_no_cache:app
 }
 
 werkzeug_debug() {

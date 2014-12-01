@@ -8,7 +8,7 @@ from demokratikollen.www.app.helpers.db import db
 import os
 
 #App Factory to facilitate testing.
-def create_app(testing=False):
+def create_app(testing=False, caching=True):
     app = Flask(__name__, static_url_path='', static_folder='static')
 
     #Load the basic config.
@@ -18,7 +18,9 @@ def create_app(testing=False):
     if testing:
         print("Running Test env.")
         app.config['TESTING'] = True
-        app.config['SQLALCHEMY_DATABASE_URI'] = os.environ['TEST_DATABASE_URL']
+        cache.config['CACHE_TYPE'] = 'null'
+
+    if not caching:
         cache.config['CACHE_TYPE'] = 'null'
 
     #init the cache
@@ -33,10 +35,12 @@ def create_app(testing=False):
         return render_template('404.html'), 404
 
     # Import a module / component using its blueprint handler variable
-    from .routes import data
+    from demokratikollen.www.app.views import parliament, pages
+    blueprints = (parliament.blueprint, pages.blueprint)
 
     # Register blueprint(s)
-    app.register_blueprint(data.data_blueprint)
+    for b in blueprints:
+        app.register_blueprint(b)
 
     return app
 

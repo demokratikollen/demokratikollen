@@ -7,11 +7,16 @@
   apt: pkg={{ item }} state=installed
   with_items:
       - unzip
+      - ruby-dev
+      - git-core
 
 - name: Copy config files
   copy: src={{item.file}} dest={{item.path}}
   with_items:
       - {file: '.bashrc', path: '~/.bashrc'}
+
+- name: Copy db dump file.
+  copy: src='create_test_dumps.sh' dest='~/create_test_dumps.sh'
 
 - name: Set base path for git repo
   lineinfile: dest=~/.bashrc state=present line='export REPO_PATH="/vagrant"'

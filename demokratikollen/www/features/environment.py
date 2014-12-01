@@ -7,10 +7,11 @@ import time
 
 def before_all(context):
     print("Starting Webserver and Webdriver")
-    context.server = subprocess.Popen(shlex.split("gunicorn --debug -b 127.0.0.1:5555 demokratikollen.www.gunicorn_testing:app"),stdout=subprocess.PIPE)
-    time.sleep(2)
+    if 'DEPLOY' in os.environ:
+    	context.server = subprocess.Popen(shlex.split("gunicorn --debug -b 127.0.0.1:5000 demokratikollen.www.gunicorn_no_cache:app"),stdout=subprocess.PIPE)
+    else:
+       	context.server = subprocess.Popen(shlex.split("gunicorn --debug -b 127.0.0.1:8000 demokratikollen.www.gunicorn_no_cache:app"),stdout=subprocess.PIPE)
     context.driver = webdriver.PhantomJS()
-   
 
 def after_all(context):
     print("Stopping the Webserver and Webdriver")

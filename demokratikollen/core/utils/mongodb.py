@@ -21,7 +21,7 @@ class MongoDBDatastore:
         database = url_comp.path[1:]
         
         self.connection = MongoClient(self.dburl)
-        self.database = self.connection[database]
+        self.database = self.connection.demokratikollen
         self.collection = self.database.datastore
         self.collection.ensure_index([('identifier', ASCENDING)], unique=True)
 

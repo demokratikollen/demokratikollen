@@ -1,0 +1,56 @@
+$xs-tot-top: $navbar-height + $tb-content-padding + 2px;
+$sm-tot-top: 2*$navbar-height + $tb-content-padding;
+$md-tot-top: $navbar-height + $tb-content-padding;
+
+#content-wrapper {
+  margin-top: -$md-tot-top;
+  @media (max-width: $screen-xs-max) {
+    margin-top: -$xs-tot-top;
+  }
+  @media (min-width: $screen-xs-max) and (max-width: $screen-sm-max) {
+    margin-top: -$sm-tot-top;
+  }
+  min-height: 100%;
+
+  .container {
+    padding-bottom:$footer-height + 20px;
+    padding-top: $md-tot-top;
+    @media (max-width: $screen-xs-max) {
+      padding-top: $xs-tot-top;
+    }
+    @media (min-width: $screen-xs-max) and (max-width: $screen-sm-max) {
+      padding-top: $sm-tot-top;
+    }
+  }
+}
+
+footer {
+  height: $footer-height;
+  line-height: $footer-height;
+  padding: 0;
+  background-color: $gray-lighter;
+  position: relative;
+  margin-top: -$footer-height;
+  clear:both;
+
+  div:first-child {
+    @extend .container;
+
+    p {
+      margin: 0;
+      font-size: $font-size-small;
+      color: $gray-light;
+      a {
+        color: $gray;
+      }
+    }
+
+    p.left {
+      @extend .pull-left;
+    }
+
+    p.right {
+      @extend .pull-right;
+    }
+  }
+}

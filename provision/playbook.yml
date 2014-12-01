@@ -2,10 +2,12 @@
   vars:
       app_name: demokratikollen
       venv_dir: ~/.virtualenv
+
   roles:
       - setup
       - postgresql
       - mongodb
       - python
       - web
+      - webdev
       - deploy

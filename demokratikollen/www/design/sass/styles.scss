@@ -1,0 +1,41 @@
+@import "custom-bootstrap-variables";
+@import "custom-bootstrap-imports";
+
+$logo-font-size: 27px;
+$logo-font-size-xs: 22px;
+
+$footer-height: 40px;
+$tb-content-padding:20px;
+
+@mixin xs-font-size($xs-size,$default-size) {
+  font-size: $default-size;
+  @media (max-width: $screen-xs-max) {
+    font-size: $xs-size;
+  }
+}
+
+@mixin no-border-or-shadow() {
+  border:none;
+  @include box-shadow(none);
+}
+
+@import "navbar";
+@import "footer";
+
+html,body {
+  height: 100%;
+}
+
+#width-test {
+  @extend .container;
+  .one-unit {
+    @extend .col-xs-1;
+    border-left: 1px solid #000;
+    border-right: 1px solid #000;
+  }
+}
+
+#menu-toggle {
+  @extend .navbar-toggle;
+  @extend .navbar-right;
+}

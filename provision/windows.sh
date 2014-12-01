@@ -34,7 +34,7 @@ if [ ! -f /usr/local/bin/ansible ]; then
   echo "Installing required python modules."
   sudo pip install paramiko pyyaml jinja2 markupsafe
   echo "Installing Ansible."
-  sudo pip install ansible
+  sudo pip install ansible==1.7
 fi
 
 # Fix the ansible host file to be able to only do the develop provisioning
