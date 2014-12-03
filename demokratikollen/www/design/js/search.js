@@ -1,7 +1,7 @@
 Search = {
   Setup: function() {
     var f;
-    $.getJSON( "/parliament/members_search.json", function( data ) {
+    $.getJSON( "/data/members_search.json", function( data ) {
       f = new Fuse(data.d, {keys: ['fullName','party'], threshold:0.2});
     });
 
@@ -22,7 +22,7 @@ Search = {
             return '<p>'+d.fullName+' <small>('+d.party+')</small></p>';
         }
     }).on('typeahead:selected', function (obj, datum) {
-        $('#test').html(datum.fullName);
+        $('#test').html(datum.full_name);
     });
   }
 };

@@ -116,7 +116,7 @@ gulp.task('script-deps', function () {
         .pipe(plumber())
         .pipe(sourcemaps.init({loadMaps: true}))
         .pipe(concatenate('dependencies.js'))
-        .pipe(uglify())
+        // .pipe(uglify())
         .pipe(rename({suffix: '.min'}))
         .pipe(sourcemaps.write('../js'))
         .pipe(gulp.dest(js_dist));

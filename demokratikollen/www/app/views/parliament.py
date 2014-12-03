@@ -53,6 +53,6 @@ def parliament_json():
 
 @blueprint.route('/members_search.json')
 def members_search_json():
-    members_dict = parliament.get_members_typeahead()
+    members_dict = data.get_members_typeahead()
 
     return jsonify(members_dict)
