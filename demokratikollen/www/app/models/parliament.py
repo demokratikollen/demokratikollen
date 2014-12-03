@@ -2,8 +2,9 @@
 from demokratikollen.www.app.helpers.db import db
 from demokratikollen.www.app.helpers.cache import cache
 from demokratikollen.core.db_structure import Member, Appointment, \
-        CommitteeAppointment, ChamberAppointment, Party
+        CommitteeAppointment, ChamberAppointment, GroupAppointment, Group, Party
 from sqlalchemy import and_
+from sqlalchemy.orm import joinedload
 from datetime import datetime
 
 def gender(date,party=''):
@@ -68,16 +69,13 @@ def get_parties():
 
 @cache.cached(3600*24)
 def get_members_typeahead():
-    now = datetime.utcnow()
-    members = db.session.query(Member).join(Appointment) \
-                .filter(and_(Appointment.start_date <= now,Appointment.end_date >= now)).all()
-    print(members[0].appointments)
+    members = db.session.query(Member).options(joinedload(Member.party),joinedload(Member.current_group_appointments).joinedload(GroupAppointment.group)).all()
 
     output = {"d": [{
                         "fullName": "{} {}".format(m.first_name,m.last_name),
                         "party": m.party.name.split()[0],
                         "id": m.id,
-                        "tokens": [m.first_name,m.last_name]+[a.group.name for a in m.appointments if isinstance(a,CommitteeAppointment)]
+                        "groups": ' '.join([a.group.name for a in m.current_group_appointments])
                     } for m in members]}
     return output
 
