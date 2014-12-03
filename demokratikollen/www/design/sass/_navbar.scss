@@ -69,7 +69,7 @@
         @extend .form-group;
         width: 100%;
         .search-typeahead {
-          @extend .input-group;
+          @extend .input-group,.dropdown;
           @include no-border-or-shadow();
 
           .input-group-addon {
@@ -87,6 +87,11 @@
             border-top-right-radius: $border-radius-base !important;
             width: 100% !important;
           }
+        }
+
+        ul {
+          @extend .dropdown-menu;
+          width: 100%;
         }
       }
     }
