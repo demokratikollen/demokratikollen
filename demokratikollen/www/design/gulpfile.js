@@ -7,7 +7,9 @@ var gulp = require('gulp'),
     sourcemaps = require('gulp-sourcemaps'),
     minifyCss = require('gulp-minify-css'),
     rename = require('gulp-rename'),
-    sass = require('gulp-ruby-sass');
+    sass = require('gulp-ruby-sass'),
+    gulpFilter = require('gulp-filter'),
+    plumber = require('gulp-plumber');
 
 var work_dir = '/home/vagrant/demokratikollen/www/design/',
     dist_dir = '/home/vagrant/demokratikollen/www/app/static/';
@@ -37,7 +39,9 @@ var js_deps = [
     bs_scripts_dir+'bootstrap/transition.js',
     bs_scripts_dir+'bootstrap/collapse.js',
     // Typeahead
-    'bower_components/typeahead.js/dist/typeahead.bundle.js'
+    'bower_components/typeahead.js/dist/typeahead.bundle.js',
+    // Fuse.js
+    'bower_components/fuse.js/src/fuse.js'
 ];
 
 var style_deps = [
@@ -71,14 +75,19 @@ gulp.task('copy',['copy-css-images','copy-fonts']);
  * Compilation tasks
  * ======================================================================== */
 gulp.task('styles', function () {
+    var filter = gulpFilter('**/*.css');
     return gulp.src(sass_files)
+        .pipe(plumber())
+        .pipe(sass({loadPath: bs_styles_dir, style:'compressed'}))
+        .pipe(filter)
         .pipe(rename({suffix: '.min'}))
-        .pipe(sass({loadPath: bs_styles_dir, style: 'compressed'}))
+        .pipe(filter.restore())
         .pipe(gulp.dest(css_dist));
 });
 
 gulp.task('scripts', function () {
     return gulp.src(js_files)
+        .pipe(plumber())
         .pipe(sourcemaps.init({loadMaps: true}))
         .pipe(concatenate('scripts.js'))
         .pipe(uglify())
@@ -93,6 +102,7 @@ gulp.task('scripts', function () {
  * ======================================================================== */
 gulp.task('style-deps', function () {
     return gulp.src(style_deps)
+        .pipe(plumber())
         .pipe(sourcemaps.init({loadMaps: true}))
         .pipe(concatenate('dependencies.css'))
         .pipe(minifyCss())
@@ -103,6 +113,7 @@ gulp.task('style-deps', function () {
 
 gulp.task('script-deps', function () {
     return gulp.src(js_deps)
+        .pipe(plumber())
         .pipe(sourcemaps.init({loadMaps: true}))
         .pipe(concatenate('dependencies.js'))
         .pipe(uglify())
@@ -119,5 +130,6 @@ gulp.task('watch', function() {
     gulp.watch(js_files, ['scripts'])
 });
 
+gulp.task('dependencies',['style-deps','script-deps']);
 gulp.task('all',['copy','styles','style-deps','script-deps']);
-gulp.task('default',['styles','scripts','watch']);
+gulp.task('default',['dependencies','styles','scripts','watch']);

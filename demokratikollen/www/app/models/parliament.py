@@ -1,4 +1,4 @@
-# Import the database object from the main app module
+﻿# Import the database object from the main app module
 from demokratikollen.www.app.helpers.db import db
 from demokratikollen.www.app.helpers.cache import cache
 from demokratikollen.core.db_structure import Member, Appointment, \
@@ -6,11 +6,10 @@ from demokratikollen.core.db_structure import Member, Appointment, \
 from sqlalchemy import and_
 from datetime import datetime
 
-def gender_json(date,party=''):
+def gender(date,party=''):
 
     members = get_gender_db_statement(date,party);
-    print(members.all())
-
+    
     response = {'statistics': {'n_males': 0, 'n_females': 0, 'total': 0}, 'data': [], }
     for member in members.all():
         response['data'].append(dict(member_id=member[0],gender=member[1],party=member[2]))
@@ -38,7 +37,7 @@ def get_gender_db_statement(date, party=''):
 
     return members
 
-def parliament_json(date):
+def parliament(date):
 
     members = get_parliament_db_statement(date)
 
@@ -75,8 +74,8 @@ def get_members_typeahead():
     print(members[0].appointments)
 
     output = {"d": [{
-                        "full_name": "{} {}".format(m.first_name,m.last_name),
-                        "party": m.party.abbr,
+                        "fullName": "{} {}".format(m.first_name,m.last_name),
+                        "party": m.party.name.split()[0],
                         "id": m.id,
                         "tokens": [m.first_name,m.last_name]+[a.group.name for a in m.appointments if isinstance(a,CommitteeAppointment)]
                     } for m in members]}

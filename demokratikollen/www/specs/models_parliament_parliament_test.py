@@ -5,11 +5,11 @@ from unittest.mock import MagicMock
 
 from demokratikollen.www.app.helpers.db import db, Member
 from demokratikollen.www.app import create_app
-from demokratikollen.www.app.models import data
+from demokratikollen.www.app.models import parliament
 
 d = date(2014,1,1)
 
-class TestGenderJson(TestCase):
+class TestGender(TestCase):
 
     def create_app(self):
         return create_app(testing=True)
@@ -21,20 +21,20 @@ class TestGenderJson(TestCase):
         pass
 
     def test_calls_data_routine_correctly(self):
-        data.get_parliament_db_statement = MagicMock()
+        parliament.get_parliament_db_statement = MagicMock()
 
-        response = data.parliament_json(date=d)
+        response = parliament.parliament(date=d)
 
-        data.get_parliament_db_statement.assert_called_with(d)
+        parliament.get_parliament_db_statement.assert_called_with(d)
 
     def test_sets_correct_stats(self):
         out_data = [(1,'S'),(2,'MP'),(3,'V')]
 
-        data.get_parliament_db_statement = MagicMock()
-        cursor = data.get_parliament_db_statement.return_value
+        parliament.get_parliament_db_statement = MagicMock()
+        cursor = parliament.get_parliament_db_statement.return_value
         cursor.all.return_value = out_data
 
-        response = data.parliament_json(date=d)
+        response = parliament.parliament(date=d)
 
         self.assertEqual(len(response['data']), 3 )
         self.assertEqual(response['statistics']['n_members'], 3)
@@ -42,11 +42,11 @@ class TestGenderJson(TestCase):
     def test_sets_data_correctly(self):
         out_data = [(1,'S'),(2,'MP'),(3,'V')]
 
-        data.get_parliament_db_statement = MagicMock()
-        cursor = data.get_parliament_db_statement.return_value
+        parliament.get_parliament_db_statement = MagicMock()
+        cursor = parliament.get_parliament_db_statement.return_value
         cursor.all.return_value = out_data
 
-        response = data.parliament_json(date=d)
+        response = parliament.parliament(date=d)
 
         sorted_on_member_id_data = sorted(response['data'], key=lambda k: k['member_id'])
 
@@ -56,11 +56,11 @@ class TestGenderJson(TestCase):
     def test_sorts_data_correctly(self):
         out_data = [(1,'S'),(2,'MP'),(3,'V')]
 
-        data.get_parliament_db_statement = MagicMock()
-        cursor = data.get_parliament_db_statement.return_value
+        parliament.get_parliament_db_statement = MagicMock()
+        cursor = parliament.get_parliament_db_statement.return_value
         cursor.all.return_value = out_data
 
-        response = data.parliament_json(date=d)
+        response = parliament.parliament(date=d)
 
         correct_order = [2,1,3]
 
