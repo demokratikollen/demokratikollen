@@ -24,6 +24,10 @@ build:
             code: |
                 export MONGO_DATABASE_URL=$MONGODB_URL
         - script:
+            name: Add the deploy env.
+            code: |
+                export DEPLOY=1
+        - script:
             name: Recreate the databases.
             cwd: demokratikollen/data/dumps
             code: |
