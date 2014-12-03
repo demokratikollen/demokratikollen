@@ -39,7 +39,7 @@ var js_deps = [
     bs_scripts_dir+'bootstrap/transition.js',
     bs_scripts_dir+'bootstrap/collapse.js',
     // Typeahead
-    'bower_components/typeahead.js/dist/typeahead.bundle.js',
+    // 'bower_components/typeahead.js/dist/typeahead.bundle.js',
     // Fuse.js
     'bower_components/fuse.js/src/fuse.js'
 ];
