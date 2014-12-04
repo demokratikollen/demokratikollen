@@ -2,13 +2,18 @@
 
 {% block styles -%}{{ super() }}
     <style>
+    .line.appointment { stroke:#333; stroke-width:16px; }
+    .line.appointment.substitute { stroke:#999; }
+    
+    g.tick text { font-size: 16px; }
+    path.domain { display: none; }
     </style>
 {%- endblock %}
 
 {% block content %}
 <div class="row">
-  <div class="col-md-5" style="border:1px solid #444;">
-  <svg id="timeline_svg" class="canvas"></svg>
+  <div class="col-md-9" style="border:1px solid #444;">
+  <svg id="timeline_svg" class="canvas" preserveAspectRatio="xMinYMin meet"></svg>
   </div>
 </div>
 {% endblock %}
@@ -17,9 +22,14 @@
     <script type="text/javascript" src="{{ url_for('static', filename='js/member-timeline.js') }}"></script>
     <script type="text/javascript">
     // Load data and render timeline
-    var config = {fontSize:12};
+    var config = {
+      width: 940,
+      labelWidth: 200,
+      lineHeight: 30,
+      fontSize: 14
+    };
     $(function() {
-      d3.json("/data/appointments.json", function(data) {
+      d3.json("/data/member/appointments.json", function(data) {
         d3.select("#timeline_svg")
         .datum(data)
         .call(AppointmentsTimeline(config))

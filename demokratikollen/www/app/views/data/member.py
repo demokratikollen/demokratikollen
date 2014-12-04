@@ -9,18 +9,22 @@ def appointments_json():
         { 
             "start": "2006-01-01T00:00:00",
             "end": "2010-01-01T00:00:00",
-            "name": "Utskottet för det ena"
-        },
-        { 
-            "start": "2005-01-01T00:00:00",
-            "end": "2010-01-01T00:00:00",
-            "name": "Utskottet för det andra"
+            "name": "Utskottet för det ena",
+            "role": "Ordförande"
         },
         { 
             "start": "2008-01-01T00:00:00",
             "end": "2012-01-01T00:00:00",
-            "name": "Utskottet för det tredje"
+            "name": "Utskottet för det tredje",
+            "role": "Ledamot"
+        },
+        { 
+            "start": "2005-01-01T00:00:00",
+            "end": "2010-01-01T00:00:00",
+            "name": "Utskottet för det andra",
+            "role": "Suppleant"
         }
+        
     ]
     """
 
