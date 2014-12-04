@@ -180,7 +180,8 @@ def run_calculations(deploy_settings):
     p = params.get_params()
 
     commands = ['python compute_party_votes.py',
-                'python calculations/party_covoting.py']
+                'python calculations/party_covoting.py',
+                'python calculations/sankey_data.py']
     for cmd in commands:
         deploy_settings['log'].info("Starting {0} on {1}".format(cmd, p['curr_containers']['bgtasks']))
 
