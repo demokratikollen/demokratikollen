@@ -89,7 +89,7 @@ P = {
         P.DrawMemberNodes(P.ChairsObject);
     },
     data: null,
-    dataUrl: '/parliament/parliament.json',
+    dataUrl: '/data/parliament/parliament.json',
     date_string: null,
     member_node_data: null,
     chairs_inner_radius: 220,
@@ -191,7 +191,7 @@ GenderObject: {
     side_padding: 50,
     circle_padding: 5,
     bottom_padding: 20,
-    dataUrl: '/parliament/gender.json',
+    dataUrl: '/data/parliament/gender.json',
     date_string: null,
     member_node_data: null,
     name: 'gender'
