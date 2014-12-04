@@ -3,7 +3,7 @@ from demokratikollen.www.app.models import parliament
 
 import datetime
 
-blueprint = Blueprint('parliament', __name__, url_prefix='/parliament')
+blueprint = Blueprint('parliament', __name__, url_prefix='/data/parliament')
 
 # Set the route and accepted methods
 @blueprint.route('/gender.json', methods=['GET'])
