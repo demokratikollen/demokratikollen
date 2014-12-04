@@ -3,14 +3,14 @@ from demokratikollen.www.app.models import parliament
 
 import datetime
 
-blueprint = Blueprint('parliament', __name__, url_prefix='/parliament')
+blueprint = Blueprint('parliament', __name__, url_prefix='/data/parliament')
 
 # Set the route and accepted methods
 @blueprint.route('/gender.json', methods=['GET'])
 def gender_json():
     str_date = request.args.get('date', '')
     party = request.args.get('party','')
-    
+
     #Check if the party exists
     parties = parliament.get_parties()
     if party and party not in parties:
@@ -49,3 +49,10 @@ def parliament_json():
     json = parliament.parliament(date=date)
 
     return jsonify(json)
+
+
+@blueprint.route('/members_search.json')
+def members_search_json():
+    members_dict = parliament.get_members_typeahead()
+
+    return jsonify(members_dict)

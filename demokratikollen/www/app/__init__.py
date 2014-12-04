@@ -1,11 +1,16 @@
 # Import flask and template operators
 from flask import Flask, render_template
+import os
 
 #import helpers
 from demokratikollen.www.app.helpers.cache import cache
 from demokratikollen.www.app.helpers.db import db
 
-import os
+import demokratikollen.www.app.views.data.member
+import demokratikollen.www.app.views.data.parliament
+import demokratikollen.www.app.views.pages
+from demokratikollen.www.app import views
+
 
 #App Factory to facilitate testing.
 def create_app(testing=False, caching=True):
@@ -35,8 +40,11 @@ def create_app(testing=False, caching=True):
         return render_template('404.html'), 404
 
     # Import a module / component using its blueprint handler variable
-    from demokratikollen.www.app.views import parliament, pages
-    blueprints = (parliament.blueprint, pages.blueprint)
+
+    blueprints = (
+        views.data.parliament.blueprint,
+        views.data.member.blueprint,
+        views.pages.blueprint)
 
     # Register blueprint(s)
     for b in blueprints:

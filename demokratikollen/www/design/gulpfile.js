@@ -1,4 +1,4 @@
-/* ========================================================================
+﻿/* ========================================================================
  * Setup
  * ======================================================================== */
 var gulp = require('gulp'),
@@ -37,7 +37,11 @@ var js_deps = [
     jqueryUiSliderPipsDir+'jquery-ui-slider-pips.js',
     // Bootstrap plugins
     bs_scripts_dir+'bootstrap/transition.js',
-    bs_scripts_dir+'bootstrap/collapse.js'
+    bs_scripts_dir+'bootstrap/collapse.js',
+    // Typeahead
+    // 'bower_components/typeahead.js/dist/typeahead.bundle.js',
+    // Fuse.js
+    'bower_components/fuse.js/src/fuse.js'
 ];
 
 var style_deps = [
@@ -112,7 +116,7 @@ gulp.task('script-deps', function () {
         .pipe(plumber())
         .pipe(sourcemaps.init({loadMaps: true}))
         .pipe(concatenate('dependencies.js'))
-        .pipe(uglify())
+        // .pipe(uglify())
         .pipe(rename({suffix: '.min'}))
         .pipe(sourcemaps.write('../js'))
         .pipe(gulp.dest(js_dist));
@@ -126,5 +130,6 @@ gulp.task('watch', function() {
     gulp.watch(js_files, ['scripts'])
 });
 
+gulp.task('dependencies',['style-deps','script-deps']);
 gulp.task('all',['copy','styles','style-deps','script-deps']);
-gulp.task('default',['styles','scripts','watch']);
+gulp.task('default',['dependencies','styles','scripts','watch']);

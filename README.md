@@ -71,6 +71,6 @@ The class should be able to store any python object. Storing sqlalchemy objects 
 ## Front-end compilation and dependency handling
 [Gulp](http://gulpjs.com/) is used to compile SASS style sheets, concatenate and minify JS and CSS dependencies, and to copy necessary files (fonts, images, etc.) to the right places.
 
-To run, go to the folder `~/demokratikollen/www/design` and run `gulp all` or run any of the specialized tasks defined in `gulpfile.js` (in the same folder). To modify/add tasks or change dependencies, edit `gulpfile.js`.
+To run, go to the folder `~/demokratikollen/www/design` and run `gulp` to run all tasks and watch recompile on changes in `design/js` or `design/sass` or run any of the specialized tasks defined in `gulpfile.js` (in the same folder). To modify/add tasks or change dependencies, edit `gulpfile.js`.
 
 To install `npm` packages and add as dependencies go to `~/` and run `npm install <pkg> --save-dev`. The file `~/package.json` is linked to the corresponding file in `~demokratikollen/www/design`, which is tracked in `git`.
