@@ -1,0 +1,23 @@
+{% extends "parties/base.html" %}
+
+{% block styles %}
+{{ super() }}
+<style>
+/*.municipality {
+    fill: #ddd;
+    stroke: #fff;
+    stroke-width: 0.2px;
+    stroke-linejoin: round;
+    stroke-linecap: round;
+}*/
+</style>
+{% endblock %}
+
+{% block content %}
+    <svg id='election-map' class='canvas'></svg>
+{% endblock %}
+
+{% block scripts %}
+{{ super() }}
+<script type="text/javascript">$(Parties.Setup);</script>
+{% endblock %}

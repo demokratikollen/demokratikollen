@@ -13,7 +13,7 @@ def create_app(testing=False, caching=True):
 
     #Load the basic config.
     app.config.from_object('demokratikollen.www.config')
-    
+
     #If we require testing. change some configs.
     if testing:
         print("Running Test env.")
@@ -35,8 +35,8 @@ def create_app(testing=False, caching=True):
         return render_template('404.html'), 404
 
     # Import a module / component using its blueprint handler variable
-    from demokratikollen.www.app.views import parliament, pages
-    blueprints = (parliament.blueprint, pages.blueprint)
+    from demokratikollen.www.app.views import parliament, parties, pages
+    blueprints = (parliament.blueprint, parties.blueprint, pages.blueprint)
 
     # Register blueprint(s)
     for b in blueprints:
