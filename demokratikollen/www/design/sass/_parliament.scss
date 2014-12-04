@@ -1,0 +1,19 @@
+#parliament_figure {
+
+  .row.svg_canvas {
+    @extend .col-xs-12;
+  }
+
+  .row.date_slider {
+    @extend .col-xs-12;
+  }
+
+  .row.buttons {
+    @extend .col-xs-12;
+    margin: 10px 0px 0px 0px;
+    button {
+      @extend .btn
+    }
+
+  }
+}

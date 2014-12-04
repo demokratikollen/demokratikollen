@@ -1,4 +1,3 @@
-
 P = {
     ChairsObject: {
         SetupFigure: function () {
@@ -92,7 +91,7 @@ P = {
     dataUrl: '/parliament/parliament.json',
     date_string: null,
     member_node_data: null,
-    chairs_inner_radius: 220,
+    chairs_inner_radius: 183,
     name: 'parliament'
 },
 GenderObject: {
@@ -204,7 +203,7 @@ Setup: function() {
 
     var date_slider = $( "#date_slider" ).slider({
         value: s_today,
-        min: s_today - 3600*24*365*30,
+        min: s_today - 3600*24*365*40,
         max: s_today,
         step: 3600*24*365,
         change: P.SliderCallback
@@ -283,14 +282,13 @@ DrawMemberNodes: function(obj) {
     //update the radius of the circle if needed.
     nodes.selectAll('circle').data(data).transition().attr("r", function(d) { return d.r; });
 },
-max_width: 1140,
-max_height: 1140/2,
+max_width: 940,
+max_height: 470-15,
 stroke_width: 8,
 partyColors: {"S": "#ED1B34", "M": "#52BDEC", "SD": "#FBC700", 
 "MP": "#53A045", "C": "#016A3A", "V": "#A9291C",
 "FP": "#004B92", "KD": "#073192", "NYD": "#FBC700", "-": "#CCCCCC"},
 page: '',
-chairs_inner_radius: 220,
 current_obj: null
 };
 
