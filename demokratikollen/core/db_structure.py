@@ -48,7 +48,7 @@ class Appointment(Base):
     }
 
 class SpeakerAppointment(Appointment):
-    position =  Column(Enum('Talman','Förste vice talman','Andre vice talman','Tredje vice talman',name='spekear_positions'))
+    position =  Column(Enum('Talman','Förste vice talman','Andre vice talman','Tredje vice talman',name='speaker_positions'))
 
     __mapper_args__ = {
         'polymorphic_identity':'speaker_appointment'
@@ -66,9 +66,9 @@ class ChamberAppointment(Appointment):
     }
 
     def title(self):
-        return '{} {} {}'.format(self.status,self.role,self.member)    
+        return '{} {} {}'.format(self.status,self.role,self.member)
     def __repr__(self):
-        return 'Chair {}: {} {} {}-{}: {}'.format(self.chair,self.status,self.role,self.start_date,self.end_date,self.member)    
+        return 'Chair {}: {} {} {}-{}: {}'.format(self.chair,self.status,self.role,self.start_date,self.end_date,self.member)
 
 
 class GroupAppointment(Appointment):
@@ -134,7 +134,7 @@ class Party(Group):
         'polymorphic_identity':'party',
     }
     def __repr__(self):
-        return 'Party {}: {} ({})'.format(self.id,self.name,self.abbr)    
+        return 'Party {}: {} ({})'.format(self.id,self.name,self.abbr)
 
 #########################
 # Voting
@@ -173,7 +173,7 @@ class Document(Base):
         'polymorphic_on':classtype
     }
 
-    
+
 class CommitteeReport(Document):
     __tablename__ = 'committee_reports'
     id = Column(Integer, ForeignKey('documents.id'), primary_key=True)
@@ -183,7 +183,7 @@ class CommitteeReport(Document):
 
     __mapper_args__ = {
         'polymorphic_identity':'committee_report',
-    }   
+    }
 
 class CommitteeReportPoint(Base):
     __tablename__ = 'committee_report_points'
@@ -196,7 +196,7 @@ class CommitteeReportPoint(Base):
     __mapper_args__ = {
         'polymorphic_on':classtype,
         'polymorphic_identity':'committee_report_point'
-    } 
+    }
 
 class AcclaimedPoint(CommitteeReportPoint):
 
@@ -233,7 +233,7 @@ class ProposalPoint(Base):
     __tablename__ = 'proposal_points'
     id = Column(Integer, primary_key=True)
     number = Column(Integer)
-    
+
     proposal_id = Column(Integer, ForeignKey('proposals.id'))
     committee_report_id = Column(Integer,ForeignKey('committee_reports.id'))
     committee_report = relationship('CommitteeReport',foreign_keys="[ProposalPoint.committee_report_id]")
