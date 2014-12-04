@@ -168,6 +168,8 @@ class Document(Base):
         'polymorphic_on':classtype
     }
 
+    def __repr__(self):
+        return '{}-{}: {}'.format(self.session, self.dok_id, self.title)
     
 class CommitteeReport(Document):
     __tablename__ = 'committee_reports'
