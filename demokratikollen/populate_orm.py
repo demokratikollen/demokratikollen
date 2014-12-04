@@ -82,7 +82,7 @@ print("Adding committee reports.")
 c.execute("""SELECT dok_id,rm,beteckning,organ,publicerad,titel,dokument_url_text,hangar_id FROM dokument WHERE doktyp='bet' AND relaterat_id=''""")
 reports = {}
 for dok_id,rm,bet,organ,publ,titel,dok_url,hangar_id in c:
-    committee = s.query(Committee).filter_by(abbr=organ).first()
+    committee = s.query(Committee).filter_by(abbr=organ).one()
     s.add(CommitteeReport(
             dok_id=dok_id,
             published=publ,
