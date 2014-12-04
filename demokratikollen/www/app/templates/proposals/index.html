@@ -1,4 +1,153 @@
 {% extends "proposals/base.html" %}
+
+{% block styles -%}{{ super() }}
+    <style>
+.canvas {
+    background-color: #ff00ff;
+}
+.origin-parties {
+  background-color: #ff0000;
+  shape-rendering: crispEdges;
+
+}
+    </style>
+
+{%- endblock %}
+
+
 {% block content %}
-Detta är startsidan under menyval "Förslagen"
+<div class="row">
+    <div class="col-lg-1"></div>
+    <div class="col-lg-10">
+    <svg id="proposals-main" class='canvas' viewBox='0 0 940 440' preserveAspectRatio="xMinYMin meet"/>        
+    </div>
+</div> 
 {% endblock %}
+
+{% block scripts %}{{ super() }}
+    <script type="text/javascript">
+proposals_main_data = {{ data | tojson | safe }};
+
+proposals_main = {
+    setup: function(){
+
+        total_bar_height = 300;
+        total = d3.sum(proposals_main_data.parties, function(d){return d.value;});
+
+        proposals_main_data.parties.forEach(function(d,i,a){
+            d.height = total_bar_height*d.value/total;
+            if (i > 0) {
+                d.y = a[i-1].y + a[i-1].height + 5; 
+            } else {
+                d.y = 0;
+            }
+        });
+        proposals_main_data.committees.forEach(function(d,i,a){
+            d.height = total_bar_height*d.value/total;
+            if (i > 0) {
+                d.y = a[i-1].y + a[i-1].height + 7; 
+            } else {
+                d.y = 0;
+            }
+        });    
+        proposals_main_data.results.forEach(function(d,i,a){
+            d.height = total_bar_height*d.value/total;
+            if (i > 0) {
+                d.y = a[i-1].y + a[i-1].height + 20; 
+            } else {
+                d.y = 0;
+            }
+        });                
+
+
+        origin_width = 20;
+
+        partyColors = {"S": "#ED1B34", "M": "#52BDEC", "SD": "#FBC700", 
+                      "MP": "#53A045", "C": "#016A3A", "V": "#D9291C",
+                      "FP": "#004B92", "KD": "#073192"};
+
+        var margin = {top: 0, right: 0, bottom: 0, left: 0},
+            width = 940 - margin.left - margin.right,
+            height = 440 - margin.top - margin.bottom;
+
+        var svg = d3.select("#proposals-main")
+          .append("g")
+            .attr("transform", "translate(" + margin.left + "," + margin.top + ")");
+
+
+        var origin_parties = svg.selectAll(".origin-parties")
+            .data(proposals_main_data.parties)
+        origin_party = origin_parties.enter()
+            .append("g")
+              .attr("class", "origin-parties")
+              .attr("transform", function(d,i) { return "translate(50,"+ d.y +")"; })
+
+        origin_party.append("rect")
+          .attr("height", function(d) { return d.height; })
+          .attr("width", "20px")
+          .style("fill", "#000000")
+          .style("stroke", "#ffff00")
+
+        origin_party.append("text")
+          .attr("x", -6)
+          .attr("y", function(d) { return d.height/2; })
+          .attr("dy", ".35em")
+          .attr("text-anchor", "end")
+          .attr("transform", null)
+          .text(function(d) { return d.name; })
+
+
+        var committees = svg.selectAll(".committees")
+            .data(proposals_main_data.committees)
+        committee = committees.enter()
+            .append("g")
+              .attr("class", "committees")
+              .attr("transform", function(d,i) { return "translate(300,"+ d.y +")"; })
+
+        committee.append("rect")
+          .attr("height", function(d) { return d.height; })
+          .attr("width", "20px")
+          .style("fill", "#000000")
+          .style("stroke", "#ffff00")
+
+        committee.append("text")
+          .attr("x", -6)
+          .attr("y", function(d) { return d.height / 2; })
+          .attr("dy", ".35em")
+          .attr("text-anchor", "end")
+          .attr("transform", null)
+          .text(function(d) { return d.name; })
+
+
+        var results = svg.selectAll(".results")
+            .data(proposals_main_data.results)
+        result = results.enter()
+            .append("g")
+              .attr("class", "results")
+              .attr("transform", function(d,i) { return "translate(600,"+ d.y +")"; })
+
+        result.append("rect")
+          .attr("height", function(d) { return d.height; })
+          .attr("width", "20px")
+          .style("fill", "#000000")
+          .style("stroke", "#ffff00")
+
+        result.append("text")
+          .attr("x", -6)
+          .attr("y", function(d) { return d.height / 2; })
+          .attr("dy", ".35em")
+          .attr("text-anchor", "end")
+          .attr("transform", null)
+          .text(function(d) { return d.name; })
+
+
+        return this;
+    } // setup
+}
+
+$(proposals_main.setup()); 
+
+
+    </script>
+    <script type="text/javascript" src="{{ url_for('static', filename='js/proposals.js') }}"></script>
+{%- endblock %}
