@@ -1,6 +1,8 @@
 {% extends "parliament/base.html" %}
 
-{% block styles -%}{{ super() }}
+{% block styles -%}
+
+{{ super() }}
     <style>
 
     svg#parliament_svg line {
@@ -23,13 +25,27 @@
 {%- endblock %}
 
 {% block content %}
-      <svg id="parliament_svg" class='canvas' viewBox='0 0 1140 600' preserveAspectRatio="xMinYMin meet"></svg>
+<div id="parliament_figure">
+  <div class="row svg_canvas">
+    <div class="column">
+      <svg id="parliament_svg" viewBox='0 0 940 470' preserveAspectRatio="xMinYMin meet"></svg>
+    </div>
+  </div>
+  <div class="row date_slider">
+    <div class="column">
       <div id="date_slider"></div>
-      <div id="parliament_mode_switcher">
-        <button id="parliament_button">Riksdagen</button><button id="gender_button">Könsfördelning</button>
-      </div>
+    </div>
+  </div>
+  <div class="row buttons">
+    <div class="column">
+      <button id="parliament_button">Riksdagen</button>
+      <button id="gender_button">Könsfördelning</button>
+    </div>
+  </div>
+</div>
 {% endblock %}
 
-{% block scripts %}{{ super() }}
+{% block scripts %}
+    {{ super() }}
     <script type="text/javascript" src="{{ url_for('static', filename='js/parliament.js') }}"></script>
 {%- endblock %}
