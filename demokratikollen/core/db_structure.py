@@ -1,5 +1,6 @@
 # -*- coding: utf-8 -*-
 from sqlalchemy import Table, Column, String, Integer, ForeignKey, create_engine
+from sqlalchemy.sql import func
 from sqlalchemy.types import Date, Enum, DateTime
 from sqlalchemy.orm import relationship, backref, sessionmaker
 from sqlalchemy.ext.declarative import declarative_base
@@ -20,6 +21,10 @@ class Member(Base):
     party_id = Column(Integer, ForeignKey('groups.id'))
     votes = relationship('Vote', backref='member')
     appointments = relationship('Appointment', backref='member')
+    current_group_appointments = relationship("GroupAppointment",
+                    primaryjoin="and_(Member.id==GroupAppointment.member_id,"
+                                    "GroupAppointment.start_date<=func.now(),"
+                                    "GroupAppointment.end_date>=func.now())")
 
     def __repr__(self):
         return '{}, {} ({})'.format(self.last_name,self.first_name,self.party.abbr)

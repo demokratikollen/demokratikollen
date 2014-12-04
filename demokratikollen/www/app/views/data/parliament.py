@@ -10,7 +10,7 @@ blueprint = Blueprint('parliament', __name__, url_prefix='/data/parliament')
 def gender_json():
     str_date = request.args.get('date', '')
     party = request.args.get('party','')
-    
+
     #Check if the party exists
     parties = parliament.get_parties()
     if party and party not in parties:
@@ -50,21 +50,8 @@ def parliament_json():
 
     return jsonify(json)
 
-@blueprint.route('/appointments.json', methods=['GET'])
-def appointments_json():
-    json = """
-    [
-        { "x": 0, "y": 0 },
-        { "x": 100.5, "y": 0.95 },
-        { "x": 0.5, "y": 0.95 }
-    ]"""
+@blueprint.route('/members_search.json')
+def members_search_json():
+    members_dict = parliament.get_members_typeahead()
 
-    json = """
-    [
-        [0,0],
-        [100,50],
-        [100,100]
-    ]
-    """
-
-    return json
+    return jsonify(members_dict)
