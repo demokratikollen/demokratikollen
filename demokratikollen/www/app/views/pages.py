@@ -38,3 +38,7 @@ def proposals():
 @blueprint.route('/om', methods=['GET'])
 def about():
     return render_template("/about.html")
+
+@blueprint.route('/member-test', methods=['GET'])
+def member_test():
+    return render_template("/parliament/member.html")

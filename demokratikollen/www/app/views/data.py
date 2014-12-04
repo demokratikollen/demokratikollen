@@ -49,3 +49,22 @@ def parliament_json():
     json = data.parliament_json(date=date)
 
     return jsonify(json)
+
+@blueprint.route('/appointments.json', methods=['GET'])
+def appointments_json():
+    json = """
+    [
+        { "x": 0, "y": 0 },
+        { "x": 100.5, "y": 0.95 },
+        { "x": 0.5, "y": 0.95 }
+    ]"""
+
+    json = """
+    [
+        [0,0],
+        [100,50],
+        [100,100]
+    ]
+    """
+
+    return json

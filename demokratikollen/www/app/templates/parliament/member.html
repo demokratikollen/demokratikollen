@@ -1,5 +1,29 @@
 {% extends "parliament/base.html" %}
 
+{% block styles -%}{{ super() }}
+    <style>
+    </style>
+{%- endblock %}
+
 {% block content %}
-Detta är sidan för en riksdagsledamot
+<div class="row">
+  <div class="col-md-5" style="border:1px solid #444;">
+  <svg id="timeline_svg" class="canvas"></svg>
+  </div>
+</div>
 {% endblock %}
+
+{% block scripts %}{{ super() }}
+    <script type="text/javascript" src="{{ url_for('static', filename='js/member-timeline.js') }}"></script>
+    <script type="text/javascript">
+    // Load data and render timeline
+    var config = {fontSize:12};
+    $(function() {
+      d3.json("/data/appointments.json", function(data) {
+        d3.select("#timeline_svg")
+        .datum(data)
+        .call(AppointmentsTimeline(config))
+      });
+    });
+    </script>
+{%- endblock %}
