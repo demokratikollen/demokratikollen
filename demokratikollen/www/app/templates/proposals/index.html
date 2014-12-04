@@ -3,13 +3,16 @@
 {% block styles -%}{{ super() }}
     <style>
 .canvas {
-    background-color: #ff00ff;
 }
 .origin-parties {
-  background-color: #ff0000;
   shape-rendering: crispEdges;
-
 }
+rect {
+    fill: #333333;
+    stroke: #111111;
+}
+
+
     </style>
 
 {%- endblock %}
@@ -85,8 +88,6 @@ proposals_main = {
         origin_party.append("rect")
           .attr("height", function(d) { return d.height; })
           .attr("width", "20px")
-          .style("fill", "#000000")
-          .style("stroke", "#ffff00")
 
         origin_party.append("text")
           .attr("x", -6)
@@ -107,8 +108,6 @@ proposals_main = {
         committee.append("rect")
           .attr("height", function(d) { return d.height; })
           .attr("width", "20px")
-          .style("fill", "#000000")
-          .style("stroke", "#ffff00")
 
         committee.append("text")
           .attr("x", -6)
@@ -129,9 +128,6 @@ proposals_main = {
         result.append("rect")
           .attr("height", function(d) { return d.height; })
           .attr("width", "20px")
-          .style("fill", "#000000")
-          .style("stroke", "#ffff00")
-
         result.append("text")
           .attr("x", -6)
           .attr("y", function(d) { return d.height / 2; })
