@@ -7,7 +7,9 @@ var gulp = require('gulp'),
     sourcemaps = require('gulp-sourcemaps'),
     minifyCss = require('gulp-minify-css'),
     rename = require('gulp-rename'),
-    sass = require('gulp-ruby-sass');
+    sass = require('gulp-ruby-sass'),
+    gulpFilter = require('gulp-filter'),
+    plumber = require('gulp-plumber');
 
 var work_dir = '/home/vagrant/demokratikollen/www/design/',
     dist_dir = '/home/vagrant/demokratikollen/www/app/static/';
@@ -47,7 +49,7 @@ var style_deps = [
  * Paths for collection/compilation and distribution
  * ======================================================================== */
 var sass_files = work_dir+'sass/*.scss',
-    js_files = work_dir+'javascripts/*.js',
+    js_files = work_dir+'js/*.js',
     css_dist = dist_dir+'css/',
     js_dist = dist_dir+'js/';
 
@@ -69,10 +71,25 @@ gulp.task('copy',['copy-css-images','copy-fonts']);
  * Compilation tasks
  * ======================================================================== */
 gulp.task('styles', function () {
+    var filter = gulpFilter('**/*.css');
     return gulp.src(sass_files)
+        .pipe(plumber())
+        .pipe(sass({loadPath: bs_styles_dir, style:'compressed'}))
+        .pipe(filter)
         .pipe(rename({suffix: '.min'}))
-        .pipe(sass({loadPath: bs_styles_dir, style: 'compressed'}))
+        .pipe(filter.restore())
         .pipe(gulp.dest(css_dist));
+});
+
+gulp.task('scripts', function () {
+    return gulp.src(js_files)
+        .pipe(plumber())
+        .pipe(sourcemaps.init({loadMaps: true}))
+        .pipe(concatenate('scripts.js'))
+        .pipe(uglify())
+        .pipe(rename({suffix: '.min'}))
+        .pipe(sourcemaps.write('../js'))
+        .pipe(gulp.dest(js_dist));
 });
 
 
@@ -81,6 +98,7 @@ gulp.task('styles', function () {
  * ======================================================================== */
 gulp.task('style-deps', function () {
     return gulp.src(style_deps)
+        .pipe(plumber())
         .pipe(sourcemaps.init({loadMaps: true}))
         .pipe(concatenate('dependencies.css'))
         .pipe(minifyCss())
@@ -91,6 +109,7 @@ gulp.task('style-deps', function () {
 
 gulp.task('script-deps', function () {
     return gulp.src(js_deps)
+        .pipe(plumber())
         .pipe(sourcemaps.init({loadMaps: true}))
         .pipe(concatenate('dependencies.js'))
         .pipe(uglify())
@@ -104,7 +123,8 @@ gulp.task('script-deps', function () {
  * ======================================================================== */
 gulp.task('watch', function() {
     gulp.watch(sass_files, ['styles']);
+    gulp.watch(js_files, ['scripts'])
 });
 
 gulp.task('all',['copy','styles','style-deps','script-deps']);
-gulp.task('default',['styles','watch']);
+gulp.task('default',['styles','scripts','watch']);

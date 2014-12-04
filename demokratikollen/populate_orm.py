@@ -45,13 +45,12 @@ print("Adding groups, committees, and parties.")
 for abbr,name in c:
     if name in parties:
         g = Party(name=name,abbr=abbr)
-        group_type = "party"
-    elif 'utskottet' in name:
+    elif 'tskott' in name:
         g = Committee(name=name,abbr=abbr)
-        group_type = "committee"
+    elif 'epartement' in name:
+        g = Ministry(name=name,abbr=abbr)
     else:
         g = Group(name=name,abbr=abbr)
-        group_type = "group"
     groups[(abbr,name)] = g
 
 # Manually add 'Kammaren', and parties not in 'personuppdrag'
@@ -60,7 +59,7 @@ groups['PP'] = Party(name="Piratpartiet",abbr="PP")
 groups['NYD'] = Party(name="Ny demokrati",abbr="NYD")
 for g in groups.values():
     s.add(g)
-s.commit()
+# s.commit()
 
 print("Adding members.")
 c.execute("SELECT fodd_ar,tilltalsnamn,efternamn,kon,parti,intressent_id FROM person")
@@ -76,7 +75,7 @@ for birth_year,first_name,last_name,gender,party_abbr,intressent_id in c:
                                     birth_year=birth_year,gender=gender,party=party,
                                     image_url="http://data.riksdagen.se/filarkiv/bilder/ledamot/{}_192.jpg".format(intressent_id))
     s.add(members[intressent_id])
-s.commit()
+# s.commit()
 
 # Select only betänkanden from dokument
 print("Adding committee reports.")
@@ -92,7 +91,7 @@ for dok_id,rm,bet,organ,publ,titel,dok_url,hangar_id in c:
             title=titel,
             text_url=dok_url,
             committee=committee))
-s.commit()
+# s.commit()
 
 pbar = InitBar(title="Adding votes")
 pbar(0)
@@ -116,11 +115,11 @@ for i,(votering_id,intressent_id,beteckning,rm,punkt,rost,datum) in enumerate(c_
                 vote_option=rost,polled_point=polls[votering_id]))
 
 del pbar
-s.commit()
+# s.commit()
 
-# # Add kammaruppdrag
+# Add kammaruppdrag
 print("Adding chamber appointments.")
-c.execute("""SELECT intressent_id,ordningsnummer,"from",tom,status,roll_kod FROM personuppdrag WHERE typ='kammaruppdrag' AND ordningsnummer!=0""")
+c.execute("""SELECT intressent_id,ordningsnummer,"from",tom,status,roll_kod FROM personuppdrag WHERE typ='kammaruppdrag'""")
 for intressent_id,ordningsnummer,fr,to,stat,roll in c:
     role = "Ersättare" if "rsättare" in roll else "Riksdagsledamot"
     status = "Ledig" if "Ledig" in stat else "Tjänstgörande"
@@ -131,13 +130,223 @@ for intressent_id,ordningsnummer,fr,to,stat,roll in c:
                 end_date=to.date(),
                 status=status,
                 role=role))
-s.commit()
+# s.commit()
 
+# Add ministry (departement) appointments
+print("Adding ministry appointments.")
+c.execute("""SELECT intressent_id,"from",tom,roll_kod,organ_kod,uppgift FROM personuppdrag WHERE uppgift LIKE '%epartement%'""")
+for intressent_id,fr,to,roll,abbr,g_name in c:
+    s.add(MinistryAppointment(
+                member=members[intressent_id],
+                start_date=fr.date(),
+                end_date=to.date(),
+                role=roll,
+                group=groups[(abbr,g_name)]))
+
+# Add committee (utskott) appointments
+print("Adding committee appointments.")
+c.execute("""SELECT intressent_id,"from",tom,roll_kod,organ_kod,uppgift FROM personuppdrag WHERE uppgift LIKE '%utskott%'""")
+for intressent_id,fr,to,roll,abbr,g_name in c:
+    s.add(CommitteeAppointment(
+                member=members[intressent_id],
+                start_date=fr.date(),
+                end_date=to.date(),
+                role=roll,
+                group=groups[(abbr,g_name)]))
+
+# Add other group appointments
+print("Adding other group appointments.")
+c.execute("""SELECT intressent_id,"from",tom,roll_kod,organ_kod,uppgift FROM personuppdrag
+                WHERE NOT uppgift  LIKE '%utskott%' AND NOT uppgift LIKE '%utskott%' AND organ_kod != 'kam'""")
+for intressent_id,fr,to,roll,abbr,g_name in c:
+    s.add(GroupAppointment(
+                member=members[intressent_id],
+                start_date=fr.date(),
+                end_date=to.date(),
+                role=roll,
+                group=groups[(abbr,g_name)]))
+
+# s.commit()
+
+print("Adding member proposals.")
+c.execute("""SELECT hangar_id,dok_id,rm,beteckning,publicerad,titel,
+                            dokument_url_text,subtyp
+                    FROM dokument WHERE doktyp='mot' AND relaterat_id='' ORDER BY hangar_id""")
+m_props = {}
+for hangar_id,dok_id,rm,beteckning,publicerad,titel,dokument_url_text,subtyp in c:
+    if subtyp in ['Enskild motion','Kommittémotion','Följdmotion','Partimotion','Flerpartimotion','Fristående motion']:
+        subtype = subtyp
+    else:
+        subtype = '-'
+    if hangar_id in m_props:
+        raise Exception('Member proposal with hangar_id {} already exists.'.format(hangar_id))
+    m_props[hangar_id] = MemberProposal(
+                            dok_id=dok_id,
+                            published=publicerad,
+                            session=rm,
+                            code=beteckning,
+                            title=titel,
+                            text_url=dokument_url_text,
+                            subtype=subtype)
+    s.add(m_props[hangar_id])
+
+print("Adding signatories of member proposals.")
+c.execute("""SELECT d.hangar_id,i.intressent_id FROM dokument AS d
+                JOIN dokintressent AS i ON i.hangar_id=d.hangar_id
+                WHERE d.doktyp='mot' ORDER BY d.hangar_id""")
+for hangar_id,intressent_id in c:
+    m_props[hangar_id].signatories.append(members[intressent_id])
+
+
+print("Adding points of member proposals.")
+c.execute("""SELECT d.hangar_id,f.utskottet,f.nummer,f.kammaren,f.behandlas_i
+                FROM dokument AS d
+                JOIN dokforslag AS f ON f.hangar_id=d.hangar_id
+                WHERE d.doktyp='mot' ORDER BY d.hangar_id""")
+m_missing_crs = 0
+m_props_tot = 0
+for hangar_id,utskottet,nummer,kammaren,behandlas_i in c:
+    decision_options = ['Avslag','Bifall','Delvis bifall']
+    utskottet = utskottet.strip()
+    kammaren = kammaren.strip()
+
+    if kammaren in decision_options:
+        ch_decision = kammaren
+    else:
+        ch_decision = '-'
+
+    if utskottet in decision_options:
+        com_recommendation = utskottet
+    else:
+        com_recommendation = '-'
+
+    try:
+        m_props_tot += 1
+        rm,bet = behandlas_i.split(':')
+        cr = s.query(CommitteeReport).filter(CommitteeReport.session==rm,
+                func.lower(CommitteeReport.code)==bet.lower()).one()
+        p = ProposalPoint(
+                proposal=m_props[hangar_id],
+                number=nummer,
+                committee_recommendation=com_recommendation,
+                decision=ch_decision,
+                committee_report=cr)
+    except (ValueError,NoResultFound) as e:
+        m_missing_crs += 1
+        p = ProposalPoint(
+                proposal=m_props[hangar_id],
+                number=nummer,
+                committee_recommendation=com_recommendation,
+                decision=ch_decision)
+
+    s.add(p)
+print("{} of {} member proposal points missing committee report.".format(m_missing_crs,m_props_tot))
+
+print("Adding government proposals.")
+c.execute("""SELECT hangar_id,dok_id,rm,beteckning,publicerad,titel,
+                            dokument_url_text,organ
+                    FROM dokument WHERE doktyp='prop' AND relaterat_id='' AND subtyp='prop'
+                    ORDER BY hangar_id""")
+g_props = {}
+g_missing_ministry = 0
+g_tot = 0
+for hangar_id,dok_id,rm,beteckning,publicerad,titel,dokument_url_text,organ in c:
+    if hangar_id in g_props:
+        raise Exception('Government proposal with hangar_id {} already exists.'.format(hangar_id))
+    try:
+        g_tot += 1
+        m = s.query(Ministry).filter(func.lower(Ministry.abbr)==organ.lower()).one()
+    except NoResultFound as e:
+        try:
+            m = s.query(Ministry).filter(func.lower(Ministry.name)==organ.lower()).one()
+        except NoResultFound as e:
+            g_missing_ministry += 1
+            m = None
+
+    if not m:
+        g_props[hangar_id] = GovernmentProposal(
+                                    dok_id=dok_id,
+                                    published=publicerad,
+                                    session=rm,
+                                    code=beteckning,
+                                    title=titel,
+                                    text_url=dokument_url_text)
+    else:
+        g_props[hangar_id] = GovernmentProposal(
+                                    dok_id=dok_id,
+                                    published=publicerad,
+                                    session=rm,
+                                    code=beteckning,
+                                    title=titel,
+                                    text_url=dokument_url_text,
+                                    ministry=m)
+    s.add(g_props[hangar_id])
+print("{} of {} government proposals missing ministry.".format(g_missing_ministry,g_tot))
+
+
+print("Adding points of government proposals.")
+c.execute("""SELECT d.hangar_id,f.utskottet,f.nummer,f.kammaren,f.behandlas_i
+                FROM dokument AS d
+                JOIN dokforslag AS f ON f.hangar_id=d.hangar_id
+                WHERE d.doktyp='prop' AND d.subtyp='prop' ORDER BY d.hangar_id""")
+g_props_tot = 0
+g_prop_missing = 0
+g_missing_crs = 0
+# g_missing_crs_list = []
+for hangar_id,utskottet,nummer,kammaren,behandlas_i in c:
+    decision_options = ['Avslag','Bifall','Delvis bifall']
+    utskottet = utskottet.strip()
+    kammaren = kammaren.strip()
+
+    if kammaren in decision_options:
+        ch_decision = kammaren
+    else:
+        ch_decision = '-'
+
+    if utskottet in decision_options:
+        com_recommendation = utskottet
+    else:
+        com_recommendation = '-'
+
+    if hangar_id not in g_props:
+        g_prop_missing += 1
+        continue
+
+    try:
+        g_props_tot += 1
+        rm,bet = behandlas_i.split(':')
+        cr = s.query(CommitteeReport).filter(CommitteeReport.session==rm,
+                func.lower(CommitteeReport.code)==bet.lower()).one()
+        p = ProposalPoint(
+                proposal=g_props[hangar_id],
+                number=nummer,
+                committee_recommendation=com_recommendation,
+                decision=ch_decision,
+                committee_report=cr)
+    except (ValueError,NoResultFound) as e:
+        g_missing_crs += 1
+        # g_missing_crs_list.append((hangar_id,nummer,behandlas_i))
+        # if g_missing_crs >= 10:
+        #     for missing_cr in g_missing_crs_list:
+        #         print("{}, punkt {}: {} saknas.".format(missing_cr[0],missing_cr[1],missing_cr[2]))
+        #     exit()
+        p = ProposalPoint(
+                proposal=g_props[hangar_id],
+                number=nummer,
+                committee_recommendation=com_recommendation,
+                decision=ch_decision)
+
+    s.add(p)
+print("{} government proposal points missing proposal document.".format(g_prop_missing))
+print("{} of {} government proposal points missing committee report.".format(g_missing_crs,g_props_tot))
+
+print("Adding committee report points")
 c.execute("""SELECT rm,bet,punkt,rubrik,beslutstyp,votering_id FROM dokutskottsforslag""")
 for rm,bet,punkt,rubrik,beslutstyp,votering_id in c:
     try:
         if not votering_id:
-            rep = s.query(CommitteeReport).filter_by(session=rm,code=bet).one()
+            rep = s.query(CommitteeReport).filter(CommitteeReport.session==rm,
+                            func.lower(CommitteeReport.code)==bet.lower()).one()
             s.add(AcclaimedPoint(
                     number=punkt,
                     title=rubrik,
@@ -148,5 +357,6 @@ for rm,bet,punkt,rubrik,beslutstyp,votering_id in c:
     except NoResultFound:
         pass
 
+print("Committing.")
 s.commit()
 source_conn.close()
