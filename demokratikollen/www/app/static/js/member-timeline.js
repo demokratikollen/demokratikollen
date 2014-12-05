@@ -3,26 +3,45 @@ function AppointmentsTimeline(config) {
   ROLE_CLASSES.set("Ordförande", "chair");
   ROLE_CLASSES.set("Suppleant", "substitute");
 
+  function getMinDate(appointments) { 
+    return d3.min(appointments, function (a) { return a.start; });
+  }
+
+  function getMaxDate(appointments) { 
+    return d3.max(appointments, function (a) { return a.end; });
+  }
+
   function prepData(data) {
+    // Transform date strings to Date objects
     data.forEach(
       function(element, index, array) {
         element.start = new Date(element.start);
         element.end = new Date(element.end);
       });
+  }
+
+  function orderedNames(appointments) {
+    // Make a nested list by appointment name, with overall 
+    // start and end dates for the appointments in each group
+    datesByName = d3.nest()
+      .key(function(a) { return a.name; })
+      .rollup(function(a) {
+        return { minDate: getMinDate(a), maxDate: getMaxDate(a) };
+      })
+      .entries(appointments)
       
     ordering = function(a, b) {
       //Sort by end date descending, then start date descending
-      endDiff = b.end - a.end;
+      endDiff = b.values.maxDate - a.values.maxDate;
       if (endDiff) {
         return endDiff;
       } else {
-        return b.start - a.start
+        return b.values.minDate - a.values.minDate
       }
     }
-    data.sort(ordering);
+    datesByName.sort(ordering);
 
-    data.minDate = d3.min(data, function (d) { return d.start; });
-    data.maxDate = d3.max(data, function (d) { return d.end; });
+    return datesByName.map(function(d) { return d.key; });
   }
 
   function chart(selection) {
@@ -37,25 +56,27 @@ function AppointmentsTimeline(config) {
       svg.attr("viewBox", "0 0 940 " + height);
 
       var x = d3.time.scale()
-        .domain([data.minDate, data.maxDate])
+        .domain([getMinDate(data), getMaxDate(data)])
         .range([config.labelWidth, config.width])
         .nice(d3.time.year);
 
       var y = d3.scale.ordinal()
-        .domain(d3.range(numAppointments))
+        .domain(orderedNames(data))
         .rangePoints([0, height], 1);
 
       var yAxis = d3.svg.axis()
         .scale(y)
-        .tickFormat(function(d, i) { return data[i].name; })
         .orient("right");
+
+      var xAxis = d3.svg.axis()
+        .scale(x);
 
       var line = d3.svg.line()
         .x(function(d) { return x(d[0]); })
         .y(function(d) { return y(d[1]); });
 
       data.forEach(function (el, i, arr) {
-        lineData = [[el.start, i], [el.end, i]];
+        lineData = [[el.start, el.name], [el.end, el.name]];
         path = svg.append("path")
           .attr("class", "line appointment")
           .attr("d", line(lineData));
@@ -65,7 +86,12 @@ function AppointmentsTimeline(config) {
       });
 
       svg.append("g")
-          .call(yAxis);
+        .classed("axis x", true)
+        .call(xAxis);
+      
+      svg.append("g")
+        .classed("axis y", true)
+        .call(yAxis);
 
     });
   }

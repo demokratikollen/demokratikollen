@@ -50,6 +50,7 @@ def parliament_json():
 
     return jsonify(json)
 
+
 @blueprint.route('/members_search.json')
 def members_search_json():
     members_dict = parliament.get_members_typeahead()

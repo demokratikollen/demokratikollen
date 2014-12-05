@@ -13,6 +13,12 @@ def appointments_json():
             "role": "Ordförande"
         },
         { 
+            "start": "2003-01-01T00:00:00",
+            "end": "2005-05-01T00:00:00",
+            "name": "Utskottet för det ena",
+            "role": "Suppleant"
+        },
+        { 
             "start": "2008-01-01T00:00:00",
             "end": "2012-01-01T00:00:00",
             "name": "Utskottet för det tredje",
