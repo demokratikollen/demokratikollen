@@ -12,7 +12,7 @@ Search = {
     }
 
     var f;
-    $.getJSON( "/parliament/members_search.json", function( data ) {
+    $.getJSON( "/data/parliament/members_search.json", function( data ) {
       f = new Fuse(data.d, {keys: ['fullName','party','groups'], threshold:0.6});
     });
 
