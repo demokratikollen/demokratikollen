@@ -52,7 +52,11 @@ function AppointmentsTimeline(config) {
       
       numAppointments = data.length;
 
-      var height = numAppointments * config.lineHeight;
+      var height = (
+        config.marginTop +
+        numAppointments * config.lineHeight + 
+        config.marginBottom);
+
       svg.attr("viewBox", "0 0 940 " + height);
 
       var x = d3.time.scale()
@@ -62,14 +66,15 @@ function AppointmentsTimeline(config) {
 
       var y = d3.scale.ordinal()
         .domain(orderedNames(data))
-        .rangePoints([0, height], 1);
+        .rangePoints([config.marginTop, height-config.marginBottom], 1);
 
       var yAxis = d3.svg.axis()
         .scale(y)
         .orient("right");
 
       var xAxis = d3.svg.axis()
-        .scale(x);
+        .scale(x)
+        .orient("top");
 
       var line = d3.svg.line()
         .x(function(d) { return x(d[0]); })
@@ -92,6 +97,8 @@ function AppointmentsTimeline(config) {
       svg.append("g")
         .classed("axis y", true)
         .call(yAxis);
+
+      console.log(this.width)
 
     });
   }

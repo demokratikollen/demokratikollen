@@ -2,39 +2,40 @@
 
 {% block styles -%}{{ super() }}
     <style>
-    .line.appointment { stroke:#333; stroke-width:10; stroke-linecap: round; }
-    .line.appointment.substitute { stroke:#999; stroke-dasharray: 15 15; }
-    .line.appointment.chair { stroke:#111; stroke-width:16; stroke-linecap: square; }
-    
-    g.tick text { font-size: 16px; }
-    g.axis.y path { display: none; }
+    g.labels text { fill: #404040; }
+    g.lines path { stroke: #4a473f; stroke-width: 8px; }
+    g.axis path { display: none; }
+    rect.background { fill: #e7e3da; }
+    g.axis.x g.tick line { stroke: #ffffff; }
     </style>
 {%- endblock %}
 
 {% block content %}
 <div class="row">
   <div class="col-md-9" style="border:1px solid #444;">
-  <svg id="timeline_svg" class="canvas" preserveAspectRatio="xMinYMin meet"></svg>
+  <div id="timeline"></div>
   </div>
 </div>
 {% endblock %}
 
 {% block scripts %}{{ super() }}
-    <script type="text/javascript" src="{{ url_for('static', filename='js/member-timeline.js') }}"></script>
+    <script type="text/javascript" src="{{ url_for('static', filename='js/appointments-timeline.js') }}"></script>
     <script type="text/javascript">
-    // Load data and render timeline
-    var config = {
-      width: 940,
-      labelWidth: 200,
-      lineHeight: 30,
-      fontSize: 14
-    };
     $(function() {
+      chart = AppointmentsTimeline();
+
       d3.json("/data/member/appointments.json", function(data) {
-        d3.select("#timeline_svg")
+        data.forEach(function(d) {
+          d.start = new Date(d.start);
+          d.end = new Date(d.end);
+        })
+        timeline = d3.select("#timeline")
         .datum(data)
-        .call(AppointmentsTimeline(config))
+        .call(chart)
       });
+
+      d3.select(window).on('resize', function() { timeline.html("").call(chart); }); 
+    
     });
     </script>
 {%- endblock %}

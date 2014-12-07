@@ -1,0 +1,5 @@
+.chart {
+	@media (max-width: $screen-xs-max) {
+      g.tick text { font-size: 12px; }
+    }	
+}
