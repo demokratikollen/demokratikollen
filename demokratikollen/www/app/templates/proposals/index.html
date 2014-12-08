@@ -278,13 +278,15 @@ proposals_main = function() {
 
   var width, height;
 
-  var node_yspacing = 5,
-      node_group_yspacing = 25;
+  var node_yspacing = 3,
+      node_group_yspacing = 12;
 
-  var node_group_ypadding = 12;
+  var node_group_ypadding = 10;
 
-  var node_group_width = 100;
+  var node_group_width = 40+20;
   var node_width = 40;
+
+  var flow_start_width = 20;
 
   function sankey(selection){
     selection.each(function(data){
@@ -296,6 +298,7 @@ proposals_main = function() {
 
         node_layers.forEach(function(layer){
           y = 0.5*(height-layer.total_height);
+          layer.y = y;
           layer.items.forEach(function(group){
 
             group.x = (width-node_group_width)*layer.x;
@@ -364,8 +367,56 @@ proposals_main = function() {
 
       };
 
+      compute_flow_areas = function() {
+        flow_area_data = [];
+        flows.sort(function(a,b){
+          return   a.path[0][0]-b.path[0][0] 
+                || a.path[0][1]-b.path[0][1] 
+                || a.path[0][2]-b.path[0][2]
+                || a.path[1][0]-b.path[1][0] 
+                || a.path[1][1]-b.path[1][1] 
+                || a.path[1][2]-b.path[1][2];
+        });
+
+        var layer_idx = flows[0].path[0][0];
+        console.log("preparing flows from layer " + layer_idx);
+
+        flows.forEach(function(flow){
+          if (flow.path[0][0] != layer_idx) return;
+          from = flow.path[0];
+          to = flow.path[1];
+          h = flow.magnitude*yscale;
+
+          source = nodes[from[0]].items[from[1]].items[from[2]];
+          target = nodes[to[0]].items[to[1]].items[to[2]];
+
+          source_y0 = source.filled_out_y || source.y;
+          source_y1 = source_y0 + h;
+          source.filled_out_y = source_y1;
+          target_y0 = target.filled_in_y || target.y;
+          target_y1 = target_y0 + h;
+          target.filled_in_y = target_y1;
+
+          flow_area_data.push({
+            area: [
+                    {x: source.x+node_width, y0: source_y0, y1: source_y1},
+                    {x: source.x+node_width+flow_start_width, y0: source_y0, y1: source_y1},
+                    {x: target.x-flow_start_width, y0: target_y0, y1: target_y1},
+                    {x: target.x, y0: target_y0, y1: target_y1},
+                  ],
+            classes: {}
+            });
+            
+
+        });
+
+
+        console.log(flow_area_data);
+      };
+
       compute_sizes();
       compute_positions();
+      compute_flow_areas();
 
       var parent = d3.select(this);
 
@@ -386,16 +437,31 @@ proposals_main = function() {
             .attr("width", node_group_width)
             .attr("height", prop("height"));
 
-      var nodes = node_groups.selectAll(".node")
+      var nodes_elements = node_groups.selectAll(".node")
                           .data(prop("items"));
-      nodes.enter()
+      nodes_elements.enter()
             .append("g").classed("node", true)
-      nodes.append("rect")
+      nodes_elements.append("rect")
             .classed("node", true)
             .attr("x", prop("x"))
             .attr("y", prop("y"))
             .attr("width", node_width)
             .attr("height",prop("height"));
+
+
+      parent.selectAll(".flow").data(flow_area_data)
+        .enter()
+          .append("path")
+          .datum(prop("area"))
+          .style("fill", "#ff0000")
+          .style("stroke","#ff0000")
+          .attr("d", 
+            d3.svg.area()
+              .x(prop("x"))
+              .y0(prop("y0"))
+              .y1(prop("y1") )
+              .interpolate("monotone"));
+
     });
 
   };
@@ -416,8 +482,8 @@ proposals_main = function() {
 
 $(d3.select("#proposals-main").datum(testdata).call(
   proposals_main()
-    .width(940)
-    .height(440)
+    .width(500)
+    .height(300)
   )); 
 
     </script>
