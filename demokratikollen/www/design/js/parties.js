@@ -1,5 +1,5 @@
-Parties = {
-  Setup: function() {
+parties = {
+  setup: function() {
     d3.json('/data/municipalities.topojson', function (error,data) {
       if (error) return console.error(error);
       // console.log(data);
@@ -14,12 +14,10 @@ Parties = {
             .attr('height',height);
 
       var projection = d3.geo.conicEqualArea()
-          // .clipAngle(180-1e-3)
           .parallels([50,70])
           .scale(1300)
           .center([16.6358,62.1792])
           .translate([width / 2, height / 2]);
-          // .precision(.1);
       var path = d3.geo.path()
           .projection(projection);
 

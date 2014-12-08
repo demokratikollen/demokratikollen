@@ -128,5 +128,5 @@ gulp.task('watch', function() {
     gulp.watch(js_files, ['scripts'])
 });
 
-gulp.task('all',['copy','styles','style-deps','script-deps']);
+gulp.task('all',['copy','styles','scripts','style-deps','script-deps']);
 gulp.task('default',['styles','scripts','watch']);
