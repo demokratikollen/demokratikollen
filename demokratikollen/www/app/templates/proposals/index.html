@@ -7,8 +7,13 @@
 .origin-parties {
   shape-rendering: crispEdges;
 }
-rect {
+
+.node rect {
     fill: #333333;
+    stroke: #111111;
+}
+.node-group rect {
+    fill: #888888;
     stroke: #111111;
 }
 
@@ -44,12 +49,6 @@ testdata = {
             },
             {
               title: 'S'
-            },
-            {
-              title: 'M'
-            },
-            {
-              title: 'FP'
             }
           ]
         },
@@ -119,28 +118,153 @@ testdata = {
   flows: [
     {
       path: [[0,0,0],[1,0,0],[2,0,0]],
-      magnitude: 5
+      magnitude: Math.floor(Math.random() * 50) + 2
     },
     {
       path: [[0,0,0],[1,0,0],[2,0,1]],
-      magnitude: 10
+      magnitude: Math.floor(Math.random() * 50) + 2
     }, 
     {
       path: [[0,0,0],[1,0,1],[2,0,0]],
-      magnitude: 7
+      magnitude: Math.floor(Math.random() * 50) + 2
     },
     {
       path: [[0,0,0],[1,0,1],[2,0,1]],
-      magnitude: 12
+      magnitude: Math.floor(Math.random() * 50) + 2
     },  
     {
       path: [[0,0,0],[1,0,2],[2,0,0]],
-      magnitude: 2
+      magnitude: Math.floor(Math.random() * 50) + 2
     },
     {
       path: [[0,0,0],[1,0,2],[2,0,1]],
-      magnitude: 9
-    }         
+      magnitude: Math.floor(Math.random() * 50) + 2
+    },//V
+
+    {
+      path: [[0,0,1],[1,0,0],[2,0,0]],
+      magnitude: Math.floor(Math.random() * 50) + 2
+    },
+    {
+      path: [[0,0,1],[1,0,0],[2,0,1]],
+      magnitude: Math.floor(Math.random() * 50) + 2
+    }, 
+    {
+      path: [[0,0,1],[1,0,1],[2,0,0]],
+      magnitude: Math.floor(Math.random() * 50) + 2
+    },
+    {
+      path: [[0,0,1],[1,0,1],[2,0,1]],
+      magnitude: Math.floor(Math.random() * 50) + 2
+    },  
+    {
+      path: [[0,0,1],[1,0,2],[2,0,0]],
+      magnitude: Math.floor(Math.random() * 50) + 2
+    },
+    {
+      path: [[0,0,1],[1,0,2],[2,0,1]],
+      magnitude: Math.floor(Math.random() * 50) + 2
+    },
+
+    {
+      path: [[0,1,0],[1,0,0],[2,0,0]],
+      magnitude: Math.floor(Math.random() * 50) + 2
+    },
+    {
+      path: [[0,1,0],[1,0,0],[2,0,1]],
+      magnitude: Math.floor(Math.random() * 50) + 2
+    }, 
+    {
+      path: [[0,1,0],[1,0,1],[2,0,0]],
+      magnitude: Math.floor(Math.random() * 50) + 2
+    },
+    {
+      path: [[0,1,0],[1,0,1],[2,0,1]],
+      magnitude: Math.floor(Math.random() * 50) + 2
+    },  
+    {
+      path: [[0,1,0],[1,0,2],[2,0,0]],
+      magnitude: Math.floor(Math.random() * 50) + 2
+    },
+    {
+      path: [[0,1,0],[1,0,2],[2,0,1]],
+      magnitude: Math.floor(Math.random() * 50) + 2
+    },//V
+
+    {
+      path: [[0,1,1],[1,0,0],[2,0,0]],
+      magnitude: Math.floor(Math.random() * 50) + 2
+    },
+    {
+      path: [[0,1,1],[1,0,0],[2,0,1]],
+      magnitude: Math.floor(Math.random() * 50) + 2
+    }, 
+    {
+      path: [[0,1,1],[1,0,1],[2,0,0]],
+      magnitude: Math.floor(Math.random() * 50) + 2
+    },
+    {
+      path: [[0,1,1],[1,0,1],[2,0,1]],
+      magnitude: Math.floor(Math.random() * 50) + 2
+    },  
+    {
+      path: [[0,1,1],[1,0,2],[2,0,0]],
+      magnitude: Math.floor(Math.random() * 50) + 2
+    },
+    {
+      path: [[0,1,1],[1,0,2],[2,0,1]],
+      magnitude: Math.floor(Math.random() * 50) + 2
+    },
+
+    {
+      path: [[0,2,0],[1,0,0],[2,0,0]],
+      magnitude: Math.floor(Math.random() * 50) + 2
+    },
+    {
+      path: [[0,2,0],[1,0,0],[2,0,1]],
+      magnitude: Math.floor(Math.random() * 50) + 2
+    }, 
+    {
+      path: [[0,2,0],[1,0,1],[2,0,0]],
+      magnitude: Math.floor(Math.random() * 50) + 2
+    },
+    {
+      path: [[0,2,0],[1,0,1],[2,0,1]],
+      magnitude: Math.floor(Math.random() * 50) + 2
+    },  
+    {
+      path: [[0,2,0],[1,0,2],[2,0,0]],
+      magnitude: Math.floor(Math.random() * 50) + 2
+    },
+    {
+      path: [[0,2,0],[1,0,2],[2,0,1]],
+      magnitude: Math.floor(Math.random() * 50) + 2
+    },//V
+
+    {
+      path: [[0,2,1],[1,0,0],[2,0,0]],
+      magnitude: Math.floor(Math.random() * 50) + 2
+    },
+    {
+      path: [[0,2,1],[1,0,0],[2,0,1]],
+      magnitude: Math.floor(Math.random() * 50) + 2
+    }, 
+    {
+      path: [[0,2,1],[1,0,1],[2,0,0]],
+      magnitude: Math.floor(Math.random() * 50) + 2
+    },
+    {
+      path: [[0,2,1],[1,0,1],[2,0,1]],
+      magnitude: Math.floor(Math.random() * 50) + 2
+    },  
+    {
+      path: [[0,2,1],[1,0,2],[2,0,0]],
+      magnitude: Math.floor(Math.random() * 50) + 2
+    },
+    {
+      path: [[0,2,1],[1,0,2],[2,0,1]],
+      magnitude: Math.floor(Math.random() * 50) + 2
+    }             
   ] // flows
 };
 
@@ -148,40 +272,86 @@ proposals_main = function() {
 
     var parent = {};
 
-    var width;
+    var width, height;
+
+    var node_yspacing = 5,
+        node_group_yspacing = 25;
+
+    var node_group_ypadding = 12;
+
+    var node_group_width = 100;
+    var node_width = 40;
+
+    var _yscale;
+
 
     function sankey(_parent){
         
         parent = _parent;
         sankey._compute_sizes();
+        sankey._compute_positions();
 
         var node_layers = parent.selectAll(".node-layers")
                               .data(function(d){return d.nodes;});
         node_layers.enter()
-                    .append("g").classed("node-layer",true)
-                    .attr("transform", function(d){return "translate("+width*d.x+",0)";});
+                    .append("g").classed("node-layer",true);
 
         var node_groups = node_layers.selectAll(".node-group")
                                       .data(function(d){return d.items;});
         node_groups.enter()
                     .append("g").classed("node-group", true);
 
+        node_groups.append("rect")
+              .attr("x", function(d){return d.x})
+              .attr("y", function(d){return d.y})
+              .attr("width", node_group_width)
+              .attr("height", function(d) {return d.height;});
+
         var nodes = node_groups.selectAll(".node")
                             .data(function(d){return d.items;});
         nodes.enter()
-              .append("g").classed("node", true);
-
+              .append("g").classed("node", true)
         nodes.append("rect")
-              .attr("width",40)
-              .attr("height",40);
+              .attr("x", function(d){return d.x})
+              .attr("y", function(d){return d.y})
+              .attr("width", node_width)
+              .attr("height",function(d){return d.height;});
 
     };
-  
+    
+    sankey._compute_positions = function() {
+      node_layers = parent.data()[0].nodes;
+
+      node_layers.forEach(function(layer){
+        y = 0.0;                    
+        layer.items.forEach(function(group){
+
+          group.x = (width-node_group_width)*layer.x;
+          group.y = y;
+          y += node_group_ypadding;
+
+          group.items.forEach(function(node){
+            node.x = group.x + 0.5*(node_group_width-node_width);
+            node.y = y;
+            y += node.size * _yscale;
+            node.height = y - node.y;
+            y += node_yspacing;
+          });
+
+          y += -node_yspacing + node_group_ypadding;
+          group.height = y - group.y;
+          y += node_group_yspacing;
+
+        });
+      });
+    }
+
     sankey._compute_sizes = function() {
 
       nodes = parent.data()[0].nodes;
       flows = parent.data()[0].flows;
 
+      // compute and store sizes of all layers, groups and nodes by counting flows through them
       flows.forEach(function(flow){
         flow.path.forEach(function(p) {
           layer = nodes[p[0]];
@@ -192,6 +362,21 @@ proposals_main = function() {
           node.size = node.size + flow.magnitude || flow.magnitude;
         });
       });
+
+      nodes.forEach(function(layer){
+        layer.num_node_spacings = d3.sum(layer.items, function(g){g.items.length-1});
+        layer.num_group_spacings = layer.items.length-1;
+      });
+      // _yscale calibrated to fill height after equation:
+      // height == size*_yscale + group_spacing + group_padding + node_spacing
+      // (take worst case: smallest value)
+      _yscale = d3.min(nodes, function(d){
+        return (0.5*height 
+                - d.num_group_spacings*node_group_yspacing
+                - d.items.length*node_group_ypadding*2
+                - d.num_node_spacings*node_yspacing)/d.size;
+      });
+
     };
 
     sankey.width = function(_) {
@@ -199,13 +384,19 @@ proposals_main = function() {
       else width = +_;
       return sankey;
     }
+    sankey.height = function(_) {
+      if (!arguments.length) return height;
+      else height = +_;
+      return sankey;
+    }    
 
     return sankey;
 };
 
 $(d3.select("#proposals-main").datum(testdata).call(
   proposals_main()
-    .width(400)
+    .width(940)
+    .height(440)
   )); 
 
     </script>
