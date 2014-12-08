@@ -29,121 +29,184 @@ rect {
 
 {% block scripts %}{{ super() }}
     <script type="text/javascript">
-proposals_main_data = {{ data | tojson | safe }};
 
-proposals_main = {
-    setup: function(){
-
-        total_bar_height = 300;
-        total = d3.sum(proposals_main_data.parties, function(d){return d.value;});
-
-        proposals_main_data.parties.forEach(function(d,i,a){
-            d.height = total_bar_height*d.value/total;
-            if (i > 0) {
-                d.y = a[i-1].y + a[i-1].height + 5; 
-            } else {
-                d.y = 0;
+testdata = {
+  nodes: [
+    {
+      layer: 0,
+      x: 0,
+      items: [
+        {
+          title: 'Partiernas motioner',
+          items: [
+            {
+              title: 'V'
+            },
+            {
+              title: 'S'
+            },
+            {
+              title: 'M'
+            },
+            {
+              title: 'FP'
             }
+          ]
+        },
+        {
+          title: 'Samsignerade motioner',
+          items: [
+            {
+              title: 'V och S'
+            },
+            {
+              title: 'M och FP'
+            }
+          ]
+        },
+        {
+          title: 'Regeringens propositioner',
+          items: [
+            {
+              title: 'UD'
+            },
+            {
+              title: "FD"
+            }
+          ]
+        }
+      ]
+    },
+    {
+      layer: 1,
+      x: 0.5,
+      items: [
+        {
+          title: 'Utskotten',
+          items: [
+            {
+              title: 'UU'
+            },
+            {
+              title: 'FiU'
+            },
+            {
+              title: 'FöU'
+            }
+          ]
+        }
+      ]
+    },
+    {
+      layer: 2,
+      x: 1.0,
+      items: [
+        {
+          title: 'Besluten',
+          items: [
+            {
+              title: 'Bifall'
+            },
+            {
+              title: 'Avslag'
+            }
+          ]
+        }
+      ]
+    }
+  ], //nodes
+
+  flows: [
+    {
+      path: [[0,0,0],[1,0,0],[2,0,0]],
+      magnitude: 5
+    },
+    {
+      path: [[0,0,0],[1,0,0],[2,0,1]],
+      magnitude: 10
+    }, 
+    {
+      path: [[0,0,0],[1,0,1],[2,0,0]],
+      magnitude: 7
+    },
+    {
+      path: [[0,0,0],[1,0,1],[2,0,1]],
+      magnitude: 12
+    },  
+    {
+      path: [[0,0,0],[1,0,2],[2,0,0]],
+      magnitude: 2
+    },
+    {
+      path: [[0,0,0],[1,0,2],[2,0,1]],
+      magnitude: 9
+    }         
+  ] // flows
+};
+
+proposals_main = function() {
+
+    var parent = {};
+
+    var width;
+
+    function sankey(_parent){
+        
+        parent = _parent;
+        sankey._compute_sizes();
+
+        var node_layers = parent.selectAll(".node-layers")
+                              .data(function(d){return d.nodes;});
+        node_layers.enter()
+                    .append("g").classed("node-layer",true)
+                    .attr("transform", function(d){return "translate("+width*d.x+",0)";});
+
+        var node_groups = node_layers.selectAll(".node-group")
+                                      .data(function(d){return d.items;});
+        node_groups.enter()
+                    .append("g").classed("node-group", true);
+
+        var nodes = node_groups.selectAll(".node")
+                            .data(function(d){return d.items;});
+        nodes.enter()
+              .append("g").classed("node", true);
+
+        nodes.append("rect")
+              .attr("width",40)
+              .attr("height",40);
+
+    };
+  
+    sankey._compute_sizes = function() {
+
+      nodes = parent.data()[0].nodes;
+      flows = parent.data()[0].flows;
+
+      flows.forEach(function(flow){
+        flow.path.forEach(function(p) {
+          layer = nodes[p[0]];
+          node_group = layer.items[p[1]];
+          node = node_group.items[p[2]];
+          layer.size = layer.size + flow.magnitude || flow.magnitude;
+          node_group.size = node_group.size + flow.magnitude || flow.magnitude;
+          node.size = node.size + flow.magnitude || flow.magnitude;
         });
-        proposals_main_data.committees.forEach(function(d,i,a){
-            d.height = total_bar_height*d.value/total;
-            if (i > 0) {
-                d.y = a[i-1].y + a[i-1].height + 7; 
-            } else {
-                d.y = 0;
-            }
-        });    
-        proposals_main_data.results.forEach(function(d,i,a){
-            d.height = total_bar_height*d.value/total;
-            if (i > 0) {
-                d.y = a[i-1].y + a[i-1].height + 20; 
-            } else {
-                d.y = 0;
-            }
-        });                
+      });
+    };
 
+    sankey.width = function(_) {
+      if (!arguments.length) return width;
+      else width = +_;
+      return sankey;
+    }
 
-        origin_width = 20;
+    return sankey;
+};
 
-        partyColors = {"S": "#ED1B34", "M": "#52BDEC", "SD": "#FBC700", 
-                      "MP": "#53A045", "C": "#016A3A", "V": "#D9291C",
-                      "FP": "#004B92", "KD": "#073192"};
-
-        var margin = {top: 0, right: 0, bottom: 0, left: 0},
-            width = 940 - margin.left - margin.right,
-            height = 440 - margin.top - margin.bottom;
-
-        var svg = d3.select("#proposals-main")
-          .append("g")
-            .attr("transform", "translate(" + margin.left + "," + margin.top + ")");
-
-
-        var origin_parties = svg.selectAll(".origin-parties")
-            .data(proposals_main_data.parties)
-        origin_party = origin_parties.enter()
-            .append("g")
-              .attr("class", "origin-parties")
-              .attr("transform", function(d,i) { return "translate(50,"+ d.y +")"; })
-
-        origin_party.append("rect")
-          .attr("height", function(d) { return d.height; })
-          .attr("width", "20px")
-
-        origin_party.append("text")
-          .attr("x", -6)
-          .attr("y", function(d) { return d.height/2; })
-          .attr("dy", ".35em")
-          .attr("text-anchor", "end")
-          .attr("transform", null)
-          .text(function(d) { return d.name; })
-
-
-        var committees = svg.selectAll(".committees")
-            .data(proposals_main_data.committees)
-        committee = committees.enter()
-            .append("g")
-              .attr("class", "committees")
-              .attr("transform", function(d,i) { return "translate(300,"+ d.y +")"; })
-
-        committee.append("rect")
-          .attr("height", function(d) { return d.height; })
-          .attr("width", "20px")
-
-        committee.append("text")
-          .attr("x", -6)
-          .attr("y", function(d) { return d.height / 2; })
-          .attr("dy", ".35em")
-          .attr("text-anchor", "end")
-          .attr("transform", null)
-          .text(function(d) { return d.name; })
-
-
-        var results = svg.selectAll(".results")
-            .data(proposals_main_data.results)
-        result = results.enter()
-            .append("g")
-              .attr("class", "results")
-              .attr("transform", function(d,i) { return "translate(600,"+ d.y +")"; })
-
-        result.append("rect")
-          .attr("height", function(d) { return d.height; })
-          .attr("width", "20px")
-        result.append("text")
-          .attr("x", -6)
-          .attr("y", function(d) { return d.height / 2; })
-          .attr("dy", ".35em")
-          .attr("text-anchor", "end")
-          .attr("transform", null)
-          .text(function(d) { return d.name; })
-
-
-        return this;
-    } // setup
-}
-
-$(proposals_main.setup()); 
-
+$(d3.select("#proposals-main").datum(testdata).call(
+  proposals_main()
+    .width(400)
+  )); 
 
     </script>
-    <script type="text/javascript" src="{{ url_for('static', filename='js/proposals.js') }}"></script>
 {%- endblock %}
