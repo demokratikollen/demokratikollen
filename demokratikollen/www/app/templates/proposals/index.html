@@ -8,11 +8,11 @@
   shape-rendering: crispEdges;
 }
 
-.node rect {
+rect.node {
     fill: #333333;
     stroke: #111111;
 }
-.node-group rect {
+rect.node-group {
     fill: #888888;
     stroke: #111111;
 }
@@ -267,130 +267,151 @@ testdata = {
     }             
   ] // flows
 };
+function prop(p) {
 
+  return function(d) {
+    return d[p];
+  };
+
+}
 proposals_main = function() {
 
-    var parent = {};
+  var width, height;
 
-    var width, height;
+  var node_yspacing = 5,
+      node_group_yspacing = 25;
 
-    var node_yspacing = 5,
-        node_group_yspacing = 25;
+  var node_group_ypadding = 12;
 
-    var node_group_ypadding = 12;
+  var node_group_width = 100;
+  var node_width = 40;
 
-    var node_group_width = 100;
-    var node_width = 40;
+  function sankey(selection){
+    selection.each(function(data){
 
-    var _yscale;
+      var yscale;
 
+      compute_positions = function() {
+        node_layers = data.nodes;
 
-    function sankey(_parent){
-        
-        parent = _parent;
-        sankey._compute_sizes();
-        sankey._compute_positions();
+        node_layers.forEach(function(layer){
+          y = 0.5*(height-layer.total_height);
+          layer.items.forEach(function(group){
 
-        var node_layers = parent.selectAll(".node-layers")
-                              .data(function(d){return d.nodes;});
-        node_layers.enter()
-                    .append("g").classed("node-layer",true);
+            group.x = (width-node_group_width)*layer.x;
+            group.y = y;
+            y += node_group_ypadding;
 
-        var node_groups = node_layers.selectAll(".node-group")
-                                      .data(function(d){return d.items;});
-        node_groups.enter()
-                    .append("g").classed("node-group", true);
+            group.items.forEach(function(node){
+              node.x = group.x + 0.5*(node_group_width-node_width);
+              node.y = y;
+              y += node.size * yscale;
+              node.height = y - node.y;
+              y += node_yspacing;
+            });
 
-        node_groups.append("rect")
-              .attr("x", function(d){return d.x})
-              .attr("y", function(d){return d.y})
-              .attr("width", node_group_width)
-              .attr("height", function(d) {return d.height;});
+            y -= node_yspacing;
+            y += node_group_ypadding;
+            group.height = y - group.y;
+            
+            y += node_group_yspacing;
 
-        var nodes = node_groups.selectAll(".node")
-                            .data(function(d){return d.items;});
-        nodes.enter()
-              .append("g").classed("node", true)
-        nodes.append("rect")
-              .attr("x", function(d){return d.x})
-              .attr("y", function(d){return d.y})
-              .attr("width", node_width)
-              .attr("height",function(d){return d.height;});
-
-    };
-    
-    sankey._compute_positions = function() {
-      node_layers = parent.data()[0].nodes;
-
-      node_layers.forEach(function(layer){
-        y = 0.0;                    
-        layer.items.forEach(function(group){
-
-          group.x = (width-node_group_width)*layer.x;
-          group.y = y;
-          y += node_group_ypadding;
-
-          group.items.forEach(function(node){
-            node.x = group.x + 0.5*(node_group_width-node_width);
-            node.y = y;
-            y += node.size * _yscale;
-            node.height = y - node.y;
-            y += node_yspacing;
           });
-
-          y += -node_yspacing + node_group_ypadding;
-          group.height = y - group.y;
-          y += node_group_yspacing;
-
+          y -= node_group_yspacing;
         });
-      });
-    }
+      };
 
-    sankey._compute_sizes = function() {
+      compute_sizes = function() {
 
-      nodes = parent.data()[0].nodes;
-      flows = parent.data()[0].flows;
+        nodes = data.nodes;
+        flows = data.flows;
 
-      // compute and store sizes of all layers, groups and nodes by counting flows through them
-      flows.forEach(function(flow){
-        flow.path.forEach(function(p) {
-          layer = nodes[p[0]];
-          node_group = layer.items[p[1]];
-          node = node_group.items[p[2]];
-          layer.size = layer.size + flow.magnitude || flow.magnitude;
-          node_group.size = node_group.size + flow.magnitude || flow.magnitude;
-          node.size = node.size + flow.magnitude || flow.magnitude;
+        // compute and store sizes of all layers, groups and nodes by counting flows through them
+        flows.forEach(function(flow){
+          flow.path.forEach(function(p) {
+            layer = nodes[p[0]];
+            node_group = layer.items[p[1]];
+            node = node_group.items[p[2]];
+            layer.size = layer.size + flow.magnitude || flow.magnitude;
+            node_group.size = node_group.size + flow.magnitude || flow.magnitude;
+            node.size = node.size + flow.magnitude || flow.magnitude;
+          });
         });
-      });
 
-      nodes.forEach(function(layer){
-        layer.num_node_spacings = d3.sum(layer.items, function(g){g.items.length-1});
-        layer.num_group_spacings = layer.items.length-1;
-      });
-      // _yscale calibrated to fill height after equation:
-      // height == size*_yscale + group_spacing + group_padding + node_spacing
-      // (take worst case: smallest value)
-      _yscale = d3.min(nodes, function(d){
-        return (0.5*height 
-                - d.num_group_spacings*node_group_yspacing
-                - d.items.length*node_group_ypadding*2
-                - d.num_node_spacings*node_yspacing)/d.size;
-      });
+        
+        nodes.forEach(function(layer){
+          layer.num_node_spacings = d3.sum(layer.items, function(g){return g.items.length-1;});
+          layer.num_group_spacings = layer.items.length-1;
+        });
 
-    };
+        // yscale calibrated to fill height after equation:
+        // height == size*yscale + group_spacing + group_padding + node_spacing
+        // (take worst case: smallest value)
+        yscale = d3.min(nodes, function(d){
+          return (height 
+                  - d.num_group_spacings*node_group_yspacing
+                  - d.items.length*node_group_ypadding*2
+                  - d.num_node_spacings*node_yspacing)/d.size;
+        });
 
-    sankey.width = function(_) {
-      if (!arguments.length) return width;
-      else width = +_;
-      return sankey;
-    }
-    sankey.height = function(_) {
-      if (!arguments.length) return height;
-      else height = +_;
-      return sankey;
-    }    
+        nodes.forEach(function(layer){
+          layer.total_height = layer.size * yscale
+                              + layer.num_group_spacings*node_group_yspacing
+                              + layer.items.length*node_group_ypadding*2
+                              + layer.num_node_spacings*node_yspacing;
+        });
 
+
+      };
+
+      compute_sizes();
+      compute_positions();
+
+      var parent = d3.select(this);
+
+      var node_layers = parent.selectAll(".node-layers")
+                            .data(prop("nodes"));
+      node_layers.enter()
+                  .append("g").classed("node-layer",true);
+
+      var node_groups = node_layers.selectAll(".node-group")
+                                    .data(prop("items"));
+      node_groups.enter()
+                  .append("g").classed("node-group", true);
+
+      node_groups.append("rect")
+            .classed("node-group", true)
+            .attr("x", prop("x"))
+            .attr("y", prop("y"))
+            .attr("width", node_group_width)
+            .attr("height", prop("height"));
+
+      var nodes = node_groups.selectAll(".node")
+                          .data(prop("items"));
+      nodes.enter()
+            .append("g").classed("node", true)
+      nodes.append("rect")
+            .classed("node", true)
+            .attr("x", prop("x"))
+            .attr("y", prop("y"))
+            .attr("width", node_width)
+            .attr("height",prop("height"));
+    });
+
+  };
+  
+  sankey.width = function(_) {
+    if (!arguments.length) return width;
+    else width = +_;
     return sankey;
+  }
+  sankey.height = function(_) {
+    if (!arguments.length) return height;
+    else height = +_;
+    return sankey;
+  }    
+
+  return sankey;
 };
 
 $(d3.select("#proposals-main").datum(testdata).call(
