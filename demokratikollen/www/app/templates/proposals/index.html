@@ -13,8 +13,18 @@ rect.node {
     stroke: #111111;
 }
 rect.node-group {
-    fill: #888888;
-    stroke: #111111;
+  display:none;
+}
+.flow {
+  fill: #000;
+  fill-opacity: .2;
+  stroke: 0px;
+  stroke-opacity: .2;
+}
+
+.flow:hover {
+  stroke-opacity: .5;
+  fill-opacity:.5;
 }
 
 
@@ -279,12 +289,12 @@ proposals_main = function() {
   var width, height;
 
   var node_yspacing = 3,
-      node_group_yspacing = 12;
+      node_group_yspacing = 20;
 
-  var node_group_ypadding = 10;
+  var node_group_ypadding = 0;
 
-  var node_group_width = 40+20;
-  var node_width = 40;
+  var node_group_width = 30+10;
+  var node_width = 30;
 
   var flow_start_width = 20;
 
@@ -292,25 +302,32 @@ proposals_main = function() {
     selection.each(function(data){
 
       var yscale;
+      
+      var currently_active = undefined;
 
       compute_positions = function() {
         node_layers = data.nodes;
 
-        node_layers.forEach(function(layer){
+        node_layers.forEach(function(layer, layer_idx){
           y = 0.5*(height-layer.total_height);
           layer.y = y;
-          layer.items.forEach(function(group){
+          layer.items.forEach(function(group, group_idx){
 
             group.x = (width-node_group_width)*layer.x;
             group.y = y;
             y += node_group_ypadding;
 
-            group.items.forEach(function(node){
+            group.items.forEach(function(node, node_idx){
               node.x = group.x + 0.5*(node_group_width-node_width);
               node.y = y;
               y += node.size * yscale;
               node.height = y - node.y;
               y += node_yspacing;
+
+              node.layer_idx = layer_idx;
+              node.group_idx = group_idx;
+              node.node_idx = node_idx;
+              node.unique_id = [layer_idx, group_idx, node_idx].join("-");
             });
 
             y -= node_yspacing;
@@ -404,10 +421,8 @@ proposals_main = function() {
                     {x: target.x-flow_start_width, y0: target_y0, y1: target_y1},
                     {x: target.x, y0: target_y0, y1: target_y1},
                   ],
-            classes: {}
+            class: "flow" + " passes-"+from.join("-") + " passes-"+to.join("-")
             });
-            
-
         });
 
 
@@ -437,6 +452,18 @@ proposals_main = function() {
             .attr("width", node_group_width)
             .attr("height", prop("height"));
 
+      var flows_elements = parent.selectAll(".flow").data(flow_area_data)
+        .enter()
+          .append("path")
+          .attr("class", prop("class"))
+          .datum(prop("area"))
+          .attr("d", 
+            d3.svg.area()
+              .x(prop("x"))
+              .y0(prop("y0"))
+              .y1(prop("y1") )
+              .interpolate("monotone"));
+
       var nodes_elements = node_groups.selectAll(".node")
                           .data(prop("items"));
       nodes_elements.enter()
@@ -446,24 +473,33 @@ proposals_main = function() {
             .attr("x", prop("x"))
             .attr("y", prop("y"))
             .attr("width", node_width)
-            .attr("height",prop("height"));
+            .attr("height",prop("height"))
+            .on("click", function(d,i){
+              
+              var node_id = d.unique_id;
 
+              if (currently_active == node_id) return;
 
-      parent.selectAll(".flow").data(flow_area_data)
-        .enter()
-          .append("path")
-          .datum(prop("area"))
-          .style("fill", "#ff0000")
-          .style("stroke","#ff0000")
-          .attr("d", 
-            d3.svg.area()
-              .x(prop("x"))
-              .y0(prop("y0"))
-              .y1(prop("y1") )
-              .interpolate("monotone"));
+              if (currently_active) {
+                var theflows = parent.selectAll(".passes-"+currently_active);
+                theflows.transition()
+                  .style("fill", "")
+                  .style("fill-opacity", "");
 
-    });
+                currently_active = undefined;
+              }
 
+              var theflows = parent.selectAll(".passes-"+node_id);
+              console.log(node_id, theflows);
+              theflows.transition()
+                .style("fill", "#ff0000")
+                .style("fill-opacity", 1.0);
+
+              currently_active = node_id;
+              
+            });          
+
+    }); // selection.each()
   };
   
   sankey.width = function(_) {
