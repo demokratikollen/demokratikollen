@@ -277,6 +277,9 @@ testdata = {
     }             
   ] // flows
 };
+
+data = {{data | tojson | safe}};
+
 function prop(p) {
 
   return function(d) {
@@ -309,7 +312,7 @@ proposals_main = function() {
         node_layers = data.nodes;
 
         node_layers.forEach(function(layer, layer_idx){
-          y = 0.5*(height-layer.total_height);
+          var y = 0.5*(height-layer.total_height);
           layer.y = y;
           layer.items.forEach(function(group, group_idx){
 
@@ -343,8 +346,8 @@ proposals_main = function() {
 
       compute_sizes = function() {
 
-        nodes = data.nodes;
-        flows = data.flows;
+        var nodes = data.nodes;
+        var flows = data.flows;
 
         // compute and store sizes of all layers, groups and nodes by counting flows through them
         flows.forEach(function(flow){
@@ -385,7 +388,10 @@ proposals_main = function() {
       };
 
       compute_flow_areas = function() {
-        flow_area_data = [];
+
+        var nodes = data.nodes;
+        var flows = data.flows;
+        
         flows.sort(function(a,b){
           return   a.path[0][0]-b.path[0][0] 
                 || a.path[0][1]-b.path[0][1] 
@@ -400,18 +406,18 @@ proposals_main = function() {
 
         flows.forEach(function(flow){
           if (flow.path[0][0] != layer_idx) return;
-          from = flow.path[0];
-          to = flow.path[1];
-          h = flow.magnitude*yscale;
+          var from = flow.path[0];
+          var to = flow.path[1];
+          var h = flow.magnitude*yscale;
 
-          source = nodes[from[0]].items[from[1]].items[from[2]];
-          target = nodes[to[0]].items[to[1]].items[to[2]];
+          var source = nodes[from[0]].items[from[1]].items[from[2]];
+          var target = nodes[to[0]].items[to[1]].items[to[2]];
 
-          source_y0 = source.filled_out_y || source.y;
-          source_y1 = source_y0 + h;
+          var source_y0 = source.filled_out_y || source.y;
+          var source_y1 = source_y0 + h;
           source.filled_out_y = source_y1;
-          target_y0 = target.filled_in_y || target.y;
-          target_y1 = target_y0 + h;
+          var target_y0 = target.filled_in_y || target.y;
+          var target_y1 = target_y0 + h;
           target.filled_in_y = target_y1;
 
           flow_area_data.push({
@@ -428,6 +434,8 @@ proposals_main = function() {
 
         console.log(flow_area_data);
       };
+
+      var flow_area_data = [];
 
       compute_sizes();
       compute_positions();
@@ -516,7 +524,7 @@ proposals_main = function() {
   return sankey;
 };
 
-$(d3.select("#proposals-main").datum(testdata).call(
+$(d3.select("#proposals-main").datum(data).call(
   proposals_main()
     .width(500)
     .height(300)
