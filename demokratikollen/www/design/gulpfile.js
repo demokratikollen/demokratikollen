@@ -129,4 +129,4 @@ gulp.task('watch', function() {
 });
 
 gulp.task('all',['copy','styles','scripts','style-deps','script-deps']);
-gulp.task('default',['styles','scripts','watch']);
+gulp.task('default',['all','watch']);
