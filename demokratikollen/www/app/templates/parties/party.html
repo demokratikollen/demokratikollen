@@ -14,10 +14,14 @@
 {% endblock %}
 
 {% block content %}
-    <svg id='election-map' class='canvas'></svg>
+        <div id='election-map'></div>
+ <!--    <svg id='election-map' class='canvas'></svg> -->
 {% endblock %}
 
 {% block scripts %}
 {{ super() }}
-<script type="text/javascript">$(parties.setup);</script>
+<script type="text/javascript">
+  var data = [{id: "1884", color: "pink"},{id: "1861", color: "blue"}];
+  $(parties.setup('#election-map',data))
+</script>
 {% endblock %}
