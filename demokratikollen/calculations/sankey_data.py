@@ -47,11 +47,12 @@ def main():
     mongo_collection.ensure_index([("government", ASCENDING)], unique=True)
 
 
-    basequery = s.query(Proposal).options(joinedload('points'))
+    basequery = s.query(Proposal).options( \
+            joinedload(Proposal.points).joinedload(ProposalPoint.committee_report).joinedload(CommitteeReport.committee))
 
     governments = [
-        ("persson3"   , basequery.filter(MemberProposal.session.in_(['2002/03', '2003/04', '2004/05', '2005/06'])) ),
-        ("reinfeldt1" , basequery.filter(MemberProposal.session.in_(['2006/07', '2007/08', '2008/09', '2009/10'])) ),
+#        ("persson3"   , basequery.filter(MemberProposal.session.in_(['2002/03', '2003/04', '2004/05', '2005/06'])) ),
+#        ("reinfeldt1" , basequery.filter(MemberProposal.session.in_(['2006/07', '2007/08', '2008/09', '2009/10'])) ),
         ("reinfeldt2" , basequery.filter(MemberProposal.session.in_(['2010/11', '2011/12', '2012/13', '2013/14'])) )
         ]
 
@@ -65,6 +66,7 @@ def main():
         parties_tree = Tree()
         multiparties_tree = Tree()
         ministries_tree = Tree()
+        members_tree = Tree()
 
         committees_set = set()
         results_set = set()
@@ -84,7 +86,10 @@ def main():
                     continue
                 signing_parties = sorted(list(set( m.party.id for m in doc.signatories)))
 
-                if len(signing_parties) == 1:
+                if doc.subtype == 'Enskild motion':
+                    origin_tree = members_tree
+                    origin_key = "Alla enskilda motioner"
+                elif len(signing_parties) == 1:
                     origin_tree = parties_tree
                     origin_key = signing_parties[0]
                 else: #multiparty signature
@@ -132,6 +137,10 @@ def main():
         ministries = list(ministries_tree.keys())
         ministry_idc = {p:k for (k,p) in enumerate(ministries)}
 
+        members = list(members_tree.keys())
+        member_idc = {p:k for (k,p) in enumerate(members)}
+
+
         committees = list(committees_set)
         committee_idc = {c:k for (k,c) in enumerate(committees)}
 
@@ -140,25 +149,53 @@ def main():
 
         nodes = list()
 
-        node_group_party = dict(title="Partiförslag", items=[dict(party_id=p, title=party_data[p]['abbr']) for p in parties])
-        node_group_multiparty = dict(title="Flerpartiförslag", items=[dict(title=p) for p in multiparties])
-        node_group_government = dict(title="Regeringspropositioner", items=[dict(title=p) for p in ministries])
+        node_group_members = dict(
+            title="Enskilda ledamöters förslag", 
+            items=[dict(title=p) for p in members],
+            label = -1)
 
-        node_group_committee = dict(title="Utskotten", items=[dict(title=p) for p in committees])
-        node_group_results = dict(title="Besluten", items=[dict(title=p) for p in results])
+        node_group_party = dict(
+            title="Partiförslag", 
+            items=[dict(party_id=p, title=party_data[p]['abbr']) for p in parties],
+            label = -1)
+
+        node_group_multiparty = dict(
+            title="Flerpartiförslag", 
+            items=[dict(title=p) for p in multiparties],
+            label = -1)
+        node_group_government = dict(
+            title="Regeringspropositioner", 
+            items=[dict(title=p) for p in ministries],
+            label = -1)
+
+        node_group_committee = dict(
+            title="Utskotten", 
+            items=[dict(title=p) for p in committees],
+            label = 0)
+        node_group_results = dict(
+            title="Besluten", 
+            items=[dict(title=p) for p in results],
+            label = 0)
 
         nodes = [
-            dict(x=0.0, items=[node_group_party, node_group_multiparty, node_group_government]),
+            dict(x=0.0, items=[node_group_members, node_group_party, node_group_multiparty, node_group_government]),
             dict(x=0.5, items=[node_group_committee]),
             dict(x=1.0, items=[node_group_results])
         ]
 
         flows = list()
+        for member_key in members_tree:
+            for committee_key in members_tree[member_key]:
+                for (result_key, count) in members_tree[member_key][committee_key].items():
+                    member_addr = (0,0,member_idc[member_key])
+                    committee_addr = (1,0,committee_idc[committee_key])
+                    result_addr = (2,0,result_idc[result_key])
+                    flows.append(dict(path=[member_addr, committee_addr, result_addr], magnitude=count))
 
         for party_key in parties_tree:
             for committee_key in parties_tree[party_key]:
                 for (result_key, count) in parties_tree[party_key][committee_key].items():
-                    party_addr = (0,0,party_idc[party_key])
+                    party_addr = (0,1,party_idc[party_key])
                     committee_addr = (1,0,committee_idc[committee_key])
                     result_addr = (2,0,result_idc[result_key])
                     flows.append(dict(path=[party_addr, committee_addr, result_addr], magnitude=count))
@@ -166,7 +203,7 @@ def main():
         for multiparty_key in multiparties_tree:
             for committee_key in multiparties_tree[multiparty_key]:
                 for (result_key, count) in multiparties_tree[multiparty_key][committee_key].items():
-                    multiparty_addr = (0,1,multiparty_idc[multiparty_key])
+                    multiparty_addr = (0,2,multiparty_idc[multiparty_key])
                     committee_addr = (1,0,committee_idc[committee_key])
                     result_addr = (2,0,result_idc[result_key])
                     flows.append(dict(path=[multiparty_addr, committee_addr, result_addr], magnitude=count))                    
@@ -174,7 +211,7 @@ def main():
         for ministry_key in ministries_tree:
             for committee_key in ministries_tree[ministry_key]:
                 for (result_key, count) in ministries_tree[ministry_key][committee_key].items():
-                    ministry_addr = (0,2,ministry_idc[ministry_key])
+                    ministry_addr = (0,3,ministry_idc[ministry_key])
                     committee_addr = (1,0,committee_idc[committee_key])
                     result_addr = (2,0,result_idc[result_key])
                     flows.append(dict(path=[ministry_addr, committee_addr, result_addr], magnitude=count))
