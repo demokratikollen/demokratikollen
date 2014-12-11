@@ -18,11 +18,6 @@ rect.node-group {
   stroke-opacity: .2;
 }
 
-.flow:hover {
-  stroke-opacity: .5;
-  fill-opacity:.5;
-}
-
 .node-group-label path {
   fill: none;
   stroke-width: 3px;
@@ -104,13 +99,13 @@ rect.node-group {
 <div class="row">
     <div class="col-md-6">
     <figure>
-    <svg id="proposals-main" class='canvas' viewBox='0 0 450 400' preserveAspectRatio="xMinYMin meet"/>        
+    <svg id="proposals-main" class='canvas' width="100%" height="440" />        
     <figcaption>Figure caption tag here</figcaption>
     </figure>
     </div>
     <div class="col-md-6">
     <figure>
-    <svg id="proposals-detail" class='canvas' viewBox='0 0 450 400' preserveAspectRatio="xMinYMin meet"/>        
+    <svg id="proposals-detail" class='canvas' width="100%" height="440" />        
     <figcaption>Figure caption tag here</figcaption>
     </figure>
     </div>    
@@ -128,53 +123,53 @@ function prop(p) {
 
 PARTIES = [
     {
-        key: "m",
+        name: "m",
         color: "#1b49dd"
     },
     {
-        key: "fp",
+        name: "fp",
         color: "#6bb7ec"
     },
     {
-        key: "kd",
+        name: "kd",
         color: "#231977"
     },
     {
-        key: "c",
+        name: "c",
         color: "#009933"
     },
     {
-        key: "sd",
+        name: "sd",
         color: "#dddd00"
     },
     {
-        key: "mp",
+        name: "mp",
         color: "#83cf39"
     },
     {
-        key: "s",
+        name: "s",
         color: "#ee2020"
     },
     {
-        key: "v",
+        name: "v",
         color: "#af0000"
     },
     {
-        key: "fi",
+        name: "fi",
         color: "#d9308e"
     },
     {
-        key: "nyd",
+        name: "nyd",
         color: "#dddd00"
     }
     ];
-
-var COLORS = d3.map([
-    { name: "bifall", color: "#0f0" },
-    { name: "delvis bifall", color: "#ff0" },
-    { name: "avslag", color: "#f00" }
-  ]+PARTIES, function(d){return d.name;});
-
+var COLORS = PARTIES.concat([
+    { name: "alla enskilda motioner", color: "#7f7f7f"},
+    { name: "bifall", color: "#2ca02c" },
+    { name: "delvis bifall", color: "#ff7f0e" },
+    { name: "avslag", color: "#d62728" }
+  ]);
+COLORS = d3.map(COLORS, function(d){return d.name;});
 
 sankey_data = {{data | tojson | safe}};
 
@@ -182,6 +177,7 @@ sankey_data = {{data | tojson | safe}};
 proposals_main = function() {
 
   var width, height;
+  var onNodeSelected, onNodeDeselected;
 
   var node_yspacing = 3,
       node_group_yspacing = 0;
@@ -225,7 +221,9 @@ proposals_main = function() {
               node.group_idx = group_idx;
               node.node_idx = node_idx;
               node.unique_id = [layer_idx, group_idx, node_idx].join("-");
-              node.color = COLORS.get((""+node.title).toLowerCase()) || 'orange'; 
+
+              var colorobj = COLORS.get( (""+node.title).toLowerCase() );
+              node.color = d3.hsl(colorobj ? colorobj.color : '#7f7f7f'); 
             });
 
             y -= node_yspacing;
@@ -424,39 +422,44 @@ proposals_main = function() {
             .attr("y", prop("y"))
             .attr("width", node_width)
             .attr("height",prop("height"))
-            .style("fill", prop("color"))
+            .style("fill", function(d){return d.color;})
+            .on("mouseover", function(d){
+              d3.select(this).transition().style("fill", d.color.brighter());
+            })
+            .on("mouseout", function(d){
+              d3.select(this).transition().style("fill", d.color);
+            })
             .on("click", function(d,i){
               
               var node_id = d.unique_id;
 
-              if (currently_active == node_id) return;
-
               if (currently_active) {
-                var theflows = parent.selectAll(".passes-"+currently_active);
-                var thenode = parent.selectAll(".node-"+currently_active);
+                var theflows = parent.selectAll(".passes-"+currently_active.id);
+                var thenode = parent.selectAll(".node-"+currently_active.id);
+
+                if (onNodeDeselected) onNodeDeselected(currently_active.d);
 
                 theflows.transition()
                   .style("fill", null)
                   .style("fill-opacity", null);
-                thenode.transition()
-                  .style("fill", null)
-                  .style("fill-opacity", null);
 
-                 currently_active = null;
+
+                 if (currently_active.id == node_id) {
+                   currently_active = null;
+                   return;
+                 }
               }
 
               theflows = parent.selectAll(".passes-"+node_id);
               thenode = parent.selectAll(".node-"+node_id);
-              console.log(node_id);
+
+              if (onNodeSelected) onNodeSelected(d);
+
               theflows.transition()
-                .style("fill", "#ff0000")
-                .style("fill-opacity", 1.0);
-              thenode.transition()
-                .style("fill", "#ff0000")
+                .style("fill", d.color)
                 .style("fill-opacity", 1.0);
 
-
-              currently_active = node_id;
+              currently_active = {"id": node_id, "d": d};
               
             });          
     }); // selection.each()
@@ -472,14 +475,38 @@ proposals_main = function() {
     else height = +_;
     return sankey;
   }    
+  sankey.onNodeSelected = function(_) {
+    if (!arguments.length) return onNodeSelected;
+    else onNodeSelected = _;
+    return sankey;
+  }   
+  sankey.onNodeDeselected = function(_) {
+    if (!arguments.length) return onNodeDeselected;
+    else onNodeDeselected = _;
+    return sankey;
+  }    
 
   return sankey;
 };
 
+function party_detail() {
+
+  function chart(selection) {
+    selection.each(function(data) {
+
+      return;
+    }); // selection.each
+  };
+  return chart;
+}
+
+
 $(d3.select("#proposals-main").datum(sankey_data).call(
   proposals_main()
     .width(450)
-    .height(400)
+    .height(440)
+    .onNodeSelected(function(d){console.log("Selected " + d.title);})
+    .onNodeDeselected(function(d){console.log("Deselected " + d.title);})
   ));   
 
     </script>
