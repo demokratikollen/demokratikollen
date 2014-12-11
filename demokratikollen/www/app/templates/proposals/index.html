@@ -4,13 +4,10 @@
     <style>
 .canvas {
 }
-.origin-parties {
-  shape-rendering: crispEdges;
-}
 
-rect.node {
-    fill: #333333;
-    stroke: #111111;
+.node rect {
+    fill: #eeeeee;
+    stroke: none;
 }
 rect.node-group {
   display:none;
@@ -292,9 +289,9 @@ proposals_main = function() {
   var width, height;
 
   var node_yspacing = 3,
-      node_group_yspacing = 20;
+      node_group_yspacing = 0;
 
-  var node_group_ypadding = 0;
+  var node_group_ypadding = 10;
 
   var node_group_width = 30+10;
   var node_width = 30;
@@ -475,9 +472,9 @@ proposals_main = function() {
       var nodes_elements = node_groups.selectAll(".node")
                           .data(prop("items"));
       nodes_elements.enter()
-            .append("g").classed("node", true)
+            .append("g").attr("class", "node");
       nodes_elements.append("rect")
-            .classed("node", true)
+            .attr("class", function(d){return "node-"+d.unique_id;})
             .attr("x", prop("x"))
             .attr("y", prop("y"))
             .attr("width", node_width)
@@ -490,7 +487,12 @@ proposals_main = function() {
 
               if (currently_active) {
                 var theflows = parent.selectAll(".passes-"+currently_active);
+                var thenode = parent.select(".node-"+node_id);
+
                 theflows.transition()
+                  .style("fill", "")
+                  .style("fill-opacity", "");
+                thenode.transition()
                   .style("fill", "")
                   .style("fill-opacity", "");
 
@@ -498,10 +500,14 @@ proposals_main = function() {
               }
 
               var theflows = parent.selectAll(".passes-"+node_id);
-              console.log(node_id, theflows);
+              var thenode = parent.select(".node-"+node_id);
               theflows.transition()
                 .style("fill", "#ff0000")
                 .style("fill-opacity", 1.0);
+              thenode.transition()
+                .style("fill", "#ff0000")
+                .style("fill-opacity", 1.0);
+
 
               currently_active = node_id;
               
@@ -527,7 +533,7 @@ proposals_main = function() {
 $(d3.select("#proposals-main").datum(data).call(
   proposals_main()
     .width(500)
-    .height(300)
+    .height(440)
   )); 
 
     </script>
