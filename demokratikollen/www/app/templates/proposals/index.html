@@ -6,7 +6,7 @@
 }
 
 .node rect {
-    fill: #eeeeee;
+    fill: #aaa;
     stroke: none;
 }
 rect.node-group {
@@ -42,240 +42,7 @@ rect.node-group {
 {% block scripts %}{{ super() }}
     <script type="text/javascript">
 
-testdata = {
-  nodes: [
-    {
-      layer: 0,
-      x: 0,
-      items: [
-        {
-          title: 'Partiernas motioner',
-          items: [
-            {
-              title: 'V'
-            },
-            {
-              title: 'S'
-            }
-          ]
-        },
-        {
-          title: 'Samsignerade motioner',
-          items: [
-            {
-              title: 'V och S'
-            },
-            {
-              title: 'M och FP'
-            }
-          ]
-        },
-        {
-          title: 'Regeringens propositioner',
-          items: [
-            {
-              title: 'UD'
-            },
-            {
-              title: "FD"
-            }
-          ]
-        }
-      ]
-    },
-    {
-      layer: 1,
-      x: 0.5,
-      items: [
-        {
-          title: 'Utskotten',
-          items: [
-            {
-              title: 'UU'
-            },
-            {
-              title: 'FiU'
-            },
-            {
-              title: 'FöU'
-            }
-          ]
-        }
-      ]
-    },
-    {
-      layer: 2,
-      x: 1.0,
-      items: [
-        {
-          title: 'Besluten',
-          items: [
-            {
-              title: 'Bifall'
-            },
-            {
-              title: 'Avslag'
-            }
-          ]
-        }
-      ]
-    }
-  ], //nodes
-
-  flows: [
-    {
-      path: [[0,0,0],[1,0,0],[2,0,0]],
-      magnitude: Math.floor(Math.random() * 50) + 2
-    },
-    {
-      path: [[0,0,0],[1,0,0],[2,0,1]],
-      magnitude: Math.floor(Math.random() * 50) + 2
-    }, 
-    {
-      path: [[0,0,0],[1,0,1],[2,0,0]],
-      magnitude: Math.floor(Math.random() * 50) + 2
-    },
-    {
-      path: [[0,0,0],[1,0,1],[2,0,1]],
-      magnitude: Math.floor(Math.random() * 50) + 2
-    },  
-    {
-      path: [[0,0,0],[1,0,2],[2,0,0]],
-      magnitude: Math.floor(Math.random() * 50) + 2
-    },
-    {
-      path: [[0,0,0],[1,0,2],[2,0,1]],
-      magnitude: Math.floor(Math.random() * 50) + 2
-    },//V
-
-    {
-      path: [[0,0,1],[1,0,0],[2,0,0]],
-      magnitude: Math.floor(Math.random() * 50) + 2
-    },
-    {
-      path: [[0,0,1],[1,0,0],[2,0,1]],
-      magnitude: Math.floor(Math.random() * 50) + 2
-    }, 
-    {
-      path: [[0,0,1],[1,0,1],[2,0,0]],
-      magnitude: Math.floor(Math.random() * 50) + 2
-    },
-    {
-      path: [[0,0,1],[1,0,1],[2,0,1]],
-      magnitude: Math.floor(Math.random() * 50) + 2
-    },  
-    {
-      path: [[0,0,1],[1,0,2],[2,0,0]],
-      magnitude: Math.floor(Math.random() * 50) + 2
-    },
-    {
-      path: [[0,0,1],[1,0,2],[2,0,1]],
-      magnitude: Math.floor(Math.random() * 50) + 2
-    },
-
-    {
-      path: [[0,1,0],[1,0,0],[2,0,0]],
-      magnitude: Math.floor(Math.random() * 50) + 2
-    },
-    {
-      path: [[0,1,0],[1,0,0],[2,0,1]],
-      magnitude: Math.floor(Math.random() * 50) + 2
-    }, 
-    {
-      path: [[0,1,0],[1,0,1],[2,0,0]],
-      magnitude: Math.floor(Math.random() * 50) + 2
-    },
-    {
-      path: [[0,1,0],[1,0,1],[2,0,1]],
-      magnitude: Math.floor(Math.random() * 50) + 2
-    },  
-    {
-      path: [[0,1,0],[1,0,2],[2,0,0]],
-      magnitude: Math.floor(Math.random() * 50) + 2
-    },
-    {
-      path: [[0,1,0],[1,0,2],[2,0,1]],
-      magnitude: Math.floor(Math.random() * 50) + 2
-    },//V
-
-    {
-      path: [[0,1,1],[1,0,0],[2,0,0]],
-      magnitude: Math.floor(Math.random() * 50) + 2
-    },
-    {
-      path: [[0,1,1],[1,0,0],[2,0,1]],
-      magnitude: Math.floor(Math.random() * 50) + 2
-    }, 
-    {
-      path: [[0,1,1],[1,0,1],[2,0,0]],
-      magnitude: Math.floor(Math.random() * 50) + 2
-    },
-    {
-      path: [[0,1,1],[1,0,1],[2,0,1]],
-      magnitude: Math.floor(Math.random() * 50) + 2
-    },  
-    {
-      path: [[0,1,1],[1,0,2],[2,0,0]],
-      magnitude: Math.floor(Math.random() * 50) + 2
-    },
-    {
-      path: [[0,1,1],[1,0,2],[2,0,1]],
-      magnitude: Math.floor(Math.random() * 50) + 2
-    },
-
-    {
-      path: [[0,2,0],[1,0,0],[2,0,0]],
-      magnitude: Math.floor(Math.random() * 50) + 2
-    },
-    {
-      path: [[0,2,0],[1,0,0],[2,0,1]],
-      magnitude: Math.floor(Math.random() * 50) + 2
-    }, 
-    {
-      path: [[0,2,0],[1,0,1],[2,0,0]],
-      magnitude: Math.floor(Math.random() * 50) + 2
-    },
-    {
-      path: [[0,2,0],[1,0,1],[2,0,1]],
-      magnitude: Math.floor(Math.random() * 50) + 2
-    },  
-    {
-      path: [[0,2,0],[1,0,2],[2,0,0]],
-      magnitude: Math.floor(Math.random() * 50) + 2
-    },
-    {
-      path: [[0,2,0],[1,0,2],[2,0,1]],
-      magnitude: Math.floor(Math.random() * 50) + 2
-    },//V
-
-    {
-      path: [[0,2,1],[1,0,0],[2,0,0]],
-      magnitude: Math.floor(Math.random() * 50) + 2
-    },
-    {
-      path: [[0,2,1],[1,0,0],[2,0,1]],
-      magnitude: Math.floor(Math.random() * 50) + 2
-    }, 
-    {
-      path: [[0,2,1],[1,0,1],[2,0,0]],
-      magnitude: Math.floor(Math.random() * 50) + 2
-    },
-    {
-      path: [[0,2,1],[1,0,1],[2,0,1]],
-      magnitude: Math.floor(Math.random() * 50) + 2
-    },  
-    {
-      path: [[0,2,1],[1,0,2],[2,0,0]],
-      magnitude: Math.floor(Math.random() * 50) + 2
-    },
-    {
-      path: [[0,2,1],[1,0,2],[2,0,1]],
-      magnitude: Math.floor(Math.random() * 50) + 2
-    }             
-  ] // flows
-};
-
-data = {{data | tojson | safe}};
+sankey_data = {{data | tojson | safe}};
 
 function prop(p) {
 
@@ -303,7 +70,7 @@ proposals_main = function() {
 
       var yscale;
       
-      var currently_active = undefined;
+      var currently_active = null;
 
       compute_positions = function() {
         node_layers = data.nodes;
@@ -387,49 +154,58 @@ proposals_main = function() {
       compute_flow_areas = function() {
 
         var nodes = data.nodes;
-        var flows = data.flows;
+        var flows = data.flows; // copy so we can destroy it
         
-        flows.sort(function(a,b){
-          return   a.path[0][0]-b.path[0][0] 
-                || a.path[0][1]-b.path[0][1] 
-                || a.path[0][2]-b.path[0][2]
-                || a.path[1][0]-b.path[1][0] 
-                || a.path[1][1]-b.path[1][1] 
-                || a.path[1][2]-b.path[1][2];
-        });
-
-        var layer_idx = flows[0].path[0][0];
-        console.log("preparing flows from layer " + layer_idx);
-
         flows.forEach(function(flow){
-          if (flow.path[0][0] != layer_idx) return;
-          var from = flow.path[0];
-          var to = flow.path[1];
-          var h = flow.magnitude*yscale;
-
-          var source = nodes[from[0]].items[from[1]].items[from[2]];
-          var target = nodes[to[0]].items[to[1]].items[to[2]];
-
-          var source_y0 = source.filled_out_y || source.y;
-          var source_y1 = source_y0 + h;
-          source.filled_out_y = source_y1;
-          var target_y0 = target.filled_in_y || target.y;
-          var target_y1 = target_y0 + h;
-          target.filled_in_y = target_y1;
-
-          flow_area_data.push({
-            area: [
-                    {x: source.x+node_width, y0: source_y0, y1: source_y1},
-                    {x: source.x+node_width+flow_start_width, y0: source_y0, y1: source_y1},
-                    {x: target.x-flow_start_width, y0: target_y0, y1: target_y1},
-                    {x: target.x, y0: target_y0, y1: target_y1},
-                  ],
-            class: "flow" + " passes-"+from.join("-") + " passes-"+to.join("-")
-            });
+          flow.extra_classes = flow.path.map(function(addr){return "passes-"+addr.join("-");}).join(" ");
         });
 
+        while(true) {
 
-        console.log(flow_area_data);
+          flows = flows.filter(function(d){return d.path.length > 1});
+          if (flows.length == 0) return;
+
+          flows.sort(function(a,b){
+            return   a.path[0][0]-b.path[0][0] 
+                  || a.path[0][1]-b.path[0][1] 
+                  || a.path[0][2]-b.path[0][2]
+                  || a.path[1][0]-b.path[1][0] 
+                  || a.path[1][1]-b.path[1][1] 
+                  || a.path[1][2]-b.path[1][2];
+          });
+
+          var layer_idx = flows[0].path[0][0];
+          flows.forEach(function(flow){
+
+            if (flow.path[0][0] != layer_idx) return;
+            var from = flow.path[0];
+            var to = flow.path[1];
+            var h = flow.magnitude*yscale;
+
+            var source = nodes[from[0]].items[from[1]].items[from[2]];
+            var target = nodes[to[0]].items[to[1]].items[to[2]];
+
+            var source_y0 = source.filled_out_y || source.y;
+            var source_y1 = source_y0 + h;
+            source.filled_out_y = source_y1;
+            var target_y0 = target.filled_in_y || target.y;
+            var target_y1 = target_y0 + h;
+            target.filled_in_y = target_y1;
+
+            flow_area_data.push({
+              area: [
+                      {x: source.x+node_width, y0: source_y0, y1: source_y1},
+                      {x: source.x+node_width+flow_start_width, y0: source_y0, y1: source_y1},
+                      {x: target.x-flow_start_width, y0: target_y0, y1: target_y1},
+                      {x: target.x, y0: target_y0, y1: target_y1},
+                    ],
+              class: ["flow", flow.extra_classes].join(" ")
+              });
+
+            flow.path.shift();
+          });
+        }        
+
       };
 
       var flow_area_data = [];
@@ -487,20 +263,21 @@ proposals_main = function() {
 
               if (currently_active) {
                 var theflows = parent.selectAll(".passes-"+currently_active);
-                var thenode = parent.select(".node-"+node_id);
+                var thenode = parent.selectAll(".node-"+currently_active);
 
                 theflows.transition()
-                  .style("fill", "")
-                  .style("fill-opacity", "");
+                  .style("fill", null)
+                  .style("fill-opacity", null);
                 thenode.transition()
-                  .style("fill", "")
-                  .style("fill-opacity", "");
+                  .style("fill", null)
+                  .style("fill-opacity", null);
 
-                currently_active = undefined;
+                 currently_active = null;
               }
 
               var theflows = parent.selectAll(".passes-"+node_id);
-              var thenode = parent.select(".node-"+node_id);
+              var thenode = parent.selectAll(".node-"+node_id);
+              console.log(node_id);
               theflows.transition()
                 .style("fill", "#ff0000")
                 .style("fill-opacity", 1.0);
@@ -530,7 +307,7 @@ proposals_main = function() {
   return sankey;
 };
 
-$(d3.select("#proposals-main").datum(data).call(
+$(d3.select("#proposals-main").datum(sankey_data).call(
   proposals_main()
     .width(500)
     .height(440)
