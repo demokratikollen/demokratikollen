@@ -14,6 +14,7 @@
 {% endblock %}
 
 {% block content %}
+        <h1>{{ party.name }}</h1>
         <div id='election-map'></div>
  <!--    <svg id='election-map' class='canvas'></svg> -->
 {% endblock %}
@@ -21,7 +22,18 @@
 {% block scripts %}
 {{ super() }}
 <script type="text/javascript">
-  var data = [{id: "1884", color: "pink"},{id: "1861", color: "blue"}];
-  $(parties.setup('#election-map',data))
+  d3.json('/parties/election/1998/{{ party.abbr }}.json',function(error,data) {
+    if(error) console.warn(error);
+    parties.setup('#election-map',data);
+  });
+
+
+
+
+  function newData() {
+    var data2 = [{id: "1380", color: "green"}];
+    parties.updateMap(data2);
+  }
+
 </script>
 {% endblock %}

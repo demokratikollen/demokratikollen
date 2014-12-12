@@ -5,20 +5,18 @@ parties = {
 
     var projection = d3.geo.conicEqualArea()
         .parallels([50,70])
-        .center([16.6358,62.1792])        
+        .center([16.6358,62.1792])
 
     var path = d3.geo.path();
 
-    function idProp(d) {
-      return d.id;
+    function prop(name) {
+      return function(d) { return d[name]; };
     }
 
     function chart(selection) {
-      console.log(regions);
       selection.each(function(data, i) {
-        var svg = d3.select(this).selectAll("svg").data([data]);
-
-        console.log(svg);
+        var max_votes = data.max_votes;
+        var svg = d3.select(this).selectAll("svg").data([data.d]);
 
         // Update projection and path
         projection.scale(10*width)
@@ -26,24 +24,34 @@ parties = {
         path.projection(projection);
         var transform = 'rotate(10,'+width/2+','+height/2+')';
 
-        // Otherwise, create the skeletal chart.
+        // If it doesn't exist, create the map
         var gMain = svg.enter().append("svg").append("g");
         var sel = gMain.attr("class","map-collection")
             .attr('transform',transform)
             .selectAll(".map-region")
-            .data(regions.features, idProp)
+            .data(regions.features, prop("id"))
             .enter()
             .append("path")
             .attr("class","map-region")
             .attr("d", path);
 
-        console.log(sel);
-
-        svg.attr("width", width)
+        var regs = svg.attr("width", width)
             .attr("height", height)
             .selectAll(".map-region")
-            .data(data, idProp)
-            .attr("fill",function(d) { return d.color });
+            .data(data.d, prop("id"));
+
+        var color = d3.scale.linear().domain([0,max_votes]).range(['white', 'green']);
+
+        regs.transition()
+            .duration(200)
+            .attr("fill",function(d) {
+              return color(d.votes);
+            });
+
+        regs.exit()
+            .transition()
+            .duration(200)
+            .attr("fill","black");
       });
     }
 
@@ -72,11 +80,16 @@ parties = {
   setup: function(divId,data) {
     d3.json('/data/municipalities.topojson', function (error,json) {
       var municipalities = topojson.feature(json, json.objects.municipalities);
-      var mapChart = parties.mapChart(municipalities);
-      mapChart.width(300);
-      d3.select(divId)
-        .datum(data)
-        .call(mapChart);
+      var mapChart = parties.mapChart(municipalities).width(150);
+      var chartDiv = d3.select(divId);
+
+      // Create and call update function
+      parties.updateMap = function(d) {
+        chartDiv.datum(d)
+                .call(mapChart)
+      }
+
+      parties.updateMap(data);
     });
   }
 };
