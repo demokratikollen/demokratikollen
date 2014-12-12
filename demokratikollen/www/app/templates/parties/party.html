@@ -15,14 +15,16 @@
 
 {% block content %}
         <h1>{{ party.name }}</h1>
-        <div id='election-map'></div>
+        <div class="row">
+          <div id='election-map' class='col-md-6 col-xs-12'></div>
+        </div>
  <!--    <svg id='election-map' class='canvas'></svg> -->
 {% endblock %}
 
 {% block scripts %}
 {{ super() }}
 <script type="text/javascript">
-  d3.json('/parties/election/1998/{{ party.abbr }}.json',function(error,data) {
+  d3.json('/parties/election/2014/{{ party.abbr }}.json',function(error,data) {
     if(error) console.warn(error);
     parties.setup('#election-map',data);
   });

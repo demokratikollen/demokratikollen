@@ -40,7 +40,7 @@ parties = {
             .selectAll(".map-region")
             .data(data.d, prop("id"));
 
-        var color = d3.scale.linear().domain([0,max_votes]).range(['white', 'green']);
+        var color = d3.scale.linear().domain([0,max_votes]).range(['#dddddd', 'green']);
 
         regs.transition()
             .duration(200)
