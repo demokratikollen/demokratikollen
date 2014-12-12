@@ -32,12 +32,20 @@ def main():
     session = sessionmaker(bind=engine)
     s = session() 
 
-    party_data = dict()
+    party_metadata = dict()
     for party in s.query(Party):
-        party_data[party.id] = dict(
+        party_metadata[party.id] = dict(
             abbr=party.abbr,
+            name=party.name,
             ordering=party_ordering[party.abbr]
             )
+    committee_metadata = dict()
+    for c in s.query(Committee):
+        committee_metadata[c.id] = dict(
+                abbr=c.abbr,
+                name=c.name
+            )
+
 
 
     mdb = MongoDBDatastore()
@@ -125,7 +133,8 @@ def main():
                 results_set.add(result_key)
 
         def party_sort_key(p):
-            return party_data[p]['ordering']
+            return party_metadata[p]['ordering']
+
 
         parties = list(parties_tree.keys())
         parties.sort(key=party_sort_key)
@@ -148,33 +157,32 @@ def main():
         result_idc = {r:k for (k,r) in enumerate(results)}
 
         nodes = list()
-
         node_group_members = dict(
             title="Enskilda ledamöters förslag", 
-            items=[dict(title=p) for p in members],
+            items=[dict(detail="single", title=p) for p in members],
             label = -1)
 
         node_group_party = dict(
             title="Partiförslag", 
-            items=[dict(party_id=p, title=party_data[p]['abbr']) for p in parties],
+            items=[dict(detail="party", party_id=p, title=party_metadata[p]['name'],abbr=party_metadata[p]['abbr']) for p in parties],
             label = -1)
 
         node_group_multiparty = dict(
             title="Flerpartiförslag", 
-            items=[dict(title=p) for p in multiparties],
+            items=[dict(detail="multiparty", title=p) for p in multiparties],
             label = -1)
         node_group_government = dict(
             title="Regeringspropositioner", 
-            items=[dict(title=p) for p in ministries],
+            items=[dict(detail="government", title=p) for p in ministries],
             label = -1)
 
         node_group_committee = dict(
             title="Utskotten", 
-            items=[dict(title=p) for p in committees],
+            items=[dict(detail="committee",committee_id=p, title=committee_metadata[p]['name'],abbr=committee_metadata[p]['abbr']) for p in committees],
             label = 0)
         node_group_results = dict(
             title="Besluten", 
-            items=[dict(title=p) for p in results],
+            items=[dict(detail="result", result_id=p, title=p) for p in results],
             label = 0)
 
         nodes = [
@@ -217,11 +225,21 @@ def main():
                     flows.append(dict(path=[ministry_addr, committee_addr, result_addr], magnitude=count))
 
 
+        party_detail = dict();
+        for p_id in parties:
+            party_detail[repr(p_id)] = dict(
+                committees = [dict(id=c_id,name=committee_metadata[c_id]["name"],count=sum(parties_tree[p_id][c_id].values())) for c_id in committees if c_id in parties_tree[p_id]],
+                results = [dict(id=result,name=result,count=sum(parties_tree[p_id][c_id][result] for c_id in committees if c_id in parties_tree[p_id] and result in parties_tree[p_id][c_id]) ) for result in results]
+                )
+
+
+
 
         output_top = dict(
                             government=name,
                             nodes = nodes,
-                            flows = flows
+                            flows = flows,
+                            party_detail=party_detail
                         )
 
         mongo_collection.update(dict(government=name), output_top, upsert=True)
