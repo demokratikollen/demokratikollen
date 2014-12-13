@@ -10,17 +10,10 @@
     stroke-linejoin: round;
     stroke-linecap: round;
 }*/
-  .d3-tip {
-    line-height: 1;
-    font-weight: bold;
-    padding: 12px;
-    background: rgba(0, 0, 0, 0.8);
-    color: #fff;
-    border-radius: 2px;
-  }
+
 
   /* Creates a small triangle extender for the tooltip */
-  .d3-tip:after {
+/*  .d3-tip:after {
     box-sizing: border-box;
     display: inline;
     font-size: 10px;
@@ -30,15 +23,15 @@
     content: "\25BC";
     position: absolute;
     text-align: center;
+    pointer-events: none !important;
   }
-
-  /* Style northward tooltips differently */
-  .d3-tip.n:after {
+*/
+ /* Style northward tooltips differently */
+/*  .d3-tip.n:after {
     margin: -1px 0 0 0;
     top: 100%;
     left: 0;
-  }
-
+  }*/
 </style>
 {% endblock %}
 
@@ -53,9 +46,9 @@
 {% block scripts %}
 {{ super() }}
 <script type="text/javascript">
-  d3.json('/parties/election/2014/{{ party.abbr }}.json',function(error,data) {
+  d3.json("{{ url_for('elections.election', year='2014', abbr=party.abbr|lower) }}",function(error,data) {
     if(error) console.warn(error);
-    parties.setup('#election-map',data);
+    parties.setup('#election-map',data,utils.parties.get("{{ party.abbr|lower }}").color);
   });
 
 
