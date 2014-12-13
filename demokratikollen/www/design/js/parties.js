@@ -50,7 +50,7 @@ parties = {
 
         var tooltip = d3.select("body")
             .append("div")
-            .attr('class', 'tooltip')
+            .attr('class', 'election-tooltip')
             .style("opacity", 0);
 
         // Setup tooltip events
