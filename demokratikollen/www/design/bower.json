@@ -12,9 +12,13 @@
   ],
   "devDependencies": {
     "bootstrap-sass-official": "~3.3.1",
-    "d3": "~3.4.13",
+    "d3": "~3.5.2",
+    "d3-tip": "~0.6.6",
     "jquery-ui-slider-pips": "~1.7.2",
     "typeahead.js": "~0.10.5",
     "fuse.js": "~1.2.2"
+  },
+  "resolutions": {
+    "d3": "~3.5.2"
   }
 }
