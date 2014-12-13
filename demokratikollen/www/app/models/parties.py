@@ -39,15 +39,21 @@ def party_election(party_abbr,year):
     if party_abbr not in db_name:
         raise ValueError("Unknown party: {}".format(party_abbr))
 
-    el_dict = mdb.get_object("election_data")
+    el_dict = mdb.get_object("election_municipalities")
+    el_totals = mdb.get_object("election_totals")
+    el_party_sums = mdb.get_object("election_party_sums")
     try:
         el = el_dict[year][db_name[party_abbr]]
+        timeseries = el_party_sums[db_name[party_abbr]]
     except KeyError as e:
-        raise ValueError("No election data for year {}.".format(year))
+        raise ValueError("Data missing for year {}.".format(year))
+
+    timeseries = {y: val/el_totals[y] for y,val in timeseries.items()}
 
     max_votes = max(el.values())
 
-    out_dict = {"d": [{"id": k, "votes": v} if not math.isnan(v) else {"id": k, "votes": 0} for k,v in el.items()]}
-    out_dict["max_votes"] = max_votes
+    out_dict = {"municipalities": [{"id": k, "votes": v} if not math.isnan(v) else {"id": k, "votes": 0} for k,v in el.items()]}
+    out_dict["max_municipality"] = max_votes
+    out_dict["history"] = timeseries
 
     return out_dict
