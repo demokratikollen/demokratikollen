@@ -1,5 +1,6 @@
 # -*- coding: utf-8 -*-
 from sqlalchemy import Table, Column, String, Integer, ForeignKey, create_engine
+from sqlalchemy.sql import func
 from sqlalchemy.types import Date, Enum, DateTime
 from sqlalchemy.orm import relationship, backref, sessionmaker
 from sqlalchemy.ext.declarative import declarative_base
@@ -20,6 +21,10 @@ class Member(Base):
     party_id = Column(Integer, ForeignKey('groups.id'))
     votes = relationship('Vote', backref='member')
     appointments = relationship('Appointment', backref='member')
+    current_group_appointments = relationship("GroupAppointment",
+                    primaryjoin="and_(Member.id==GroupAppointment.member_id,"
+                                    "GroupAppointment.start_date<=func.now(),"
+                                    "GroupAppointment.end_date>=func.now())")
 
     def __repr__(self):
         return '{}, {} ({})'.format(self.last_name,self.first_name,self.party.abbr)
@@ -43,7 +48,7 @@ class Appointment(Base):
     }
 
 class SpeakerAppointment(Appointment):
-    position =  Column(Enum('Talman','Förste vice talman','Andre vice talman','Tredje vice talman',name='spekear_positions'))
+    position =  Column(Enum('Talman','Förste vice talman','Andre vice talman','Tredje vice talman',name='speaker_positions'))
 
     __mapper_args__ = {
         'polymorphic_identity':'speaker_appointment'
@@ -61,9 +66,9 @@ class ChamberAppointment(Appointment):
     }
 
     def title(self):
-        return '{} {} {}'.format(self.status,self.role,self.member)    
+        return '{} {} {}'.format(self.status,self.role,self.member)
     def __repr__(self):
-        return 'Chair {}: {} {} {}-{}: {}'.format(self.chair,self.status,self.role,self.start_date,self.end_date,self.member)    
+        return 'Chair {}: {} {} {}-{}: {}'.format(self.chair,self.status,self.role,self.start_date,self.end_date,self.member)
 
 
 class GroupAppointment(Appointment):
@@ -129,7 +134,7 @@ class Party(Group):
         'polymorphic_identity':'party',
     }
     def __repr__(self):
-        return 'Party {}: {} ({})'.format(self.id,self.name,self.abbr)    
+        return 'Party {}: {} ({})'.format(self.id,self.name,self.abbr)
 
 #########################
 # Voting
@@ -168,6 +173,8 @@ class Document(Base):
         'polymorphic_on':classtype
     }
 
+    def __repr__(self):
+        return '{}-{}: {}'.format(self.session, self.dok_id, self.title)
     
 class CommitteeReport(Document):
     __tablename__ = 'committee_reports'
@@ -178,7 +185,7 @@ class CommitteeReport(Document):
 
     __mapper_args__ = {
         'polymorphic_identity':'committee_report',
-    }   
+    }
 
 class CommitteeReportPoint(Base):
     __tablename__ = 'committee_report_points'
@@ -191,7 +198,7 @@ class CommitteeReportPoint(Base):
     __mapper_args__ = {
         'polymorphic_on':classtype,
         'polymorphic_identity':'committee_report_point'
-    } 
+    }
 
 class AcclaimedPoint(CommitteeReportPoint):
 
@@ -228,7 +235,7 @@ class ProposalPoint(Base):
     __tablename__ = 'proposal_points'
     id = Column(Integer, primary_key=True)
     number = Column(Integer)
-    
+
     proposal_id = Column(Integer, ForeignKey('proposals.id'))
     committee_report_id = Column(Integer,ForeignKey('committee_reports.id'))
     committee_report = relationship('CommitteeReport',foreign_keys="[ProposalPoint.committee_report_id]")

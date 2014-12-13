@@ -7,7 +7,7 @@ Feature: As a curious user
         Then the page title should be "Riksdagen - Demokratikollen"
         But only the header button "Riksdagen" should be activated
         Then the response should contain an element "svg#parliament_svg"
-        Then the response should contain an element "div#parliament_mode_switcher"
+        Then the response should contain an element "div.row.buttons"
         Then the response should contain an element "button#parliament_button"
         Then the response should contain an element "button#gender_button"
     

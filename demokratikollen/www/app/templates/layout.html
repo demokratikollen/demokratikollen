@@ -1,4 +1,4 @@
-﻿<!DOCTYPE html>
+<!DOCTYPE html>
 <html lang="sv">
   <head>
     {% block head -%}
@@ -42,9 +42,17 @@
             <div class="column menu-search">
               <div class="collapse">
                 <form role="search">
-                  <div class="input-group">
-                    <span class="input-group-addon"><span aria-hidden="true"></span></span>
-                    <input type="text" placeholder="Sök">
+                  <div class="search">
+                    <div class="search-typeahead" id="main-search">
+                      <span class="input-group-addon"><span aria-hidden="true"></span></span>
+                      <input type="text" placeholder="Sök">
+                      <ul>
+                        <li role="presentation"><a role="menuitem" tabindex="-1" href="#">Action</a></li>
+                        <li role="presentation"><a role="menuitem" tabindex="-1" href="#">Another action</a></li>
+                        <li role="presentation"><a role="menuitem" tabindex="-1" href="#">Something else here</a></li>
+                        <li role="presentation"><a role="menuitem" tabindex="-1" href="#">Separated link</a></li>
+                      </ul>
+                    </div>
                   </div><!-- /input-group -->
                 </form>
               </div>
@@ -67,6 +75,7 @@
 
     <div id="content-wrapper">
       <div class="container">
+        <p id="test"></p>
         {% block content %}{% endblock %}
       </div>
     </div>
@@ -79,6 +88,7 @@
     {%- block scripts %}
     <script src="{{ url_for('static', filename='js/dependencies.min.js') }}"></script>
     <script src="{{ url_for('static', filename='js/scripts.min.js') }}"></script>
+    <script type="text/javascript">$(Search.Setup);</script>
     {%- endblock %}
   </body>
 </html>

@@ -9,6 +9,7 @@ from demokratikollen.www.app.helpers.cache import cache
 from demokratikollen.www.app.helpers.db import db
 from demokratikollen.core.db_structure import Member, ChamberAppointment, Party
 from demokratikollen.www.app.models.parties import party_bias
+from demokratikollen.www.app.models.proposals import proposals_main
 from flask import Blueprint, request
 from sqlalchemy.orm.exc import NoResultFound
 from sqlalchemy import func
@@ -35,7 +36,12 @@ def parties():
 
 @blueprint.route('/forslagen', methods=['GET'])
 def proposals():
-    return render_template("/proposals/index.html")
+
+    proposals_main_data = proposals_main("reinfeldt2")
+
+    return render_template("/proposals/index.html",
+                                data = proposals_main_data
+                            )
 
 @blueprint.route('/om', methods=['GET'])
 def about():

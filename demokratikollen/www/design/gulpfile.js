@@ -29,6 +29,7 @@ var js_deps = [
     // Main libraries
     'bower_components/jquery/dist/jquery.js',
     'bower_components/d3/d3.js',
+    'bower_components/d3-tip/index.js',
     // jQueryUI components
     jqueryUiDir+'ui/core.js',
     jqueryUiDir+'ui/widget.js',
@@ -39,7 +40,11 @@ var js_deps = [
     bs_scripts_dir+'bootstrap/transition.js',
     bs_scripts_dir+'bootstrap/collapse.js',
     // Other dependencies
-    'bower_components/topojson/topojson.js'
+    'bower_components/topojson/topojson.js',
+    // Typeahead
+    // 'bower_components/typeahead.js/dist/typeahead.bundle.js',
+    // Fuse.js
+    'bower_components/fuse.js/src/fuse.js'
 ];
 
 var style_deps = [
@@ -128,5 +133,6 @@ gulp.task('watch', function() {
     gulp.watch(js_files, ['scripts'])
 });
 
-gulp.task('all',['copy','styles','scripts','style-deps','script-deps']);
-gulp.task('default',['all','watch']);
+gulp.task('all',['copy','styles','style-deps','script-deps']);
+gulp.task('default',['styles','scripts','watch']);
+gulp.task('dependencies',['style-deps','script-deps']);
