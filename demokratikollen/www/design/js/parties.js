@@ -15,8 +15,9 @@ parties = {
 
     function chart(selection) {
       selection.each(function(data, i) {
-        var max_votes = data.max_votes;
-        var svg = d3.select(this).selectAll("svg").data([data.d]);
+        var max_votes = data.max_municipality;
+        var svg = d3.select(this).selectAll("svg").data([data.municipalities]);
+        console.log(data.history);
 
         // Update projection and path
         projection.scale(10*width)
@@ -38,9 +39,21 @@ parties = {
         var regs = svg.attr("width", width)
             .attr("height", height)
             .selectAll(".map-region")
-            .data(data.d, prop("id"));
+            .data(data.municipalities, prop("id"));
 
-        var color = d3.scale.linear().domain([0,max_votes]).range(['#dddddd', 'green']);
+        var start_color = d3.rgb('#dddddd'),
+            end_color = d3.rgb('green').darker();
+        var color = d3.scale.linear().domain([0,max_votes]).range([start_color, end_color]);
+
+        var tip = d3.tip()
+            .attr('class', 'd3-tip')
+            .offset([-10, 0])
+            .html(function(d) {
+              return "<strong>"+d.id+":</strong> <span style='color:red'>" + Math.round(100*d.votes) + "</span> %";
+            })
+        regs.call(tip)
+            .on('mouseover', tip.show)
+            .on('mouseout', tip.hide);
 
         regs.transition()
             .duration(200)
