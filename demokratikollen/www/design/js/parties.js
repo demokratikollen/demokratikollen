@@ -51,21 +51,31 @@ parties = {
             .attr('class', 'election-tooltip')
             .style("opacity", 0);
 
+        var tooltipText = tooltip.append("div");
+
+        var tooltipFigure = tooltip.append("figure")
+        // var tooltipFigure = d3.select("#municipality-timeseries")
+          .style("display","block")
+          .style("padding-top","5px");
+
         // Setup tooltip events
         regs.on("mouseover", function(d){
-              return tooltip.html("<strong>"+regMap.get(d.id).properties.name+":</strong> "
-                              +"<span style='color:"+colorScale(0.5*max_votes)+"'>" + Math.round(100*d.votes) + "</span> %")
-                            .transition()
-                            .duration(100)
-                            .style("opacity",0.9);
+              tooltipText.html("<strong>"+regMap.get(d.id).properties.name+":</strong> "
+                              +"<span style='color:"+colorScale(0.5*max_votes)+"'>" + Math.round(100*d.votes) + "</span> %");
+              d3.json("/data/elections/timeseries/"+"m"+"/"+d.id+".json",function(error,mTsJson){
+                tooltipFigure.datum(mTsJson.d).call(parties.timeSeriesChart());
+              });
+              tooltip.transition()
+                .duration(100)
+                .style("opacity",0.9);
             })
             .on("mousemove", function(d){
-              return tooltip.style("top", (event.pageY-40)+"px").style("left",(event.pageX)+"px");
+              tooltip.style("top", (event.pageY-40)+"px").style("left",(event.pageX)+"px");
             })
             .on("mouseout", function(d){
-              return tooltip.transition()
-                            .duration(100)
-                            .style("opacity",0);;
+              tooltip.transition()
+                .duration(100)
+                .style("opacity",0);;
             });
 
         regs.attr("fill",startColor)
@@ -109,6 +119,70 @@ parties = {
     };
 
     return chart;
+  },
+  timeSeriesChart: function() {
+    var margin = {top: 5, right: 5, bottom: 3, left: 5},
+        width = 80 - margin.left - margin.right,
+        height = 40 - margin.top - margin.bottom;
+
+    var x = d3.time.scale()
+      .range([0, width]);
+
+    var y = d3.scale.linear()
+      .range([height, 0]);
+
+    var line = d3.svg.line()
+      .x(function(d) { return x(d.year); })
+      .y(function(d) { return y(d.votes); });
+
+    function chart(selection) {
+      selection.each(function(data,i) {
+        var svg = d3.select(this)
+          .selectAll("svg")
+          .data([data]);
+
+        svg.enter().append("svg");
+        svg = svg.selectAll("g")
+          .data([data]);
+
+        x.domain(d3.extent(data, function(d) { return d.year; }));
+        y.domain(d3.extent(data, function(d) { return d.votes; }));
+
+        svg.enter()
+            .append("g")
+            .attr("transform", "translate(" + margin.left + "," + margin.top + ")");
+        
+        svg.attr("width", width + margin.left + margin.right)
+            .attr("height", height + margin.top + margin.bottom)
+          
+         
+        svg = svg.selectAll("path")
+            .data(data);
+
+        svg.enter()
+          .append("path")
+          .attr("class", "line")
+          .attr("d", line);
+
+        // svg.exit()
+        //   .remove();
+      });
+    }
+
+    chart.width = function(_) {
+      if (!arguments.length) return width;
+      width = _;
+      return chart;
+    };
+
+    chart.height = function(_) {
+      if (!arguments.length) return height;
+      height = _;
+      return chart;
+    };
+
+    return chart;
+
   },
   setup: function(divId,data,color) {
     d3.json('/data/municipalities.topojson', function (error,json) {

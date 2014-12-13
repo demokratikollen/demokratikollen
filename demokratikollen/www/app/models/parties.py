@@ -22,10 +22,7 @@ def party_bias(partyA_abbr, partyB_abbr):
     return record
 
 
-def party_election(party_abbr,year):
-    party_abbr = party_abbr.lower()
-    year = str(year)
-    db_name = {
+db_name = {
         'c':'Centerpartiet',
         'fp':'Folkpartiet',
         'kd':'Kristdemokraterna',
@@ -36,17 +33,16 @@ def party_election(party_abbr,year):
         'v':'Vänsterpartiet'
     }
 
-    if party_abbr not in db_name:
-        raise ValueError("Unknown party: {}".format(party_abbr))
+def party_election(party_abbr,year):
+    party = db_name[party_abbr.lower()]
+    year = str(year)
 
     el_dict = mdb.get_object("election_municipalities")
     el_totals = mdb.get_object("election_totals")
     el_party_sums = mdb.get_object("election_party_sums")
-    try:
-        el = el_dict[year][db_name[party_abbr]]
-        timeseries = el_party_sums[db_name[party_abbr]]
-    except KeyError as e:
-        raise ValueError("Data missing for year {}.".format(year))
+
+    el = el_dict[year][party]
+    timeseries = el_party_sums[party]
 
     timeseries = {y: val/el_totals[y] for y,val in timeseries.items()}
 
@@ -57,3 +53,13 @@ def party_election(party_abbr,year):
     out_dict["history"] = timeseries
 
     return out_dict
+
+def get_municipality_timeseries(party_abbr,m_id):
+    party = db_name[party_abbr.lower()]
+    m_id = str(m_id)
+
+    el_dict = mdb.get_object("election_municipalities")
+    timeseries = {"d": [{"year": y, "votes": (dy[party][m_id] if not math.isnan(dy[party][m_id]) else 0)} for y,dy in el_dict.items()]}
+
+
+    return timeseries
