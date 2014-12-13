@@ -2,7 +2,9 @@ function AppointmentsTimeline() {
 
   var lineHeight = 30,
     labelLength = 20,
-    lineOffsetY = 10;
+    lineOffsetY = 10,
+    margin = { top: 40, right: 0, bottom: 40, left: 0 }
+    timeUnit = null;
 
   function getMinDate(blocks) { 
     return d3.min(blocks, function (block) { return block.start; });
@@ -19,8 +21,7 @@ function AppointmentsTimeline() {
 
       d3.select(this).classed("chart", true);
 
-      var margin = { top: 40, right: 10, bottom: 40, left: 10 },
-          width = this.getBoundingClientRect().width - margin.left - margin.right,
+      var width = this.getBoundingClientRect().width - margin.left - margin.right,
           height = data.length * lineHeight;
 
       var svg = d3.select(this)
@@ -33,7 +34,7 @@ function AppointmentsTimeline() {
       var x = d3.time.scale()
         .domain([getMinDate(data), getMaxDate(data)])
         .range([0, width])
-        .nice(d3.time.year);
+        .nice();
 
       var y = d3.scale.ordinal()
         .domain(labels)
@@ -47,12 +48,16 @@ function AppointmentsTimeline() {
       var xAxis = d3.svg.axis()
         .scale(x)
         .orient("top")
-        .tickSize(-height)
-        .ticks(2 + Math.floor(width/75));
+        .tickSize(-height, 5)
+        .ticks(2 + Math.floor(width/50));
 
-      svg.append("g")
+      xax = svg.append("g")
         .classed("axis x", true)
         .call(xAxis);
+
+      xax.selectAll("text")
+        .style("text-anchor", "start");
+      xax.select("g.tick:last-of-type text").remove()
 
       svg.append("g")
         .classed("labels", true)
