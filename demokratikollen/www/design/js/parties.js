@@ -9,15 +9,18 @@ parties = {
 
     var path = d3.geo.path();
 
+    var featureNames = {};
+
     function prop(name) {
       return function(d) { return d[name]; };
     }
+
+    var regMap = d3.map(regions.features, prop("id"))
 
     function chart(selection) {
       selection.each(function(data, i) {
         var max_votes = data.max_municipality;
         var svg = d3.select(this).selectAll("svg").data([data.municipalities]);
-        console.log(data.history);
 
         // Update projection and path
         projection.scale(10*width)
@@ -41,24 +44,37 @@ parties = {
             .selectAll(".map-region")
             .data(data.municipalities, prop("id"));
 
-        var start_color = d3.rgb('#dddddd'),
-            end_color = d3.rgb('green').darker();
-        var color = d3.scale.linear().domain([0,max_votes]).range([start_color, end_color]);
+        var startColor = d3.rgb('#eee'),
+            endColor = d3.rgb(color);
+        var colorScale = d3.scale.linear().domain([0,max_votes]).range([startColor, endColor]);
 
-        var tip = d3.tip()
-            .attr('class', 'd3-tip')
-            .offset([-10, 0])
-            .html(function(d) {
-              return "<strong>"+d.id+":</strong> <span style='color:red'>" + Math.round(100*d.votes) + "</span> %";
+        var tooltip = d3.select("body")
+            .append("div")
+            .attr('class', 'tooltip')
+            .style("opacity", 0);
+
+        // Setup tooltip events
+        regs.on("mouseover", function(d){
+              return tooltip.html("<strong>"+regMap.get(d.id).properties.name+":</strong> "
+                              +"<span style='color:"+colorScale(0.5*max_votes)+"'>" + Math.round(100*d.votes) + "</span> %")
+                            .transition()
+                            .duration(100)
+                            .style("opacity",0.9);
             })
-        regs.call(tip)
-            .on('mouseover', tip.show)
-            .on('mouseout', tip.hide);
+            .on("mousemove", function(d){
+              return tooltip.style("top", (event.pageY-40)+"px").style("left",(event.pageX)+"px");
+            })
+            .on("mouseout", function(d){
+              return tooltip.transition()
+                            .duration(100)
+                            .style("opacity",0);;
+            });
 
-        regs.transition()
+        regs.attr("fill",startColor)
+            .transition()
             .duration(200)
             .attr("fill",function(d) {
-              return color(d.votes);
+              return colorScale(d.votes);
             });
 
         regs.exit()
@@ -88,12 +104,18 @@ parties = {
       return chart;
     };
 
+    chart.color = function(_) {
+      if (!arguments.length) return color;
+      color = _;
+      return chart;
+    };
+
     return chart;
   },
-  setup: function(divId,data) {
+  setup: function(divId,data,color) {
     d3.json('/data/municipalities.topojson', function (error,json) {
       var municipalities = topojson.feature(json, json.objects.municipalities);
-      var mapChart = parties.mapChart(municipalities).width(150);
+      var mapChart = parties.mapChart(municipalities).width(150).color(color);
       var chartDiv = d3.select(divId);
 
       // Create and call update function
