@@ -29,6 +29,7 @@ var js_deps = [
     // Main libraries
     'bower_components/jquery/dist/jquery.js',
     'bower_components/d3/d3.js',
+    'bower_components/d3-tip/index.js',
     // jQueryUI components
     jqueryUiDir+'ui/core.js',
     jqueryUiDir+'ui/widget.js',
