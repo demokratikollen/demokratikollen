@@ -9,8 +9,6 @@ parties = {
 
     var path = d3.geo.path();
 
-    var featureNames = {};
-
     function prop(name) {
       return function(d) { return d[name]; };
     }
@@ -50,7 +48,7 @@ parties = {
 
         var tooltip = d3.select("body")
             .append("div")
-            .attr('class', 'tooltip')
+            .attr('class', 'election-tooltip')
             .style("opacity", 0);
 
         // Setup tooltip events
