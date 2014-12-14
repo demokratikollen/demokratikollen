@@ -53,8 +53,8 @@ parties = {
 
         var tooltipText = tooltip.append("div");
 
-        var tooltipFigure = tooltip.append("figure")
-        // var tooltipFigure = d3.select("#municipality-timeseries")
+        // var tooltipFigure = tooltip.append("figure")
+        var tooltipFigure = d3.select("#municipality-timeseries")
           .style("display","block")
           .style("padding-top","5px");
 
@@ -156,16 +156,11 @@ parties = {
             .attr("height", height + margin.top + margin.bottom)
           
          
-        svg = svg.selectAll("path")
-            .data(data);
+        svg = svg.append("path")
+            .datum(data)
+            .attr("class", "line")
+            .attr("d", line);
 
-        svg.enter()
-          .append("path")
-          .attr("class", "line")
-          .attr("d", line);
-
-        // svg.exit()
-        //   .remove();
       });
     }
 
