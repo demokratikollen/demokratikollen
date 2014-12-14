@@ -17,6 +17,17 @@ function AppointmentsTimeline() {
     return d3.max(blocks, function (block) { return block.endDate; });
   }
 
+  function ordering(rowA, rowB) {
+    // rowA and rowB are arrays of data entries
+    maxDates = [getMaxDate(rowA.values), getMaxDate(rowB.values)];
+    if (maxDates[0] != maxDates[1]) {
+      return maxDates[1] - maxDates[0];
+    } else {
+      return getMinDate(rowB.values) - getMinDate(rowA.values);
+    }
+
+  }
+
   function unique(arr) {
     return arr.reduce(function(collected, current) {
       if (collected.indexOf(current) < 0) collected.push(current);
@@ -27,9 +38,16 @@ function AppointmentsTimeline() {
   function chart(selection) {
     selection.each(function(data) {
 
-      var rowLabels = unique(data.map(function(d) { return d.rowLabel; })),
+      dataByRowLabel = d3.nest()
+        .key(function(d) { return d.rowLabel; })
+        .entries(data);
+      dataByRowLabel.sort(ordering);
+
+
+      var rowLabels = dataByRowLabel.map(function(d) { return d.key; }),
         minDate = getMinDate(data),
         maxDate = getMaxDate(data);
+
       
       d3.select(this).classed("chart", true);
 
