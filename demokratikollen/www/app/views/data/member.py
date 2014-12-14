@@ -21,7 +21,6 @@ def appointments_json(member_id):
     appointments = db.session.query(with_polymorphic(Appointment, '*'), Group) \
         .filter(Appointment.member_id == member_id) \
         .outerjoin(Group) \
-        .order_by(desc(Appointment.end_date), Appointment.start_date) \
         .all()
 
     return appointments
