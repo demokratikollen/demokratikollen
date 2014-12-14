@@ -22,15 +22,62 @@
     <script type="text/javascript" src="{{ url_for('static', filename='js/appointments-timeline.js') }}"></script>
     <script type="text/javascript">
     $(function() {
-      chart = AppointmentsTimeline();
+      function dateString(date) { return date.toISOString().slice(0,10); }
 
-      d3.json("/data/member/appointments.json", function(data) {
-        data.forEach(function(d) {
-          d.start = new Date(d.start);
-          d.end = new Date(d.end);
+      function prepData(data) {
+        return data.map(function(d) {
+          var r = {},
+            appointment = d[0];
+            group = d[1];
+
+          r.startDate = new Date(appointment.start_date);
+          r.endDate = new Date(appointment.end_date);
+
+          if (appointment.classtype == "speaker_appointment") {
+            r.rowLabel = appointment.position;
+            r.cssClass = "speaker";
+            r.description = appointment.position
+          } else if (appointment.classtype == "chamber_appointment") {
+            if (appointment.role == "Riksdagsledamot") {
+              r.rowLabel = "Riksdagsledamot";
+              r.description = r.rowLabel;
+              if (appointment.status == "Ledig") {
+                r.cssClass = 'passive';
+                r.description += " (ledig)"
+              }
+            } else if (appointment.role == "Ersättare") {
+              r.rowLabel = "Ersättare i riksdagen";
+              r.description = r.rowLabel;
+            } else {
+              r.rowLabel = "Riksdagen (" + r.role + ")"
+              r.description = r.rowLabel;
+            }
+
+          } else if (appointment.classtype == "group_appointment") {
+            r.rowLabel = appointment.role + ', ' + group.name;
+            r.description = r.rowLabel;
+          } else if (appointment.classtype == "committee_appointment" ||
+            appointment.classtype == "ministry_appointment") {
+            r.rowLabel = group.name;
+            r.description = appointment.role + " i " + group.name.toLowerCase();
+            if (appointment.role == "Suppleant") { r.cssClass = "substitute"; }
+          }
+
+          return r;
+        });
+      }
+
+      chart = AppointmentsTimeline()
+        .tipHtml(function(d) {
+          return "<p>" + d.description + "</p><p>" + dateString(d.startDate) + " - " + dateString(d.endDate) + "</p>"
         })
+        .timeUnit(d3.time.year);
+
+
+      d3.json("/data/member/{{ member_id }}/appointments.json", function(data) {
+        console.log(prepData(data))
         timeline = d3.select("#timeline")
-        .datum(data)
+        .datum(prepData(data))
         .call(chart)
       });
 
