@@ -2,7 +2,8 @@ function AppointmentsTimeline() {
 
   var rowHeight = 40,
     lineOffsetY = 10,
-    margin = { top: 40, right: 0, bottom: 40, left: 0 }
+    margin = { top: 40, right: 0, bottom: 10, left: 0 },
+    rowLabelsMarginLeft = 10,
     timeUnit = null,
     tipHtml = null,
     markerSize = 4;
@@ -72,7 +73,7 @@ function AppointmentsTimeline() {
         .enter()
         .append("text")
         .text(function(d) { return d; })
-        .attr("transform", function(d) { return "translate(0," + y(d) + ")"; });
+        .attr("transform", function(d) { return "translate(" + rowLabelsMarginLeft +"," + y(d) + ")"; });
 
       var line = d3.svg.line()
         .x(function(d) { return x(d[0]); })
