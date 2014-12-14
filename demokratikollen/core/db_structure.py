@@ -8,7 +8,9 @@ import datetime
 from demokratikollen.core.utils import misc as misc_utils, postgres as pg_utils
 
 
-Base = declarative_base()
+from flask.ext.jsontools import JsonSerializableBase
+
+Base = declarative_base(cls=(JsonSerializableBase,))
 
 class Member(Base):
     __tablename__ = 'members'
