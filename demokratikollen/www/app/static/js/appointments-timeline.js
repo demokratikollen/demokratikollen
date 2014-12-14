@@ -77,8 +77,8 @@ function AppointmentsTimeline() {
 
       var tickValues = x.ticks(Math.floor(width / tickLabelWidth));
 
-      tickValues = tickValues.map(timeUnit.floor);
-      tickValues = unique(tickValues);
+      tickValues = unique(tickValues.map(timeUnit.floor));
+
       var xAxis = d3.svg.axis()
         .scale(x)
         .orient("top")
