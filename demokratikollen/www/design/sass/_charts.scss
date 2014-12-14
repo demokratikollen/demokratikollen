@@ -1,5 +1,3 @@
-.chart {
-	@media (max-width: $screen-xs-max) {
-      g.tick text { font-size: 12px; }
-    }	
+@media (max-width: $screen-xs-max) {
+	.d3-tip.time-schedule { font-size: 12px; }
 }

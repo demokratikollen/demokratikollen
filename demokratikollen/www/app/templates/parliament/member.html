@@ -2,11 +2,34 @@
 
 {% block styles -%}{{ super() }}
     <style>
-    g.labels text { fill: #404040; }
-    g.lines path { stroke: #4a473f; stroke-width: 8px; }
+    
+    g.rowLabels text { fill: #504040; font-weight: 700; font-size:100%; }
+    g.lines path { stroke: #40373f; stroke-width: 4px; }
+    path.substitute { stroke: #605050; stroke-dasharray: 5, 3; }
+    path.passive { stroke: #605050; stroke-width: 2px; stroke-dasharray: 3, 3; }
     g.axis path { display: none; }
-    rect.background { fill: #e7e3da; }
-    g.axis.x g.tick line { stroke: #ffffff; }
+    rect.background { fill: #f0f0e0; }
+    g.axis.x g.tick line { stroke: #ffffff; stroke-width: 2px;}
+    g.axis text { font-size:90%; font-weight:bold; fill: #403030; }
+
+    circle {
+      stroke: #000;
+      fill:#ffffff;
+      pointer-events: none;
+      stroke-width: 2px;
+    }
+
+    .d3-tip {
+      line-height: 1.2;
+      padding: 10px;
+      background: rgba(0,0,0,0.9);
+      color: #fff;
+      border-radius: 5px;
+      pointer-events: none;
+      max-width:50%;
+      pointer-events: none;
+      }
+
     </style>
 {%- endblock %}
 
