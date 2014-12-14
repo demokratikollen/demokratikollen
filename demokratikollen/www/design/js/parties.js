@@ -1,11 +1,12 @@
 parties = {
   mapChart: function(regions) {
     var width = 130,
-        height = 2.53846153846*width;
+        height = 2.53846153846*width,
+        color = "steelblue";
 
     var projection = d3.geo.conicEqualArea()
         .parallels([50,70])
-        .center([16.6358,62.1792])
+        .center([16.6358,62.1792]);
 
     var path = d3.geo.path();
 
@@ -13,7 +14,7 @@ parties = {
       return function(d) { return d[name]; };
     }
 
-    var regMap = d3.map(regions.features, prop("id"))
+    var regMap = d3.map(regions.features, prop("id"));
 
     function chart(selection) {
       selection.each(function(data, i) {
@@ -44,7 +45,9 @@ parties = {
 
         var startColor = d3.rgb('#eee'),
             endColor = d3.rgb(color);
-        var colorScale = d3.scale.linear().domain([0,max_votes]).range([startColor, endColor]);
+        var colorScale = d3.scale.linear()
+            .domain([0,max_votes])
+            .range([startColor, endColor]);
 
         var tooltip = d3.select("body")
             .append("div")
@@ -53,24 +56,27 @@ parties = {
 
         var tooltipText = tooltip.append("div");
 
-        // var tooltipFigure = tooltip.append("figure")
-        var tooltipFigure = d3.select("#municipality-timeseries")
+        var tooltipFigure = tooltip.append("figure")
+        // var tooltipFigure = d3.select("#municipality-timeseries")
           .style("display","block")
           .style("padding-top","5px");
 
         // Setup tooltip events
         regs.on("mouseover", function(d){
+              pColor = colorScale(0.5*max_votes);
               tooltipText.html("<strong>"+regMap.get(d.id).properties.name+":</strong> "
-                              +"<span style='color:"+colorScale(0.5*max_votes)+"'>" + Math.round(100*d.votes) + "</span> %");
-              d3.json("/data/elections/timeseries/"+"m"+"/"+d.id+".json",function(error,mTsJson){
-                tooltipFigure.datum(mTsJson.d).call(parties.timeSeriesChart());
+                              +"<span style='color:"+pColor+"'>" + d3.format('.1f')(100*d.votes) + "</span> % "+parties.year);
+              d3.json("/data/elections/timeseries/"+parties.party+"/"+d.id+".json",function(error,mTsJson){
+                timeSeriesChart = parties.timeSeriesChart()
+                  .lineColor(pColor);
+                tooltipFigure.datum(mTsJson.d).call(timeSeriesChart);
               });
               tooltip.transition()
                 .duration(100)
-                .style("opacity",0.9);
+                .style("opacity",0.8);
             })
             .on("mousemove", function(d){
-              tooltip.style("top", (event.pageY-40)+"px").style("left",(event.pageX)+"px");
+              tooltip.style("top", (event.pageY-110)+"px").style("left",(event.pageX+3)+"px");
             })
             .on("mouseout", function(d){
               tooltip.transition()
@@ -121,11 +127,12 @@ parties = {
     return chart;
   },
   timeSeriesChart: function() {
-    var margin = {top: 5, right: 5, bottom: 3, left: 5},
-        width = 80 - margin.left - margin.right,
-        height = 40 - margin.top - margin.bottom;
+    var margin = {top: 7, right: 12, bottom: 17, left: 25},
+        width = 170 - margin.left - margin.right,
+        height = 60 - margin.top - margin.bottom
+        lineColor = "steelblue";
 
-    var x = d3.time.scale()
+    var x = d3.scale.linear()
       .range([0, width]);
 
     var y = d3.scale.linear()
@@ -135,30 +142,84 @@ parties = {
       .x(function(d) { return x(d.year); })
       .y(function(d) { return y(d.votes); });
 
+    var xAxis = d3.svg.axis()
+        .scale(x)
+        .tickFormat(d3.format(".0f"))
+        .orient("bottom");
+
+    var yAxis = d3.svg.axis()
+        .scale(y)
+        .tickFormat(function(d) {
+          if(d>=0.1) {
+            return d3.format(".0f")(100*d);
+          } else {
+            return d3.format(".1f")(100*d).replace('.',',');
+          }
+        })
+        .orient("left");
+
     function chart(selection) {
       selection.each(function(data,i) {
+        data.forEach(function(d) {
+          d.year = parseInt(d.year);
+          d.votes = +d.votes;
+        });
+        console.log(data);
         var svg = d3.select(this)
           .selectAll("svg")
           .data([data]);
 
-        svg.enter().append("svg");
+        svg.enter().append("svg")
+          .attr("width", width + margin.left + margin.right)
+          .attr("height", height + margin.top + margin.bottom);
         svg = svg.selectAll("g")
           .data([data]);
 
-        x.domain(d3.extent(data, function(d) { return d.year; }));
-        y.domain(d3.extent(data, function(d) { return d.votes; }));
+        var years = d3.extent(data, function(d) { return d.year; });
+        x.domain(years);
 
-        svg.enter()
+        years.splice(1,0,d3.median(data,function(d) { return d.year; }));
+        xAxis.tickValues(years);
+
+        var votes = d3.extent(data, function(d) { return d.votes; });
+        yAxis.tickValues(votes);
+        y.domain(votes);
+
+        var gEnter = svg.enter()
             .append("g")
             .attr("transform", "translate(" + margin.left + "," + margin.top + ")");
-        
-        svg.attr("width", width + margin.left + margin.right)
-            .attr("height", height + margin.top + margin.bottom)
-          
-         
-        svg = svg.append("path")
-            .datum(data)
+
+        gEnter.append("path")
             .attr("class", "line")
+            .style("fill", "none")
+            .style("stroke",lineColor)
+            .style("stroke-width", "1.5px");
+
+        gEnter.append("g")
+            .attr("class", "x axis")
+            .attr("transform", "translate(0," + height + ")");
+
+        gEnter.append("g")
+            .attr("class", "y axis")
+            .append("text")
+            .attr("class","label");
+
+        svg.selectAll("g.y.axis")
+            .call(yAxis)
+          .selectAll("text.label")
+            // .attr("transform", "rotate(-90)")
+            .attr("x", 1)
+            // .attr("y", height/2)
+            .attr("dx", ".71em")
+            .style("text-anchor", "start")
+            .style("alignment-baseline","middle")
+            .text("%");
+
+        svg.selectAll("g.x.axis")
+            .call(xAxis);
+         
+        svg.selectAll("path.line")
+            .data([data])
             .attr("d", line);
 
       });
@@ -176,13 +237,23 @@ parties = {
       return chart;
     };
 
+    chart.lineColor = function(_) {
+      if (!arguments.length) return lineColor;
+      lineColor = _;
+      return chart;
+    };
+
     return chart;
 
   },
-  setup: function(divId,data,color) {
+  setup: function(divId,data,party,year) {
+    parties.party = party;
+    parties.year = year;
     d3.json('/data/municipalities.topojson', function (error,json) {
       var municipalities = topojson.feature(json, json.objects.municipalities);
-      var mapChart = parties.mapChart(municipalities).width(150).color(color);
+      var mapChart = parties.mapChart(municipalities)
+            .width(150)
+            .color(utils.parties.get(party).color);
       var chartDiv = d3.select(divId);
 
       // Create and call update function

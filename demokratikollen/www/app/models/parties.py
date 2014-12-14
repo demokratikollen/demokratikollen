@@ -5,6 +5,7 @@ import math
 
 import datetime as dt
 import calendar
+import operator
 
 mdb = MongoDBDatastore()
 
@@ -59,7 +60,7 @@ def get_municipality_timeseries(party_abbr,m_id):
     m_id = str(m_id)
 
     el_dict = mdb.get_object("election_municipalities")
-    timeseries = {"d": [{"year": y, "votes": (dy[party][m_id] if not math.isnan(dy[party][m_id]) else 0)} for y,dy in el_dict.items()]}
+    timeseries = {"d": [{"year": y, "votes": dy[party][m_id]} for y,dy in sorted(el_dict.items(), key=operator.itemgetter(0)) if not math.isnan(dy[party][m_id])]}
 
 
     return timeseries

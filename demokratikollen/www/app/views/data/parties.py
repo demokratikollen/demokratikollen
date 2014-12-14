@@ -6,7 +6,7 @@ import datetime
 
 blueprint = Blueprint('elections', __name__, url_prefix='/data/elections')
 
-@blueprint.route('/<int:year>/<abbr>.json')
+@blueprint.route('/<int:year>/<string:abbr>.json')
 def election(year,abbr):
     try:
         d = party_election(abbr,year)
@@ -14,10 +14,10 @@ def election(year,abbr):
         return render_template('404.html'), 404
     return jsonify(d)
 
-@blueprint.route('/timeseries/<abbr>/<int:municipality_id>.json')
+@blueprint.route('/timeseries/<string:abbr>/<string:municipality_id>.json')
 def municipality_timeseries(abbr,municipality_id):
-    try:
-        d = get_municipality_timeseries(abbr,municipality_id)
-    except KeyError as e:
-        return render_template('404.html'), 404
+    # try:
+    d = get_municipality_timeseries(abbr,municipality_id)
+    # except KeyError as e:
+    #     return render_template('404.html'), 404
     return jsonify(d)

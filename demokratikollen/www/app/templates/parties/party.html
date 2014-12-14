@@ -3,17 +3,26 @@
 {% block styles %}
 {{ super() }}
 <style>
+rect {
+  fill: #ddd;
+}
+
 .axis path,
 .axis line {
   fill: none;
-  stroke: #000;
+  stroke: #ddd;
   shape-rendering: crispEdges;
 }
 
+.axis text {
+  font-size: 10px;
+  fill: #eee;
+}
+/*
 .x.axis path {
   display: none;
 }
-
+*/
 .line {
   fill: none;
   stroke: steelblue;
@@ -36,7 +45,7 @@
 <script type="text/javascript">
   d3.json("{{ url_for('elections.election', year='2014', abbr=party.abbr|lower) }}",function(error,data) {
     if(error) console.warn(error);
-    parties.setup('#election-map',data,utils.parties.get("{{ party.abbr|lower }}").color);
+    parties.setup('#election-map',data,"{{ party.abbr|lower }}","2014");
   });
 
 </script>
