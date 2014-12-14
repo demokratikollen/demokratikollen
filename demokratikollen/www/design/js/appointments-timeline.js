@@ -1,4 +1,4 @@
-function AppointmentsTimeline() {
+demokratikollen.graphics.AppointmentsTimeline = function() {
 
   var rowHeight = 40,
     lineOffsetY = 10,

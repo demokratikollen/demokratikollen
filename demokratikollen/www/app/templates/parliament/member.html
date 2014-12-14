@@ -60,7 +60,6 @@
 {% endblock %}
 
 {% block scripts %}{{ super() }}
-    <script type="text/javascript" src="{{ url_for('static', filename='js/appointments-timeline.js') }}"></script>
     <script type="text/javascript">
     $(function() {
       function dateString(date) { return date.toISOString().slice(0,10); }
@@ -108,7 +107,7 @@
         });
       }
 
-      chart = AppointmentsTimeline()
+      chart = demokratikollen.graphics.AppointmentsTimeline()
         .tipHtml(function(d) {
           return "<p>" + d.description + "</p><p>" + dateString(d.startDate) + " - " + dateString(d.endDate) + "</p>"
         })
