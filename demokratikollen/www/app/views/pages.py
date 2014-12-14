@@ -47,7 +47,7 @@ def proposals():
 def about():
     return render_template("/about.html")
 
-@blueprint.route('/member-test/<int:member_id>', methods=['GET'])
+@blueprint.route('/member/<int:member_id>', methods=['GET'])
 def member_test(member_id):
     member = db.session.query(Member).join(Party).filter(Member.id == member_id).first()
     return render_template("/parliament/member.html", member=member)
