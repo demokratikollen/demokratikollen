@@ -31,6 +31,9 @@ demokratikollen/www/cache
 
 # Data
 demokratikollen/data/*
+!demokratikollen/data/other
+demokratikollen/data/other/*
+!demokratikollen/data/other/elections.json.gz
 !demokratikollen/data/create_tables.sql
 !demokratikollen/data/urls.txt
 

@@ -11,6 +11,7 @@ from demokratikollen.www.app.helpers.db import db
 
 import demokratikollen.www.app.views.data.member
 import demokratikollen.www.app.views.data.parliament
+import demokratikollen.www.app.views.data.parties
 import demokratikollen.www.app.views.pages
 from demokratikollen.www.app import views
 
@@ -37,7 +38,7 @@ def create_app(testing=False, caching=True):
     app.config.from_object('demokratikollen.www.config')
 
     app.json_encoder = ApiJSONEncoder
-    
+
     #If we require testing. change some configs.
     if testing:
         print("Running Test env.")
@@ -63,6 +64,7 @@ def create_app(testing=False, caching=True):
     blueprints = (
         views.data.parliament.blueprint,
         views.data.member.blueprint,
+        views.data.parties.blueprint,
         views.pages.blueprint)
 
     # Register blueprint(s)

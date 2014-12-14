@@ -166,7 +166,7 @@ for intressent_id,fr,to,roll,abbr,g_name in c:
 # Add other group appointments
 print("Adding other group appointments.")
 c.execute("""SELECT intressent_id,"from",tom,roll_kod,organ_kod,uppgift FROM personuppdrag
-                WHERE NOT uppgift  LIKE '%utskott%' AND NOT uppgift LIKE '%utskott%' AND organ_kod != 'kam'""")
+                WHERE NOT uppgift  LIKE '%utskott%' AND NOT uppgift LIKE '%epartement%' AND organ_kod != 'kam'""")
 for intressent_id,fr,to,roll,abbr,g_name in c:
     s.add(GroupAppointment(
                 member=members[intressent_id],

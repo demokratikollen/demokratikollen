@@ -1,0 +1,21 @@
+path.map-region {
+    // fill: #aaa;
+    stroke: #fff;
+    stroke-width: 0.5px;
+    stroke-linejoin: round;
+    stroke-linecap: round;
+    // shape-rendering: crispEdges;
+}
+
+div.election-tooltip {
+	position: absolute;
+	top: 0;
+	box-sizing: border-box;
+	line-height: 1;
+	font-weight: bold;
+	padding: 12px;
+	background: rgba(0, 0, 0, 0.8);
+	color: #fff;
+	border-radius: 2px;
+	pointer-events: none;
+}
