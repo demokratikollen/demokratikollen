@@ -45,6 +45,6 @@ def proposals():
 def about():
     return render_template("/about.html")
 
-@blueprint.route('/member-test', methods=['GET'])
-def member_test():
-    return render_template("/parliament/member.html")
+@blueprint.route('/member-test/<int:member_id>', methods=['GET'])
+def member_test(member_id):
+    return render_template("/parliament/member.html", member_id=member_id)

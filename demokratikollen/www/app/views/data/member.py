@@ -1,37 +1,27 @@
+import datetime
+import json
+
 from flask import Blueprint, request, jsonify
+
+from demokratikollen.www.app.helpers.db import db
+from demokratikollen.www.app.helpers.cache import cache
+from demokratikollen.core.db_structure import Member, Appointment, \
+        CommitteeAppointment, ChamberAppointment, GroupAppointment, Group, Party
+from sqlalchemy import and_, desc
+from sqlalchemy.orm import joinedload, with_polymorphic
+import datetime
+
+from flask.ext.jsontools import jsonapi
 
 blueprint = Blueprint('data', __name__, url_prefix='/data/member')
 
-@blueprint.route('/appointments.json', methods=['GET'])
-def appointments_json():
-    json = """
-    [
-        { 
-            "start": "2006-01-01T00:00:00",
-            "end": "2010-01-01T00:00:00",
-            "name": "Utskottet för det ena",
-            "role": "Ordförande"
-        },
-        { 
-            "start": "2003-01-01T00:00:00",
-            "end": "2005-05-01T00:00:00",
-            "name": "Utskottet för det ena",
-            "role": "Suppleant"
-        },
-        { 
-            "start": "2008-01-01T00:00:00",
-            "end": "2012-01-01T00:00:00",
-            "name": "Utskottet för det tredje",
-            "role": "Ledamot"
-        },
-        { 
-            "start": "2005-01-01T00:00:00",
-            "end": "2010-01-01T00:00:00",
-            "name": "Utskottet för det andra",
-            "role": "Suppleant"
-        }
-        
-    ]
-    """
+@blueprint.route('/<int:member_id>/appointments.json', methods=['GET'])
+@jsonapi
+def appointments_json(member_id):
+    appointments = db.session.query(with_polymorphic(Appointment, '*'), Group) \
+        .filter(Appointment.member_id == member_id) \
+        .outerjoin(Group) \
+        .order_by(desc(Appointment.end_date), Appointment.start_date) \
+        .all()
 
-    return json
+    return appointments
