@@ -7,7 +7,7 @@ from flask import request, render_template, \
 # Import the database object from the main app module
 from demokratikollen.www.app.helpers.cache import cache
 from demokratikollen.www.app.helpers.db import db
-from demokratikollen.core.db_structure import Member, ChamberAppointment
+from demokratikollen.core.db_structure import Member, Party, ChamberAppointment
 from demokratikollen.www.app.models.parties import party_bias
 from demokratikollen.www.app.models.proposals import proposals_main
 from flask import Blueprint, request
@@ -47,4 +47,5 @@ def about():
 
 @blueprint.route('/member-test/<int:member_id>', methods=['GET'])
 def member_test(member_id):
-    return render_template("/parliament/member.html", member_id=member_id)
+    member = db.session.query(Member).join(Party).filter(Member.id == member_id).first()
+    return render_template("/parliament/member.html", member=member)
