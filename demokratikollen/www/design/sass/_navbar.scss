@@ -1,6 +1,6 @@
 #navbar {
   @extend .navbar,.navbar-inverse,.navbar-static-top;
-  @include box-shadow(0 1px 5px 0px #444);
+  @include box-shadow(0 1px 5px 0px $greyish-4);
 
   .column.brand-and-menu-toggle {
     @extend .col-sm-5,.col-md-3;
@@ -114,7 +114,7 @@
   }
 }
 
-$tt-dropdown-bg-color: #ffffff;
+$tt-dropdown-bg-color: $greyish-9;
 $tt-dropdown-select-color: $brand-primary;
 
 // Search-box styling for real-time search

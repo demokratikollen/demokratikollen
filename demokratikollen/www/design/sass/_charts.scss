@@ -1,3 +1,28 @@
 @media (max-width: $screen-xs-max) {
 	.d3-tip.time-schedule { font-size: 12px; }
 }
+
+.chart rect.background { fill: $greyish-8; }
+
+.chart svg.timeline {
+	g.axis path { display: none; }
+	g.tick line { stroke: $greyish-9; stroke-width: 2px; } // Grid
+	g.axis text { font-size:110%; font-weight:bold; fill: $greyish-2; }
+
+	g.rowLabels text { fill: $greyish-3; font-weight: bold; }
+
+	g.lines path { stroke: $greyish-2; stroke-width: 4px; }
+	g.lines path.substitute { stroke-dasharray: 5, 3; }
+	g.lines path.passive { stroke: $greyish-3; stroke-width: 2px; stroke-dasharray: 2, 2; }
+	g.lines circle { stroke: $greyish-2; fill: $greyish-9; stroke-width: 2px; }
+}
+
+.d3-tip {
+	line-height: 1.2;
+	padding: 10px;
+	background: fade-out($greyish-2, 0.07);
+	color: $greyish-9;
+	border-radius: 5px;
+	pointer-events: none;
+	max-width:50%;
+}

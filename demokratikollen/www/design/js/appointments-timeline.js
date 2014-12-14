@@ -2,12 +2,14 @@ demokratikollen.graphics.AppointmentsTimeline = function() {
 
   var rowHeight = 40,
     lineOffsetY = 10,
-    margin = { top: 40, right: 0, bottom: 10, left: 0 },
+    margin = { top: 40, right: 0, bottom: 5, left: 0 },
     rowLabelsMarginLeft = 10,
     timeUnit = d3.time.year,
     tickLabelWidth = 100,
     tipHtml = null,
-    markerSize = 4;
+    markerSize = 4,
+    cssClass = "timeline",
+    hoverLinesWidth = rowHeight - 15;
 
   function getMinDate(blocks) { 
     return d3.min(blocks, function (block) { return block.startDate; });
@@ -56,6 +58,7 @@ demokratikollen.graphics.AppointmentsTimeline = function() {
 
       var svg = d3.select(this)
         .append("svg")
+        .classed(cssClass, true)
         .attr("width", width + margin.left + margin.right)
         .attr("height", height + margin.top + margin.bottom)
         .append("g")
@@ -130,7 +133,7 @@ demokratikollen.graphics.AppointmentsTimeline = function() {
 
       if (tipHtml) {
         tip = d3.tip()
-        .attr('class', 'd3-tip time-schedule')
+        .attr('class', 'd3-tip timeline')
         .direction(function(d) {
           var startX = x(d.startDate),
             endX = x(d.endDate),
@@ -156,20 +159,20 @@ demokratikollen.graphics.AppointmentsTimeline = function() {
 
           if (startX <= figMidX && figMidX <= endX) { 
             // Line covers middle of figure. Move tooltip to fig middle.
-            return [10, figMidX-lineMidX]; 
+            return [hoverLinesWidth/2+1, figMidX-lineMidX]; 
           } else if (startX >= figMidX) { 
             // Line is right of middle of figure.
-            return [10, -10];
+            return [hoverLinesWidth/2+1, -hoverLinesWidth/3];
           } else if (endX <= figMidX) { 
             // Line is left of middle of figure.
-            return [10, 10];
+            return [hoverLinesWidth/2+1, hoverLinesWidth/3];
           }
         })
         .html(tipHtml);
 
         linesSelection.append("path")
           .style("stroke", "rgba(0,0,0,0)")
-          .style("stroke-width", rowHeight-5)
+          .style("stroke-width", hoverLinesWidth)
           .attr("d", function(d) { return line([[d.startDate, d.rowLabel], [d.endDate, d.rowLabel]]); })
           .call(tip)
           .on('mouseover', tip.show)
