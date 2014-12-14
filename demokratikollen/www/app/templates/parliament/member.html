@@ -93,11 +93,11 @@
               r.description = r.rowLabel;
             }
 
-          } else if (appointment.classtype == "group_appointment") {
+          } else if (appointment.classtype == "group_appointment" ||
+            appointment.classtype == "ministry_appointment") {
             r.rowLabel = appointment.role + ', ' + group.name;
             r.description = r.rowLabel;
-          } else if (appointment.classtype == "committee_appointment" ||
-            appointment.classtype == "ministry_appointment") {
+          } else if (appointment.classtype == "committee_appointment") {
             r.rowLabel = group.name;
             r.description = appointment.role + " i " + group.name.toLowerCase();
             if (appointment.role == "Suppleant") { r.cssClass = "substitute"; }
