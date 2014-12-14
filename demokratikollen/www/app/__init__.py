@@ -2,6 +2,9 @@
 from flask import Flask, render_template
 import os
 
+import datetime
+from flask.ext.jsontools import DynamicJSONEncoder
+
 #import helpers
 from demokratikollen.www.app.helpers.cache import cache
 from demokratikollen.www.app.helpers.db import db
@@ -13,12 +16,28 @@ import demokratikollen.www.app.views.pages
 from demokratikollen.www.app import views
 
 
+class ApiJSONEncoder(DynamicJSONEncoder):
+    def default(self, o):
+        # Custom formats
+        if isinstance(o, datetime.datetime):
+            return o.isoformat()
+        if isinstance(o, datetime.date):
+            return o.isoformat()
+        if isinstance(o, set):
+            return list(o)
+
+        return o.__json__()
+        # Fallback
+        return super(DynamicJSONEncoder, self).default(o)
+
 #App Factory to facilitate testing.
 def create_app(testing=False, caching=True):
     app = Flask(__name__, static_url_path='', static_folder='static')
 
     #Load the basic config.
     app.config.from_object('demokratikollen.www.config')
+
+    app.json_encoder = ApiJSONEncoder
 
     #If we require testing. change some configs.
     if testing:
