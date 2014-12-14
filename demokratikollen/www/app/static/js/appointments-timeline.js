@@ -4,7 +4,8 @@ function AppointmentsTimeline() {
     lineOffsetY = 10,
     margin = { top: 40, right: 0, bottom: 10, left: 0 },
     rowLabelsMarginLeft = 10,
-    timeUnit = null,
+    timeUnit = d3.time.year,
+    tickLabelWidth = 100,
     tipHtml = null,
     markerSize = 4;
 
@@ -26,7 +27,9 @@ function AppointmentsTimeline() {
   function chart(selection) {
     selection.each(function(data) {
 
-      var rowLabels = unique(data.map(function(d) { return d.rowLabel; }));
+      var rowLabels = unique(data.map(function(d) { return d.rowLabel; })),
+        minDate = getMinDate(data),
+        maxDate = getMaxDate(data);
       
       d3.select(this).classed("chart", true);
 
@@ -46,7 +49,7 @@ function AppointmentsTimeline() {
         .classed("background", true);
 
       var x = d3.time.scale()
-        .domain([getMinDate(data), getMaxDate(data)])
+        .domain([minDate, maxDate])
         .range([0, width])
         .nice(timeUnit);
 
@@ -54,11 +57,15 @@ function AppointmentsTimeline() {
         .domain(rowLabels)
         .rangePoints([0, height], 1);
 
+      var tickValues = x.ticks(Math.floor(width / tickLabelWidth));
+
+      tickValues = tickValues.map(timeUnit.floor);
+      tickValues = unique(tickValues);
       var xAxis = d3.svg.axis()
         .scale(x)
         .orient("top")
-        .tickSize(-height, 5)
-        .ticks(2 + Math.floor(width/76));
+        .tickSize(-height, 0)
+        .tickValues(tickValues);
 
       xAxis = svg.append("g")
         .classed("axis x", true)
@@ -164,6 +171,12 @@ function AppointmentsTimeline() {
   chart.timeUnit = function(value) {
     if (!arguments.length) return timeUnit;
     timeUnit = value;
+    return chart;
+  };
+
+  chart.tickLabelWidth = function(value) {
+    if (!arguments.length) return tickLabelWidth;
+    tickLabelWidth = value;
     return chart;
   };
 

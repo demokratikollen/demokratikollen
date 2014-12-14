@@ -12,7 +12,7 @@
     g.axis path { display: none; }
     rect.background { fill: #f0f0e0; }
     g.axis.x g.tick line { stroke: #ffffff; stroke-width: 2px;}
-    g.axis text { font-size:90%; font-weight:bold; fill: #403030; }
+    g.axis text { font-size:110%; font-weight:bold; fill: #403030; }
 
     circle {
       stroke: #000;
@@ -112,10 +112,11 @@
         .tipHtml(function(d) {
           return "<p>" + d.description + "</p><p>" + dateString(d.startDate) + " - " + dateString(d.endDate) + "</p>"
         })
-        .timeUnit(d3.time.year);
+        .timeUnit(d3.time.year)
+        .tickLabelWidth(50);
 
 
-      d3.json("/data/member/{{ member_id }}/appointments.json", function(data) {
+      d3.json("/data/member/{{ member.id }}/appointments.json", function(data) {
         console.log(prepData(data))
         timeline = d3.select("#timeline")
         .datum(prepData(data))
