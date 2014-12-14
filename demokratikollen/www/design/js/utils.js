@@ -1,4 +1,3 @@
-demokratikollen.utils = {};
 var utils = demokratikollen.utils;
 
 utils.parties = d3.map([
