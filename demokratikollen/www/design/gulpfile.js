@@ -9,7 +9,8 @@ var gulp = require('gulp'),
     rename = require('gulp-rename'),
     sass = require('gulp-ruby-sass'),
     gulpFilter = require('gulp-filter'),
-    plumber = require('gulp-plumber');
+    plumber = require('gulp-plumber'),
+    gulpOrder = require('gulp-order');
 
 var work_dir = '/home/vagrant/demokratikollen/www/design/',
     dist_dir = '/home/vagrant/demokratikollen/www/app/static/';
@@ -90,6 +91,11 @@ gulp.task('styles', function () {
 
 gulp.task('scripts', function () {
     return gulp.src(js_files)
+        .pipe(gulpOrder([
+            "demokratikollen.js", // This one should be first to establish the namespace
+            "utils.js", // May be used by others
+            "*.js"
+            ], { base: work_dir + "js/"}))
         .pipe(plumber())
         .pipe(sourcemaps.init({loadMaps: true}))
         .pipe(concatenate('scripts.js'))
