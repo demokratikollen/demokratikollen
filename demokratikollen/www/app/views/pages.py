@@ -13,6 +13,8 @@ from demokratikollen.www.app.models.proposals import proposals_main
 from flask import Blueprint, request
 from sqlalchemy.orm.exc import NoResultFound
 from sqlalchemy import func
+from demokratikollen.core.utils.mongodb import MongoDBDatastore
+
 
 blueprint = Blueprint('pages', __name__)
 
@@ -28,11 +30,16 @@ def parliament():
 @blueprint.route('/partierna', methods=['GET'])
 def parties():
 
+    ds = MongoDBDatastore()
+
     party_bias_data = party_bias("S","M")
+
+    cosigning_data = ds.get_object("party_cosigning_timeseries")
 
     return render_template("/parties/index.html",
                             party_bias_parties = party_bias_data["parties"],
-                            party_bias_yticklabels = party_bias_data["yticklabels"])
+                            party_bias_yticklabels = party_bias_data["yticklabels"],
+                            cosigning_data = cosigning_data)
 
 @blueprint.route('/forslagen', methods=['GET'])
 def proposals():
