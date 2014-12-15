@@ -2,7 +2,7 @@ import pandas as pd
 import gzip
 import json
 
-df = pd.read_excel('E:/Data/demokratikollen/valresultat_kommun-parti_1978-2014_clean.xls',
+df = pd.read_excel('D:/data/demokratikollen/valresultat_kommun-parti_1978-2014_clean.xls',
                     index_col=None,na_values='..')
 
 # Replace NaN in Kommun and Parti

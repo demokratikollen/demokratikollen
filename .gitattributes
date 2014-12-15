@@ -3,3 +3,4 @@
 
 # keep the dumps as binary.
 demokratikollen/data/dumps/* -text
+demokratikollen/data/other/*.gz binary
