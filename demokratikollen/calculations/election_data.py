@@ -4,7 +4,8 @@ import os
 import math
 from demokratikollen.core.utils.mongodb import MongoDBDatastore
 
-data_dir = '../data/other/'
+cd = os.path.dirname(os.path.realpath(__file__))
+data_dir = os.path.join(cd,'../data/other/')
 in_file = os.path.join(data_dir,'elections.json.gz')
 
 with gzip.open(in_file,'rt') as f:
@@ -28,7 +29,7 @@ for y,dy in elec_dict.items():
             party_sums[p] = {}
         party_sums[p][y] = sum(v for v in dp.values() if not math.isnan(v))
 
-        # Sum over parties and create 
+        # Sum over parties and create
         # municipalities[id][year][{total_votes,did_not_vote,invalid}]: <number>
         for m in dp.keys():
             if m not in municipalities:
@@ -41,7 +42,7 @@ for y,dy in elec_dict.items():
             else:
                 if not math.isnan(dp[m]):
                     municipalities[m][y]['total_votes'] += dp[m]
-               
+
 totals = {}
 for p,dp in party_sums.items():
     for y,val in dp.items():
