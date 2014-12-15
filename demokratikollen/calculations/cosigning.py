@@ -9,6 +9,7 @@ import datetime as dt
 import json
 from pymongo import ASCENDING
 from collections import defaultdict
+from itertools import permutations
 
 party_ordering = {p: i for (i, p) in enumerate([
     "V",
@@ -24,8 +25,8 @@ party_ordering = {p: i for (i, p) in enumerate([
     "KD"
 ])}
 
-def main():
-    
+
+def cosigning_timeseries():    
     engine = create_engine(pg_utils.engine_url())
     session = sessionmaker(bind=engine)
     s = session() 
@@ -60,6 +61,8 @@ def main():
     output = dict()
     num_missing_committee_report = 0
     num_missing_committee_report_committee = 0
+
+    matrix = dict()
     
     for (rm_idx, rm) in enumerate(riksmoten):
         print("RM: {}".format(rm))
@@ -83,10 +86,26 @@ def main():
                     num_missing_committee_report_committee += 1
                     continue
 
-
-
                 committee = point.committee_report.committee
 
+                # compute party matrix data
+                for (p1,p2) in permutations(signing_parties,2):
+                    if not p1 in matrix:
+                        matrix[p1] = dict()
+
+                    for committee_key in [0, committee.id]:
+                        if not committee_key in matrix[p1]:
+                            matrix[p1][committee_key] = dict()
+                        if not p2 in matrix[p1][committee_key]:
+                            matrix[p1][committee_key][p2] = dict(
+                                    values = [0 for rm in riksmoten],
+                                    abbr = party_metadata[p2]["abbr"],
+                                    name = party_metadata[p2]["name"],
+                                    id = p2
+                                )
+                        matrix[p1][committee_key][p2]["values"][rm_idx] += 1
+
+                # compute timeseries data
                 for committee_key in [0, committee.id]:
                     if not committee_key in output:
                         output[committee_key] = dict()
@@ -102,21 +121,44 @@ def main():
                     output[committee_key][parties_key]["values"][rm_idx] += 1
 
 
-    output_top = dict(
+    ds = MongoDBDatastore()
+
+    output_timeseries_top = dict(
                         t = riksmoten,
                         committees = [dict(
                         abbr = committee_metadata[c_id]["abbr"],
                         name = committee_metadata[c_id]["name"],
+                        id = c_id,
                         series = list(series.values())
                         ) for (c_id, series) in output.items()]
                     )
+    ds.store_object(output_timeseries_top,"party_cosigning_timeseries")
+
+
+    mongodb = ds.get_mongodb_database() 
+    mongo_collection = mongodb.party_cosigning_matrix
+    mongo_collection.ensure_index([("partyA",ASCENDING)],unique=True)
+
+    for (p1, matrix_p1) in matrix.items():
+        mongo_partyA = party_metadata[p1]["abbr"]
+        output_party_matrix_top = dict(
+                            partyA = mongo_partyA,
+                            t = riksmoten,
+                            committees = [dict(
+                            abbr = committee_metadata[c_id]["abbr"],
+                            name = committee_metadata[c_id]["name"],
+                            id = c_id,
+                            parties = list(committee_dict.values())
+                            ) for (c_id, committee_dict) in matrix_p1.items()]
+                        )
+        mongo_collection.update(dict(partyA = mongo_partyA), output_party_matrix_top, upsert=True)
 
         
-    ds = MongoDBDatastore()
-    ds.store_object(output_top,"party_cosigning_timeseries")
     
     print("missing committee_report: {}, committee_reports missing committee's: {}".format(num_missing_committee_report,num_missing_committee_report_committee))
 
-
+def main():
+    cosigning_timeseries()
+    
 if __name__ == '__main__':
         main()     
