@@ -15,3 +15,14 @@ def proposals_main(government):
     del record['_id']
     return record
 
+def cosigning_matrix(party_abbr):
+
+    ds = MongoDBDatastore()
+    mongodb = ds.get_mongodb_database() 
+    mongo_collection = mongodb.party_cosigning_matrix
+    
+    record= mongo_collection.find_one({"partyA": party_abbr})
+    if record:
+        del record['_id']
+    return record
+

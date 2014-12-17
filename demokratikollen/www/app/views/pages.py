@@ -9,7 +9,7 @@ from demokratikollen.www.app.helpers.cache import cache
 from demokratikollen.www.app.helpers.db import db
 from demokratikollen.core.db_structure import Member, ChamberAppointment, Party
 from demokratikollen.www.app.models.parties import party_bias
-from demokratikollen.www.app.models.proposals import proposals_main
+from demokratikollen.www.app.models.proposals import proposals_main,cosigning_matrix
 from flask import Blueprint, request
 from sqlalchemy.orm.exc import NoResultFound
 from sqlalchemy import func
@@ -35,6 +35,7 @@ def parties():
     party_bias_data = party_bias("S","M")
 
     cosigning_data = ds.get_object("party_cosigning_timeseries")
+
 
     return render_template("/parties/index.html",
                             party_bias_parties = party_bias_data["parties"],
@@ -63,6 +64,8 @@ def member_test(member_id):
 def party(abbr):
     try:
         p = db.session.query(Party).filter(func.lower(Party.abbr)==abbr.lower()).one()
+        cosigning = cosigning_matrix(abbr)
+
     except NoResultFound as e:
         return render_template('404.html'), 404
-    return render_template("/parties/party.html",party=p)
+    return render_template("/parties/party.html",party=p,cosigning=cosigning)
