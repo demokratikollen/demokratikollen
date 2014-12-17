@@ -1,4 +1,9 @@
 demokratikollen.graphics.mapChart = function(regions) {
+  var mesh;
+  if (arguments.length > 1) {
+    mesh = arguments[1];
+  }
+
   var width = 130,
       height = 2.53846153846*width,
       color = "steelblue";
@@ -36,13 +41,35 @@ demokratikollen.graphics.mapChart = function(regions) {
 
       // If it doesn't exist, create the map
       var gMain = svg.enter().append("svg").append("g");
+
+      function zoomed() {
+        console.log("zoomg");
+        gMain.attr("transform", "translate(" + d3.event.translate + ")scale(" + d3.event.scale + ")");
+      }
+
+      var zoom = d3.behavior.zoom()
+        .scaleExtent([1, 8])
+        .on("zoom", zoomed);
+
+      
+      svg.call(zoom)
+        .call(zoom.event);
+
+
       var sel = gMain.attr("class","map-collection")
           .attr('transform',transform)
-          .selectAll(".map-region")
+        .selectAll(".map-region")
           .data(regions.features, prop("id"))
-          .enter()
+        .enter()
           .append("path")
           .attr("class","map-region")
+          .attr("d", path);
+
+      gMain.selectAll(".map-region-border")
+          .data([mesh])
+        .enter()
+          .append("path")
+          .attr("class", "map-region-border")
           .attr("d", path);
 
       var regs = svg.attr("width", width)
@@ -59,7 +86,7 @@ demokratikollen.graphics.mapChart = function(regions) {
         var tooltipOffsetY = 40;
         var ttHeight;
         var tooltip = d3.select("body")
-            .append("div")
+          .append("div")
             .attr('class', 'election-tooltip')
             .style("opacity", 0);
 
@@ -388,9 +415,10 @@ parties = {
       .range([startColor, endColor]);
 
     d3.json('/data/municipalities.topojson', function (error,json) {
-      var municipalities = topojson.feature(json, json.objects.municipalities);
+      var municipalities = topojson.feature(json, json.objects.municipalities),
+          mesh = topojson.mesh(json, json.objects.municipalities, function(a, b) { return a !== b; });
       var regMap = d3.map(municipalities.features, function(d) { return d.id; });
-      var mapChart = demokratikollen.graphics.mapChart(municipalities)
+      var mapChart = demokratikollen.graphics.mapChart(municipalities,mesh)
             .width(150)
             .tooltipTextHtml(function(d) {
               return "<strong>"+regMap.get(d.id).properties.name+":</strong> "
