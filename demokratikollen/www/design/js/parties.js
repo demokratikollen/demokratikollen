@@ -5,16 +5,15 @@ demokratikollen.graphics.mapChart = function(regions) {
   }
 
   var width = 130,
-      height = 2.53846153846*width,
+      height = 2.25*width,
       color = "steelblue";
 
   var tooltipTextHtml,
       tooltipFigureDataUrl,
       tooltipChart = demokratikollen.graphics.timeSeriesChart();
 
-  var projection = d3.geo.conicEqualArea()
-      .parallels([50,70])
-      .center([16.6358,62.1792]);
+  var projection = d3.geo.azimuthalEqualArea()
+    .rotate([-17, -62.25]);
 
   var path = d3.geo.path();
 
@@ -34,7 +33,7 @@ demokratikollen.graphics.mapChart = function(regions) {
       var svg = d3.select(this).selectAll("svg").data([data]);
 
       // Update projection and path
-      projection.scale(10*width)
+      projection.scale(9.3*width)
           .translate([width / 2, height / 2]);
       path.projection(projection);
       var transform = 'rotate(10,'+width/2+','+height/2+')';
@@ -43,7 +42,6 @@ demokratikollen.graphics.mapChart = function(regions) {
       var gMain = svg.enter().append("svg").append("g");
 
       function zoomed() {
-        console.log("zoomg");
         gMain.attr("transform", "translate(" + d3.event.translate + ")scale(" + d3.event.scale + ")");
       }
 
@@ -52,12 +50,12 @@ demokratikollen.graphics.mapChart = function(regions) {
         .on("zoom", zoomed);
 
       
-      svg.call(zoom)
-        .call(zoom.event);
+      svg.call(zoom);
+        // .call(zoom.event);
 
 
       var sel = gMain.attr("class","map-collection")
-          .attr('transform',transform)
+          // .attr('transform',transform)
         .selectAll(".map-region")
           .data(regions.features, prop("id"))
         .enter()
@@ -172,14 +170,14 @@ demokratikollen.graphics.mapChart = function(regions) {
   chart.width = function(_) {
     if (!arguments.length) return width;
     width = _;
-    height = 2.53846153846*_;
+    height = 2.25*_;
     return chart;
   };
 
   chart.height = function(_) {
     if (!arguments.length) return height;
     height = _;
-    width = _/2.53846153846;
+    width = _/2.25;
     return chart;
   };
 
@@ -258,7 +256,7 @@ demokratikollen.graphics.timeSeriesChart = function() {
       svg.selectAll("g.x.axis")
           .attr("transform", "translate(0," + height + ")")
           .call(xAxis);
-       
+
       svg.selectAll("path.line")
           .data([data])
           .attr("d", line);
@@ -288,31 +286,31 @@ demokratikollen.graphics.timeSeriesChart = function() {
     if (!arguments.length) return line;
     line = _;
     return chart;
-  };  
+  };
 
   chart.xAxis = function(_) {
     if (!arguments.length) return xAxis;
     xAxis = _;
     return chart;
-  }; 
+  };
 
   chart.yAxis = function(_) {
     if (!arguments.length) return yAxis;
     yAxis = _;
     return chart;
-  }; 
+  };
 
   chart.xScale = function(_) {
     if (!arguments.length) return xScale;
     xScale = _;
     return chart;
-  }; 
+  };
 
   chart.yScale = function(_) {
     if (!arguments.length) return yScale;
     yScale = _;
     return chart;
-  }; 
+  };
 
   chart.lineColor = function(_) {
     if (!arguments.length) return lineColor;
@@ -396,7 +394,7 @@ parties = {
       margin = _;
       return chart;
     };
-    
+
     return chart;
   },
   setup: function(divId,data,party,year) {

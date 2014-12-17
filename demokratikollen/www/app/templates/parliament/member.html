@@ -3,55 +3,16 @@
 {% set title = member.first_name + " " + member.last_name + " (" + member.party.abbr|lower() + ") - Demokratikollen"%}
 
 {% block styles -%}{{ super() }}
-    <style>
-    
-    g.rowLabels text { fill: #504040; font-weight: 700; font-size:100%; }
-    g.lines path { stroke: #40373f; stroke-width: 4px; }
-    path.substitute { stroke: #605050; stroke-dasharray: 5, 3; }
-    path.passive { stroke: #605050; stroke-width: 2px; stroke-dasharray: 3, 3; }
-    g.axis path { display: none; }
-    rect.background { fill: #f0f0e0; }
-    g.axis.x g.tick line { stroke: #ffffff; stroke-width: 2px;}
-    g.axis text { font-size:110%; font-weight:bold; fill: #403030; }
-
-    circle {
-      stroke: #000;
-      fill:#ffffff;
-      pointer-events: none;
-      stroke-width: 2px;
-    }
-
-    .d3-tip {
-      line-height: 1.2;
-      padding: 10px;
-      background: rgba(0,0,0,0.9);
-      color: #fff;
-      border-radius: 5px;
-      pointer-events: none;
-      max-width:50%;
-      pointer-events: none;
-      }
-
-    img.member-image {
-      border-color: #ccc;
-      border-bottom-width: 25px;
-      border-bottom-style: solid;
-    }
-
-    h1.member-name {
-      font-size: 30px;
-      font-weight: normal;
-      color: #504030;
-    }
-
-    </style>
 {%- endblock %}
 
 {% block content %}
 <h1 class="member-name">{{ member.first_name }} {{ member.last_name }} ({{ member.party.abbr|lower() }})</h1>
+
 <div class="row">
   <div class="col-md-4">
-  <img src="{{ member.image_url }}" class="member-image" />
+    <div class="member-image">
+      <img src="{{ member.image_url }}" />
+    </div>
   </div>
   <div class="col-md-8">
   <div id="timeline"></div>
@@ -129,7 +90,7 @@
 
     <script type="text/javascript">
     $(function() {
-      d3.selectAll("img.member-image").style("border-color", demokratikollen.utils.parties.get("{{ member.party.abbr }}".toLowerCase()).color);
+      d3.selectAll("div.member-image img").style("border-color", demokratikollen.utils.parties.get("{{ member.party.abbr }}".toLowerCase()).color);
     });
     </script>
 {%- endblock %}

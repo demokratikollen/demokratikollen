@@ -1,3 +1,4 @@
+@import "colors";
 @import "custom-bootstrap-variables";
 @import "custom-bootstrap-imports";
 
@@ -23,6 +24,7 @@ $tb-content-padding:20px;
 @import "footer";
 @import "parties";
 @import "parliament";
+@import "member";
 @import "charts";
 
 html,body {
