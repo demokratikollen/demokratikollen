@@ -2,6 +2,12 @@
 {% block content %}
 
 <div class="row">
+    <div class="col-md-4">
+        <div id="cosigning"></div>        
+    </div>
+</div>
+
+<div class="row">
     <div class="col-lg-8">
         <div id="party-bias"></div>        
     </div>
@@ -13,12 +19,18 @@
 
 .axis path, .axis line {
   fill: none;
-  stroke: #000;
+  stroke: #555;
   shape-rendering: crispEdges;
 }
 .axis text {
   font-size: 11px;
 }
+
+.line-path {
+  fill: none;
+  stroke: #111;
+}
+
 path.line {
   fill:none;
   stroke-width: 2px;
@@ -37,7 +49,103 @@ circle.marker {
 
 <script type="text/javascript">
 
-cosigning_data = {{ cosigning_data | tojson | safe }};
+function prop(p) {
+  return function(d) {
+    return d[p];
+  };
+}
+
+cosigningData = {{ cosigning_data | tojson | safe }};
+
+ordinalLineGraph = function() {
+
+  margin = { top: 25, right: 25, bottom: 50, left: 50 };
+
+  function graph(selection) {
+    selection.each(function(data) {
+
+      var boundingRect = this.getBoundingClientRect();
+      var width = boundingRect.width - margin.left - margin.right,
+          height = 400 - margin.top - margin.bottom;
+
+      var parent = d3.select(this);
+      var select = parent.append("select").attr("class", "graph-filter");
+      var options = select.selectAll("option").data(data.committees);
+      options.enter().append("option")       
+        .text(prop("name"))
+
+      var top = parent.append("svg")
+        .attr("width", width + margin.left + margin.right)
+        .attr("height", height + margin.top + margin.bottom)
+        .append("g")
+          .attr("transform", "translate(" + margin.left + "," + margin.top + ")");
+
+      var tScale = d3.scale.ordinal()
+          .domain(d3.range(data.t.length))
+          .rangePoints([0,width]);
+
+      var tAxis = d3.svg.axis()
+          .scale(tScale)
+          .tickFormat(function(d) { return data.t[d]; })
+          .orient("bottom");
+
+      var tAxisElement = top.append("g")
+                            .attr("transform", "translate(0," + height + ")")
+                          .attr("class", "axis x-axis");
+      var yAxisElement = top.append("g")
+                          .attr("class", "axis y-axis");
+
+      select.on("change", function() {
+        var i = d3.select(this).property("selectedIndex");
+        var series = data.committees[i].series;
+
+        var maxValue = d3.max(series, function(s){return d3.max(s.values);});
+        var minValue = d3.min(series, function(s){return d3.min(s.values);});
+        var yScale = d3.scale.linear()
+            .domain([minValue, maxValue])
+            .range([height,0]);
+        var lineGenerator = d3.svg.line()
+          .x(function(d,i) { return tScale(i); })
+          .y(function(d,i) { return yScale(d); })
+          .defined(function(d) { return d != 0; });
+
+        
+        var lineGroups = top.selectAll(".line-group").data(series);
+        var enteringLineGroups = lineGroups.enter()
+          .append("g").attr("class", "line-group");
+        var enteringPaths = enteringLineGroups.append("path");
+        enteringPaths
+          .attr("class","line-path")
+          .attr("d", function(d,i){return lineGenerator(d.values);})        
+
+
+        lineGroups.exit().remove();
+
+        var yAxis = d3.svg.axis()
+            .scale(yScale)
+            .orient("left");
+        tAxisElement.call(tAxis)
+                      .selectAll("text")
+                        .style("text-anchor", "end")
+                        .attr("dx", "-.8em")
+                        .attr("dy", ".15em")
+                        .attr("transform","rotate(-60)");
+        yAxisElement.call(yAxis);
+      });
+      select.on("change").apply(select[0][0], null); // initial display
+
+    }); // selection.each
+  } // function graph
+
+
+  return graph;
+}
+
+
+$(d3.select("#cosigning").datum(cosigningData).call(
+  ordinalLineGraph()
+  ));   
+
 
 party_bias = {
     setup: function(){
