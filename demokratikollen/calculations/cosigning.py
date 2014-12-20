@@ -56,7 +56,7 @@ def cosigning_timeseries():
                     .filter(MemberProposal.subtype != 'Enskild motion')
     
 
-    riksmoten = ['{:04d}/{:02d}'.format(y,y-2000+1) for y in range(2002,2005)]
+    riksmoten = ['{:04d}/{:02d}'.format(y,y-2000+1) for y in range(2002,2014)]
 
     output = dict()
     num_missing_committee_report = 0

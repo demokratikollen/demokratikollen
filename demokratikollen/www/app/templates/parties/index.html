@@ -92,6 +92,14 @@ ordinalLineGraph = function() {
       var tAxisElement = top.append("g")
                             .attr("transform", "translate(0," + height + ")")
                           .attr("class", "axis x-axis");
+      tAxisElement.call(tAxis)
+                    .selectAll("text")
+                      .style("text-anchor", "end")
+                      .attr("dx", "-.8em")
+                      .attr("dy", ".15em")
+                      .attr("transform","rotate(-60)");
+
+
       var yAxisElement = top.append("g")
                           .attr("class", "axis y-axis");
 
@@ -106,31 +114,30 @@ ordinalLineGraph = function() {
             .range([height,0]);
         var lineGenerator = d3.svg.line()
           .x(function(d,i) { return tScale(i); })
-          .y(function(d,i) { return yScale(d); })
-          .defined(function(d) { return d != 0; });
-
+          .y(function(d,i) { return yScale(d); });
         
-        var lineGroups = top.selectAll(".line-group").data(series);
-        var enteringLineGroups = lineGroups.enter()
-          .append("g").attr("class", "line-group");
-        var enteringPaths = enteringLineGroups.append("path");
-        enteringPaths
-          .attr("class","line-path")
-          .attr("d", function(d,i){return lineGenerator(d.values);})        
+        var lineGroups = top.selectAll(".line-group")
+                           .data(series,function(s){return s.abbr;});
 
+        lineGroups.select("path").transition()
+          .attr("d", function(d,i){if(d3.max(d.values)>300)console.log("update >300");return lineGenerator(d.values);});
 
-        lineGroups.exit().remove();
+        lineGroups.enter()
+          .append("g").attr("class", "line-group")
+            .append("path")
+              .attr("class","line-path")
+              .attr("d", function(d,i){if(d3.max(d.values)>300)console.log("append >300");return lineGenerator(d.values);});
+
+        lineGroups.exit()
+          .transition()
+            .style("stroke-opacity",1e-5)
+            .remove();
 
         var yAxis = d3.svg.axis()
             .scale(yScale)
             .orient("left");
-        tAxisElement.call(tAxis)
-                      .selectAll("text")
-                        .style("text-anchor", "end")
-                        .attr("dx", "-.8em")
-                        .attr("dy", ".15em")
-                        .attr("transform","rotate(-60)");
-        yAxisElement.call(yAxis);
+
+        yAxisElement.transition().call(yAxis);
       });
       select.on("change").apply(select[0][0], null); // initial display
 
