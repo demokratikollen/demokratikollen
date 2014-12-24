@@ -72,7 +72,7 @@ def cosigning_timeseries():
             if not doc.signatories or len(doc.signatories) == 1:
                 continue
 
-            signing_parties = sorted(list(set( m.party.id for m in doc.signatories)))
+            signing_parties = sorted(list(set( m.party.id for m in doc.signatories if not m.party.abbr == "-")))
             if len(signing_parties) <= 1:
                 continue
 
@@ -115,7 +115,8 @@ def cosigning_timeseries():
                           dict(
                                 values = [0 for rm in riksmoten],
                                 abbr = ' + '.join(party_metadata[p_id]["abbr"] for p_id in signing_parties),
-                                name = ' + '.join(party_metadata[p_id]["name"] for p_id in signing_parties)
+                                name = ' + '.join(party_metadata[p_id]["name"] for p_id in signing_parties),
+                                num_parties = len(signing_parties)
                               )
                         
                     output[committee_key][parties_key]["values"][rm_idx] += 1
@@ -129,7 +130,15 @@ def cosigning_timeseries():
                         abbr = committee_metadata[c_id]["abbr"],
                         name = committee_metadata[c_id]["name"],
                         id = c_id,
-                        series = list(series.values())
+                        series = [
+                                    [dict(
+                                        abbr=p_dict["abbr"],
+                                        name=p_dict["name"],
+                                        num_parties=p_dict["num_parties"],
+                                        value=p_dict["values"][rm_idx]
+                                        ) for (p_key, p_dict) in series.items() if p_dict["values"][rm_idx] > 0] 
+                                      for (rm_idx, rm) in enumerate(riksmoten)
+                                 ]
                         ) for (c_id, series) in output.items()]
                     )
     ds.store_object(output_timeseries_top,"party_cosigning_timeseries")
