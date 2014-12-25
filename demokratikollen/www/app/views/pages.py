@@ -30,17 +30,11 @@ def parliament():
 @blueprint.route('/partierna', methods=['GET'])
 def parties():
 
-    ds = MongoDBDatastore()
-
     party_bias_data = party_bias("S","M")
-
-    cosigning_data = ds.get_object("party_cosigning_timeseries")
-
 
     return render_template("/parties/index.html",
                             party_bias_parties = party_bias_data["parties"],
-                            party_bias_yticklabels = party_bias_data["yticklabels"],
-                            cosigning_data = cosigning_data)
+                            party_bias_yticklabels = party_bias_data["yticklabels"])
 
 @blueprint.route('/forslagen', methods=['GET'])
 def proposals():

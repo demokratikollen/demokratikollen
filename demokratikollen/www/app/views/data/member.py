@@ -13,7 +13,7 @@ import datetime
 
 from flask.ext.jsontools import jsonapi
 
-blueprint = Blueprint('data', __name__, url_prefix='/data/member')
+blueprint = Blueprint('data_member', __name__, url_prefix='/data/member')
 
 @blueprint.route('/<int:member_id>/appointments.json', methods=['GET'])
 @jsonapi

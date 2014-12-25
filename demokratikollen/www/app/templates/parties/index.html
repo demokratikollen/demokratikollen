@@ -2,31 +2,36 @@
 {% block content %}
 
 <div class="row">
-    <div class="col-md-4">
-        <div id="cosigning-filter"></div>        
+    <div class="col-sm-12 col-md-8">
+        <h1>Antal samarbetsförslag i riksdagen</h1>
+        <p>Ett samarbetsförslag är en förslagspunkt i en motion signerad av ledamöter från två eller fler partier. Mängden samarbetsförslag kan vara en indikation på möjligheterna för partiöverskridande samarbeten för ledamöterna. Du kan själv filtrera datan per utskott med listan nedan.</p>      
     </div>
-
 </div>
 <div class="row">
-    <div class="col-md-4">
-
+    <div class="col-sm-6 col-md-4">
+      <div id="cosigning-filter"></div>        
       <figure>
         <div id="cosigning"></div>        
-            <figcaption>Figure caption tag here</figcaption>
+            <figcaption>Staplarna indikerar hur många samarbetsförslag som behandlades under ett riksmöte. Klicka på en stapel för att visa de vanligaste partikombinationerna.</figcaption>
     </figure>
 
     </div>
-    <div class="col-md-4">
+    <div class="col-sm-6 col-md-4">
     <figure>
         <div id="cosigning-detail"></div>        
-            <figcaption>Figure caption tag here</figcaption>
+            <figcaption></figcaption>
     </figure>
 
     </div>
 </div>
-
 <div class="row">
-    <div class="col-lg-8">
+    <div class="col-sm-12 col-md-8">
+        <h1>Vem röstar med vem?</h1>
+        <p></p>      
+    </div>
+</div>
+<div class="row">
+    <div class="col-sm-12 col-md-5">
         <div id="party-bias"></div>        
     </div>
 </div>
@@ -48,15 +53,15 @@
 #cosigning .bar-rect {
   shape-rendering: crispEdges;
 }
-#cosigning-detail .bar-text {
+#cosigning-detail .bar-title {
   font-size: 11px;
   font-weight: normal;
 }
-#cosigning .bar-text {
+.bar-text {
   font-size: 11px;
   font-weight: bold;
 }
-#cosigning .title-text {
+.title-text {
   font-size: 14px;
 }
 .click-rect {
@@ -67,11 +72,16 @@
   cursor:pointer;
 }
 
-path.line {
+figcaption {
+  font-size:12px;
+  color: #111;
+}
+
+.line-path {
   fill:none;
   stroke-width: 2px;
 }
-circle.marker {
+.line-marker {
   fill:#ffffff;
   pointer-events: 'none';
   stroke-width: '2px';
@@ -145,405 +155,28 @@ circle.marker {
 
 <script type="text/javascript">
 
-function prop(p) {
-  return function(d) {
-    return d[p];
-  };
-}
 
 
-demokratikollen.utils.pageState = function(obj) {
 
-  var state = {};
-  var orderedKeys = [];
-  for (var key in obj) {
-    if (obj.hasOwnProperty(key)) {
-      state[key] = obj[key];
-      orderedKeys.push(key);
-    }
-  }
-  orderedKeys.sort();
-  
-  // try to read incoming state from URL
-  if (location.hash.length > 1) {
-    var values = location.hash.substr(1).split("/");
-    if (values.length == orderedKeys.length) {
-      values.forEach(function(value,i){
-        if (value == "") value = null;
-        var tryInt = parseInt(value,10);
-        if (NaN != tryInt) value = tryInt;
-
-        state[orderedKeys[i]] = value;
-      });
-    } else {
-      console.log("Warning: given pageStatus hash not compatible with state specification.");
-    }
-  } 
-
-  return function(obj) {
-
-    if (obj.length) {
-      var key = obj;
-      if (state.hasOwnProperty(key)) return state[key];
-    }
-
-    for (var key in obj) {
-      if (obj.hasOwnProperty(key) && state.hasOwnProperty(key)) {
-        state[key] = obj[key];
-      }
-    }
-    var newHash = orderedKeys.map(function(key){return state[key];}).join("/");
-    location.hash = '#'+newHash; 
-  };
-};
-
-var pageState = demokratikollen.utils.pageState({"cosigningActiveCommittee": 0, "cosigningActiveBar": null});
-
-cosigningData = {{ cosigning_data | tojson | safe }};
-
-cosigningData.committees.forEach(function(c){
-  c.series.forEach(function(rm,rm_i){
-    rm.sort(function(a,b){return -(a.value-b.value);});
-    rm.forEach(function(p){
-      p.title = p.abbr;
-      p.color = d3.rgb("#879");
-    });
-  });
+var pageState = demokratikollen.utils.pageState({
+  "cosigningActiveCommittee": 0,
+  "cosigningActiveBar": null
 });
 
-/*
-Horizontal bar chart.
-
-data is a list, each element is an objects describing the bar.
-[
-  {
-    title: "bar 1",
-    value: 7,
-    color: d3.rgb("#element")
-  },
-  {
-    title: "bar 2",
-    value: 9,
-    color: d3.rgb("#888")
-  }
-]
-*/
-demokratikollen.graphics.horizontalBarChart = function() {
-  var width = 400, height = 200;
-  var margin = { top: 0, right: 50, bottom: 0, left: 0 };
-  var barWidth = 0.3;
-  var maxAbsoluteBandWidth = 40;
-  var onBarActivated = null;
-
-  function chart(selection) {
-    selection.each(function(data){
-
-      var parent = d3.select(this);
-      var top = parent.selectAll("g").data([0]);
-      top.enter()
-        .append("g").attr("transform", "translate(" + margin.left + "," + margin.top + ")");
-
-      var w = width - margin.left - margin.right;
-      var h = Math.min(height, maxAbsoluteBandWidth*data.length) - margin.top - margin.bottom;
-
-      var absoluteBarWidth = barWidth * h/data.length;
-
-      var yScale = d3.scale.ordinal()
-          .domain(d3.range(data.length))
-          .rangeBands([h,0]);
-
-      var maxValue = d3.max(data, prop("value"));
-      var xScale = d3.scale.linear()
-          .domain([0, maxValue])
-          .range([0,w]);
 
 
-      var barRects = top.selectAll(".bar-rect")
-        .data(data, prop("title"));
-
-      barRects.enter().append("rect").attr("class","bar-rect");
-
-      barRects
-        .attr("y",function(d,i){return yScale(i)+0.5*h/data.length;})
-        .attr("x",0)
-        .attr("width", function(d,i){return xScale(d.value);})
-        .attr("height", absoluteBarWidth)
-        .style("fill", prop("color"));
-    
-      barRects.exit()
-        .style("fill-opacity",1e-5)
-        .remove();
-
-      barTexts = top.selectAll(".bar-text")
-        .data(data, prop("title"));
-
-      barTexts.enter().append("text").attr("class","bar-text");
-
-      barTexts
-        .text(function(d){return d.title + " ("+d.value+ " förslagspunkt" + (d.value>1 ? "er)" : ")");})
-        .attr("x", 0)
-        .attr("dy","-0.1em")
-        .attr("y", function(d,i){return yScale(i)+0.5*h/data.length;});
-
-      barTexts.exit().remove();
-
-    });// selection.each
-  };
-
- chart.onBarActivated = function(_) {
-    if (!arguments.length) return onBarActivated;
-    else onBarActivated = _;
-    return chart;
- }   
- chart.width = function(_) {
-    if (!arguments.length) return width;
-    else width = _;
-    return chart;
- }   
- chart.height = function(_) {
-    if (!arguments.length) return height;
-    else height = _;
-    return chart;
- }   
- chart.maxAbsoluteBandWidth = function(_) {
-    if (!arguments.length) return maxAbsoluteBandWidth;
-    else maxAbsoluteBandWidth = _;
-    return chart;
- }   
-
- return chart;
-};
-
-
-/*
-Upright stacked bar chart.
-
-data: object x-labels "labels" and bar-data "bars"."
-"bars" is a list, each element is a list of objects describing pieces.
-{
-  labels: ["X-label 1", "X-label 2"],
-  bars: 
-      [
-        [
-          {
-            title: "bar 1 piece 1",
-            value: 7,
-            color: d3.rgb("#888")
-          },
-          {
-            title: "bar 1 piece 2",
-            value: 9,
-            color: d3.rgb("#888")
-          }
-        ],
-        [
-          {
-            title: "bar 2 piece 1",
-            value: 1,
-            color: d3.rgb("#888")
-          },
-          {
-            title: "bar 2 piece 2",
-            value: 2,
-            color: d3.rgb("#888")
-          }
-        ]  
-      ]
-}
-*/
-demokratikollen.graphics.stackedBarChart = function() {
-  var width = 400, height = 200;
-  var title = "";
-  var margin = { top: 50, right: 10, bottom: 50, left: 10 };
-  var barWidth = 0.6;
-  var maxAbsoluteBandWidth = 50;
-
-  var onBarActivated = null;
-
-  var currentlyActive = null;
-  
-
-  function chart(selection) {
-    selection.each(function(data){
-      data.bars.forEach(function(bar,bar_idx){
-        bar.total = d3.sum(bar, prop("value"));
-        bar.rectData = [];
-        bar.forEach(function(p,i,a){
-          var rect = {};
-          if (i == 0) {
-            rect.y0 = 0;
-          } else {
-            rect.y0 = bar.rectData[i-1].y1;
-          }
-          rect.y1 = rect.y0 + p.value;
-          rect.x = bar_idx;
-          rect.color = p.color;
-          rect.title = p.title;
-          bar.rectData.push(rect);
-        });
-      });
-
-      var parent = d3.select(this);
-      var top = parent.selectAll("g").data([0]);
-      top.enter()
-        .append("g").attr("transform", "translate(" + margin.left + "," + margin.top + ")");
-
-      var w = Math.min(
-            width,
-            maxAbsoluteBandWidth * data.labels.length
-            ) - margin.left - margin.right;
-      var h = height - margin.top - margin.bottom;
-
-      var absoluteBarWidth = barWidth * w/data.labels.length;
-
-      var xScale = d3.scale.ordinal()
-          .domain(d3.range(data.labels.length))
-          .rangeBands([0,w]);
-
-      var xAxis = d3.svg.axis()
-          .scale(xScale)
-          .tickFormat(function(d) { return data.labels[d]; })
-          .orient("bottom");
-
-      var xAxisElement = top.selectAll(".x-axis").data([0]);
-      xAxisElement.enter().append("g").attr("class", "axis x-axis");
-
-      xAxisElement
-        .attr("transform", "translate(0," + h + ")")
-        .call(xAxis)
-        .selectAll("text")
-          .style("text-anchor", "end")
-          .attr("dx", "-.8em")
-          .attr("dy", ".15em")
-          .attr("transform","rotate(-75)");
-
-
-      var titleElement = top.selectAll(".title-text").data([0]);
-      titleElement.enter().append("text").attr("class", "title-text");
-      titleElement
-        .text(title)
-        .style("text-anchor","middle")
-        .attr("x", w/2)
-        .attr("y", -margin.top)
-        .attr("dy", "1.5em");
-
-      var maxValue = d3.max(data.bars, prop("total"));
-      var yScale = d3.scale.linear()
-          .domain([0, maxValue])
-          .range([h,0]);
-
-      var barGroups = top.selectAll(".bar-group").data(data.bars);
-      barGroups.enter()
-        .append("g").attr("class", "bar-group")
-          .append("text").attr("class","bar-text");
-
-      barGroups.exit().remove();
-
-      var barRects = barGroups.selectAll(".bar-rect")
-        .data(prop("rectData"),function(d){return d.title;});
-
-      barRects.enter().append("rect").attr("class","bar-rect");
-
-      barRects
-        .attr("x",function(d){return xScale(d.x)+0.5*(xScale(1)-absoluteBarWidth);})
-        .attr("y",function(d){return yScale(d.y1);})
-        .attr("height", function(d,i){return yScale(d.y0)-yScale(d.y1);})
-        .attr("width", absoluteBarWidth)
-        .style("fill", prop("color"));
-    
-      barRects.exit()
-        .style("fill-opacity",1e-5)
-        .remove();
-
-      var barTexts = barGroups.select(".bar-text");
-      barTexts
-        .text(prop("total"))
-        .style("text-anchor","middle")
-        .attr("x", function(d,i){return xScale(i)+0.5*(xScale(1));})
-        .attr("y", function(d){return yScale(d.total)})
-        .attr("dy","-0.1em");
-
-
-      var clickRects = top.selectAll(".click-rect").data(data.bars);
-
-      function activateBar(i) {
-        var d = data.bars[i];
-        if (currentlyActive != null) {
-          d3.select(clickRects[0][currentlyActive]).style("fill-opacity","");
-        }
-        d3.select(clickRects[0][i]).style("fill-opacity",0.3);
-        if (onBarActivated) onBarActivated(d,i);
-        currentlyActive = i;
-      };
-      function deActivateBar(i) {
-        var d = data.bars[i];
-        if (currentlyActive != null) {
-          d3.select(clickRects[0][currentlyActive]).style("fill-opacity","");
-        }
-        currentlyActive = null;
-      };
-
-      clickRects.enter().append("rect").attr("class", "click-rect");
-
-      clickRects
-        .attr("x", function(d,i){return xScale(i);})
-        .attr("y", yScale(maxValue))
-        .attr("width", xScale(1))
-        .attr("height",h+margin.bottom)
-        .on("mouseover",function(d,i){
-          if (currentlyActive == i) return;
-          d3.select(this).style("fill-opacity",0.2);
-        })
-        .on("mouseout",function(d,i){
-          if (currentlyActive == i) return;
-          d3.select(this).style("fill-opacity","");
-        })
-        .on("click",function(d,i){
-          if (currentlyActive == i) return;
-          deActivateBar(currentlyActive);
-          activateBar(i);
-        });
-
-      // reactivate selection when updating data
-      if (currentlyActive != null) activateBar(currentlyActive); 
-    });
-  };
-
- chart.onBarActivated = function(_) {
-    if (!arguments.length) return onBarActivated;
-    else onBarActivated = _;
-    return chart;
- }   
- chart.width = function(_) {
-    if (!arguments.length) return width;
-    else width = +_;
-    return chart;
- }   
- chart.height = function(_) {
-    if (!arguments.length) return height;
-    else height = +_;
-    return chart;
- }   
- chart.maxAbsoluteBandWidth = function(_) {
-    if (!arguments.length) return maxAbsoluteBandWidth;
-    else maxAbsoluteBandWidth = +_;
-    return chart;
- }   
- chart.currentlyActive = function(_) {
-    if (!arguments.length) return currentlyActive;
-    else currentlyActive = _;
-    return chart;
- } 
- chart.title = function(_) {
-    if (!arguments.length) return title;
-    else title = _;
-    return chart;
- } 
-
- return chart;
-};
 
 cosigningFigure = function(data) {
+
+  data.committees.forEach(function(c){
+    c.series.forEach(function(rm,rm_i){
+      rm.sort(function(a,b){return -(a.value-b.value);});
+      rm.forEach(function(p){
+        p.title = p.abbr;
+        p.color = d3.rgb("#879");
+      });
+    });
+  });
 
   var parent = d3.select("#cosigning");
   var width = parent[0][0].getBoundingClientRect().width,
@@ -551,15 +184,15 @@ cosigningFigure = function(data) {
 
   var detailParent = d3.select("#cosigning-detail");
   var detailWidth = detailParent[0][0].getBoundingClientRect().width,
-      detailHeight = 400;
+      detailHeight = 500;
   var detailTop = detailParent.append("svg")
       .attr("width",detailWidth)
       .attr("height",detailHeight)
       .style("background-color","#eee");
 
   var filterParent = d3.select("#cosigning-filter");
-
-  var select = filterParent.append("select").attr("class", "graph-filter");
+  var select = filterParent.append("select").attr("class", "graph-filter form-control input-sm");
+  select.attr("id","cosigningFilterSelect");
   var options = select.selectAll("option").data(data.committees);
   options.enter().append("option")      
     .text(prop("name"))
@@ -576,6 +209,7 @@ cosigningFigure = function(data) {
   var mainChart = demokratikollen.graphics.stackedBarChart()
     .width(width).height(height)
     .onBarActivated(function(d,i){
+      detailChart.title("Grupperingar riksmötet " + data.t[i]);
       detailTop.datum(d.slice(0,  15).reverse()).call(detailChart);
       pageState({"cosigningActiveBar": i});
     })
@@ -586,97 +220,64 @@ cosigningFigure = function(data) {
     var i = d3.select(this).property("selectedIndex");
 
     var series = data.committees[i].series;
-
-    mainChart.title("Antal samsignerade förslag i " + data.committees[i].name.toLowerCase());
     top.datum({bars: series, labels: data.t}).call(mainChart);
     pageState({"cosigningActiveCommittee": i});
     
   });
   select.on("change").apply(select[0][0]); // initial display
-}
+};
+
+covotingFigure = function(data) {
+
+  var parent = d3.select("#party-bias");
+
+  var width = parent[0][0].getBoundingClientRect().width,
+      height = 400;
+
+  var top = parent.append("svg")
+  .attr("width", width)
+  .attr("height", height)
+  .style("background-color", "#eee");
+
+  var mainChart = demokratikollen.graphics.verticalOrdinalLineChart()
+    .width(width).height(height);
+
+  top.datum(data).call(mainChart);
+
+};
+
+$(function(){
+  
+  d3.json('/data/cosigning/timeseries.json', function(err, data){
+  if (err) return console.warn(err);
+  cosigningFigure(data);
+  });
+
+testdata={
+  labels: ["label 1", "label 2", "label 3"],
+  series: [
+   {
+    title: "series 1",
+    color: d3.rgb("#f00"),
+    values: [0.5,0.8, 1.0]
+   },
+   {
+    title: "series 2",
+    color: d3.rgb("#ff0"),
+    values: [-0.5,0.0, 0.2]
+   }
+  ]
+};
+covotingFigure(testdata);
 
 
-$(cosigningFigure(cosigningData));   
+});
 
 
-party_bias = {
-    setup: function(){
 
-        yticklabels = {{ party_bias_yticklabels | tojson | safe }};
-        parties = {{ party_bias_parties | tojson | safe}};
+yticklabels = {{ party_bias_yticklabels | tojson | safe }};
+parties = {{ party_bias_parties | tojson | safe}};
 
-        partyColors = {"S": "#ED1B34", "M": "#52BDEC", "SD": "#FBC700", 
-                      "MP": "#53A045", "C": "#016A3A", "V": "#D9291C",
-                      "FP": "#004B92", "KD": "#073192"};
-
-        var margin = {top: 20, right: 20, bottom: 30, left: 60},
-            width = 300 - margin.left - margin.right,
-            height =400 - margin.top - margin.bottom;
-
-        var svg = d3.select("#party-bias").append("svg")
-            .attr("width", width + margin.left + margin.right)
-            .attr("height", height + margin.top + margin.bottom)
-          .append("g")
-            .attr("transform", "translate(" + margin.left + "," + margin.top + ")");
-
-        var x = d3.scale.linear()
-            .domain([-1.1,1.1])
-            .range([0, width]);
-
-        var y = d3.scale.ordinal()
-            .domain(d3.range(yticklabels.length))
-            .rangePoints([height, 0]);
-
-        var yAxis = d3.svg.axis()
-            .scale(y)
-            .tickFormat(function(d, i) { return yticklabels[d]; })
-            .orient("left");
-
-        var line = d3.svg.line()
-            .x(function(d,i) { return x(d[1]); })
-            .y(function(d,i) { return y(d[0]); })
-            .defined(function(d,i) { return !isNaN(d[1]); });
-
-        var paths = svg.selectAll( "path" )
-          .data(parties);
-
-        paths.enter().append("path");
-
-        paths
-          .classed({"line":true})
-          .style("stroke", function(d){return partyColors[d.abbr];})
-          .attr("d", function(d){return line(d.data);});
-
-
-        var marker_groups = svg.selectAll(".marker-group")
-          .data(parties);
-
-        marker_groups.enter().append("g");
-
-        marker_groups
-          .classed({"marker-group":true});
-
-        var markers = marker_groups.selectAll("circle")
-          .data(function(d){return d.data.filter(function(x){return !isNaN(x[1]);})});
-
-        markers.enter().append("circle");
-
-        markers
-          .classed({"marker":true})
-          .attr("cx", line.x())
-          .attr("cy", line.y())
-          .attr('r', 4)
-          .style('stroke', function(d){return partyColors[this.parentNode.__data__.abbr];});
-
-        svg.append("g")
-            .attr("class", "y axis")
-            .call(yAxis);
-        
-        return this;
-    } // setup
-}
-
-$(party_bias.setup());
 </script>  
 
 {% endblock %}

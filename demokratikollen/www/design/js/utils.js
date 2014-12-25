@@ -1,4 +1,4 @@
-var utils = demokratikollen.utils;
+(function(utils){
 
 utils.parties = d3.map([
   { key: "v", color: "#af0000" },
@@ -26,3 +26,55 @@ utils.colors = d3.map([
 // Copy party colors to colors
 utils.parties.forEach(
   function(key, party) { utils.colors.set(key, { key: party.key, color: party.color}); });
+
+
+utils.pageState = function(obj) {
+  var delim = "-"
+  var state = {};
+  var orderedKeys = [];
+  for (var key in obj) {
+    if (obj.hasOwnProperty(key)) {
+      state[key] = obj[key];
+      orderedKeys.push(key);
+    }
+  }
+  orderedKeys.sort();
+  
+  // try to read incoming state from URL
+  if (location.hash.length > 1) {
+    var values = location.hash.substr(1).split(delim);
+    if (values.length == orderedKeys.length) {
+      values.forEach(function(value,i){
+        if (value == "") value = null;
+        var tryInt = parseInt(value,10);
+        if (NaN != tryInt) value = tryInt;
+
+        state[orderedKeys[i]] = value;
+      });
+    } else {
+      console.log("Warning: given pageStatus hash not compatible with state specification.");
+    }
+  } 
+
+  return function(obj) {
+
+    if (obj.length) {
+      var key = obj;
+      if (state.hasOwnProperty(key)) return state[key];
+    }
+
+    for (var key in obj) {
+      if (obj.hasOwnProperty(key) && state.hasOwnProperty(key)) {
+        state[key] = obj[key];
+      }
+    }
+    var newHash = orderedKeys.map(function(key){return state[key];}).join(delim);
+    location.hash = '#'+newHash; 
+  };
+};
+
+
+
+
+})(demokratikollen.utils);
+
