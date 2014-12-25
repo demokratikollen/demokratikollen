@@ -15,11 +15,7 @@ def main():
     session = sessionmaker(bind=engine)
     s = session() 
 
-    intervals = [] 
-
-    for y in range(2002,2015):
-        intervals.append( (dt.date(y,1,1), dt.date(y,7,1)  ,'V {}'.format(y))   )
-        intervals.append( (dt.date(y,7,1), dt.date(y+1,1,1),'H {}'.format(y)) )
+    riksmoten = ['{:04d}/{:02d}'.format(y,y-2000+1) for y in range(2002,2014)]
 
     parties = s.query(Party) \
                 .filter(Party.abbr != "-") \
@@ -45,7 +41,7 @@ def main():
                                 .filter(v1.vote_option != v2.vote_option)
         
         num_conflicting = conflicting_votes.count()
-        if num_conflicting < 100:
+        if num_conflicting < 1000:
             continue
 
         print('================================')
@@ -64,33 +60,37 @@ def main():
                                 .filter(v3.polled_point_id == v2.polled_point_id) \
                                 .filter(v3.party_id == party.id)
 
-            party_bias = list()
-            for (k, interval) in enumerate(intervals):
+            print(agree_query.count())
 
-                agree_query_interval = agree_query.filter(PolledPoint.poll_date >= interval[0], PolledPoint.poll_date < interval[1])
+            party_bias = list()
+            for (rm_idx, rm) in enumerate(riksmoten):
+
+                agree_query_interval = agree_query.filter(CommitteeReport.session == rm)
 
                 agreeA = agree_query_interval.filter(v3.vote_option == v1.vote_option).count()
                 agreeB = agree_query_interval.filter(v3.vote_option == v2.vote_option).count()
-
-                if agreeA + agreeB > 10:
-                    party_bias.append( (k, float(agreeB - agreeA)/float(agreeA + agreeB)))
+                print(agreeA)
+                print(agreeB)
+                if agreeA + agreeB > 0:
+                    party_bias.append( float(agreeB - agreeA)/float(agreeA + agreeB))
                 else:
-                    party_bias.append( (k, float('NaN')))
+                    party_bias.append( float('NaN'))
 
             print('{}...'.format(party.abbr))
             output_parties.append(dict(
-                                        id=party.id,
-                                        abbr=party.abbr,
-                                        data=party_bias)) 
+                                        party_id=party.id,
+                                        party_abbr=party.abbr,
+                                        party_name=party.name,
+                                        values=party_bias)) 
         
         print('Dumping to MongoDB.')
         output_parties_reverse = deepcopy(output_parties)
         for item in output_parties_reverse:
-            item['data'] = [(k,-x) for (k,x) in item['data']]
+            item['values'] = [-x for x in item['values']]
 
-        yticklabels=[name for (start, stop, name) in intervals]
-        output_top = dict(partyA = partyA.id, partyB = partyB.id, parties = output_parties,yticklabels=yticklabels)
-        output_top_reverse = dict(partyA = partyB.id, partyB = partyA.id, parties = output_parties_reverse, yticklabels=yticklabels)
+
+        output_top = dict(partyA = partyA.id, partyB = partyB.id, series = output_parties,labels=riksmoten)
+        output_top_reverse = dict(partyA = partyB.id, partyB = partyA.id, series = output_parties_reverse, labels=riksmoten)
         mongo_collection.update(dict(partyA = partyA.id, partyB = partyB.id), output_top, upsert=True)
         mongo_collection.update(dict(partyA = partyB.id, partyB = partyA.id), output_top_reverse, upsert=True)
 

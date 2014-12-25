@@ -17,6 +17,7 @@ data:
   ]
 }
 
+
 */
 demokratikollen.graphics.verticalOrdinalLineChart = function() {
   var margin = { top: 10, right: 20, bottom: 10, left: 50 };

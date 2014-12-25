@@ -32,9 +32,7 @@ def parties():
 
     party_bias_data = party_bias("S","M")
 
-    return render_template("/parties/index.html",
-                            party_bias_parties = party_bias_data["parties"],
-                            party_bias_yticklabels = party_bias_data["yticklabels"])
+    return render_template("/parties/index.html",party_bias = party_bias_data)
 
 @blueprint.route('/forslagen', methods=['GET'])
 def proposals():
