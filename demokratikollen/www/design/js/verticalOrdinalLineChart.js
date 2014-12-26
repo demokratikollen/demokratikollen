@@ -20,7 +20,7 @@ data:
 
 */
 demokratikollen.graphics.verticalOrdinalLineChart = function() {
-  var margin = { top: 10, right: 20, bottom: 10, left: 50 };
+  var margin = { top: 25, right: 20, bottom: 25, left: 60 };
   var width = 400, height = 200;
   var onLineActivated = null;
   var markerSize = 8;
@@ -29,10 +29,11 @@ demokratikollen.graphics.verticalOrdinalLineChart = function() {
     selection.each(function(data){
 
       data.series.forEach(function(s){
-        s.markerData = s.values.map(function(v){
-          return {value: v, color: s.color};
-        });
-      })
+        s.markerData = s.values.map(function(v,i){
+            return {x: v, y: i, color: s.color};
+        }).filter(function(d){return d.x != null;});
+
+      });
 
       var parent = d3.select(this);
       var top = parent.selectAll("g").data([0]);
@@ -50,10 +51,21 @@ demokratikollen.graphics.verticalOrdinalLineChart = function() {
           .domain([-1.1,1.1])
           .range([0,w]);
 
+      var yAxis = d3.svg.axis()
+        .scale(yScale)
+        .tickFormat(function(d, i) { return data.labels[d]; })
+        .orient("left");
+
       var lineGenerator = d3.svg.line()
           .x(function(d,i) { return xScale(d); })
           .y(function(d,i) { return yScale(i); })
-          .defined(function(d,i) { return !isNaN(d); });
+          .defined(function(d,i) { return d != null; });
+
+      var yAxisElement = top.selectAll(".y-axis").data([0]);
+      yAxisElement.enter().append("g").attr("class","axis y-axis");
+      yAxisElement.call(yAxis);
+
+      yAxisElement.exit().remove();
 
       var seriesGroups = top.selectAll(".series-group")
         .data(data.series, prop("title"));
@@ -83,8 +95,8 @@ demokratikollen.graphics.verticalOrdinalLineChart = function() {
       markers.enter().append("circle").attr("class","line-marker");
 
       markers
-        .attr("cy", function(d,i){return yScale(i);})
-        .attr("cx", compose(xScale,prop("value")))
+        .attr("cy", compose(yScale,prop("y")))
+        .attr("cx", compose(xScale,prop("x")))
         .attr("r", markerSize*0.5)
         .style("stroke", prop("color"));
     

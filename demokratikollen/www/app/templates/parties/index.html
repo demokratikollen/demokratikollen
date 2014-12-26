@@ -3,7 +3,7 @@
 
 <div class="row">
     <div class="col-sm-12 col-md-8">
-        <h1>Antal samarbetsförslag i riksdagen</h1>
+        <h2>Antal samarbetsförslag i riksdagen</h2>
         <p>Ett samarbetsförslag är en förslagspunkt i en motion signerad av ledamöter från två eller fler partier. Mängden samarbetsförslag kan vara en indikation på möjligheterna för partiöverskridande samarbeten för ledamöterna. Du kan själv filtrera datan per utskott med listan nedan. Enskilda motioner är ej medräknade i statistiken.</p>      
     </div>
 </div>
@@ -26,13 +26,25 @@
 </div>
 <div class="row">
     <div class="col-sm-12 col-md-8">
-        <h1>Vem röstar med vem?</h1>
-        <p></p>      
+        <h2>Vem röstar med vem i kammaren?</h2>
+        <p>Den här figuren visar hur partierna förhåller sig till varandra vid voteringar i kammaren.</p>        <p>
+           Vi väljer ut två partier och placerar dem längst till vänster och höger i figuren. De definerar skalan i figuren. Vi placerar de övriga partierna på skalan efter vem de oftast håller med i voteringar. Om ett parti lika ofta håller med de båda hamnar det i mitten av figuren.
+        </p> 
+        <p>
+        Du kan själv välja vilka två partier som skall bilda skalan med hjälp av listan under figuren.
+        </p>      
     </div>
 </div>
 <div class="row">
-    <div class="col-sm-12 col-md-5">
+    <div class="col-sm-12 col-md-4">
+    <figure>
         <div id="party-bias"></div>        
+        </figure>
+    </div>
+</div>
+<div class="row">
+    <div class="col-sm-12 col-md-4">
+        <div id="party-bias-filter"></div>       
     </div>
 </div>
     
@@ -89,65 +101,6 @@ figcaption {
 
 </style> 
 
-<style>
-.d3-tip {
-  line-height: 1;
-  font-weight: bold;
-  padding: 10px;
-  background: rgba(0,0,0, 0.5);
-  color: #fff;
-  border-radius: 2px;
-  pointer-events: none;
-}
-
-/* Creates a small triangle extender for the tooltip */
-.d3-tip:after {
-  box-sizing: border-box;
-  display: inline;
-  font-size: 10px;
-  width: 100%;
-  line-height: 1;
-  color: rgba(0, 0, 0, 0.5);
-  position: absolute;
-  pointer-events: none;
-}
-
-/* Northward tooltips */
-.d3-tip.n:after {
-  content: "\25BC";
-  margin: -1px 0 0 0;
-  top: 100%;
-  left: 0;
-  text-align: center;
-}
-
-/* Eastward tooltips */
-.d3-tip.e:after {
-  content: "\25C0";
-  margin: -4px 0 0 0;
-  top: 50%;
-  left: -8px;
-}
-
-/* Southward tooltips */
-.d3-tip.s:after {
-  content: "\25B2";
-  margin: 0 0 1px 0;
-  top: -8px;
-  left: 0;
-  text-align: center;
-}
-
-/* Westward tooltips */
-.d3-tip.w:after {
-  content: "\25B6";
-  margin: -4px 0 0 -1px;
-  top: 50%;
-  left: 100%;
-}
-
-</style>
-
 {% endblock %}
 
 {% block scripts %}
@@ -157,7 +110,9 @@ figcaption {
 
 var pageState = demokratikollen.utils.pageState({
   "cosigningActiveCommittee": 0,
-  "cosigningActiveBar": null
+  "cosigningActiveBar": null,
+  "covotingActivePartyA": 1, // S
+  "covotingActivePartyB": 6 // M
 });
 
 cosigningFigure = function(data) {
@@ -221,22 +176,86 @@ cosigningFigure = function(data) {
   select.on("change").apply(select[0][0]); // initial display
 };
 
-covotingFigure = function(data) {
-  console.log(data);
+covotingFigure = function() {
+  var parties = [
+    {abbr:"V"},
+    {abbr:"S"},
+    {abbr:"MP"},
+    {abbr:"C"},
+    {abbr:"FP"},
+    {abbr:"KD"},
+    {abbr:"M"}
+  ];
+
   var parent = d3.select("#party-bias");
 
   var width = parent[0][0].getBoundingClientRect().width,
-      height = 400;
+      height = 300;
 
   var top = parent.append("svg")
     .attr("width", width)
     .attr("height", height)
     .style("background-color", "#eee");
 
+  var filterParent = d3.select("#party-bias-filter");
+
+  filterParent.attr("align","center");
+  var selectA = filterParent.append("select").attr("class", "graph-filter input-sm");
+  selectA.style("width", "90px");
+  var optionsA = selectA.selectAll("option").data(parties);
+  optionsA.enter().append("option")      
+    .text(prop("abbr"))
+    .attr("value", function(d,i){return i;});
+  selectA.node().value = pageState("covotingActivePartyA");
+
+  filterParent.append("span").text("vs")
+    .style("padding", "5px");
+
+  var selectB = filterParent.append("select").attr("class", "graph-filter input-sm");
+  selectB.style("width", "90px");
+  var optionsB = selectB.selectAll("option").data(parties);
+  optionsB.enter().append("option")      
+    .text(prop("abbr"))
+    .attr("value", function(d,i){return i;});
+  selectB.node().value = pageState("covotingActivePartyB");
+
   var mainChart = demokratikollen.graphics.verticalOrdinalLineChart()
     .width(width).height(height);
 
-  top.datum(data).call(mainChart);
+  var nodeA = selectA.node();
+  var nodeB = selectB.node();
+
+  var update = function() {
+
+    var iA = d3.select(nodeA).property("selectedIndex");
+    var iB = d3.select(nodeB).property("selectedIndex");
+    
+    var partyA = parties[iA];
+    var partyB = parties[iB];
+
+    d3.json('/data/covoting/party_bias_'+partyA.abbr+'_'+partyB.abbr+'.json', function(err, data){
+
+      pageState({"covotingActivePartyA": iA, "covotingActivePartyB": iB});  
+      
+      if (err) {
+        top.selectAll("*").remove();
+        return;
+      }
+
+      data.series.forEach(function (s){
+        s.color = demokratikollen.utils.getPartyColor(s.party_abbr);
+        s.title = s.party_abbr;
+      });
+
+      top.datum(data).call(mainChart);
+      
+    });
+    
+  }
+
+  selectA.on("change", update);
+  selectB.on("change", update);
+  update();
 
 };
 
@@ -247,10 +266,7 @@ $(function(){
   cosigningFigure(data);
   });
 
-  d3.json('/data/covoting/party_bias_S_M.json', function(err, data){
-  if (err) return console.warn(err);
-  covotingFigure(data);
-  });
+  covotingFigure();
 
 });
 

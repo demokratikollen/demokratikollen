@@ -49,7 +49,9 @@ def main():
 
         output_parties = list()
         for party in parties:
-            agree_query = s.query(v1, v2, v3, PolledPoint,CommitteeReport).join(CommitteeReport,PolledPoint.report)\
+            print('{}...'.format(party.abbr))
+            agree_query = s.query(v1, v2, v3, PolledPoint,CommitteeReport) \
+                                .filter(CommitteeReport.id == PolledPoint.committee_report_id) \
                                 .filter(PolledPoint.id == v1.polled_point_id) \
                                 .filter(v1.polled_point_id == v2.polled_point_id) \
                                 .filter(v1.party_id == partyA.id) \
@@ -67,14 +69,16 @@ def main():
 
                 agreeA = agree_query_interval.filter(v3.vote_option == v1.vote_option).count()
                 agreeB = agree_query_interval.filter(v3.vote_option == v2.vote_option).count()
-                print(agreeA)
-                print(agreeB)
+                print(rm,agreeA,agreeB)
                 if agreeA + agreeB > 0:
                     party_bias.append( float(agreeB - agreeA)/float(agreeA + agreeB))
                 else:
-                    party_bias.append( float('NaN'))
+                    party_bias.append(None)
 
-            print('{}...'.format(party.abbr))
+            
+            if all(x is None for x in party_bias):
+                continue
+
             output_parties.append(dict(
                                         party_id=party.id,
                                         party_abbr=party.abbr,
@@ -84,8 +88,7 @@ def main():
         print('Dumping to MongoDB.')
         output_parties_reverse = deepcopy(output_parties)
         for item in output_parties_reverse:
-            item['values'] = [-x for x in item['values']]
-
+            item['values'] = [x if x is None else -x for x in item['values']]
 
         output_top = dict(partyA = partyA.id, partyB = partyB.id, series = output_parties,labels=riksmoten)
         output_top_reverse = dict(partyA = partyB.id, partyB = partyA.id, series = output_parties_reverse, labels=riksmoten)

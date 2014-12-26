@@ -128,8 +128,8 @@ demokratikollen.graphics.stackedBarChart = function() {
       barRects.enter().append("rect").attr("class","bar-rect");
 
       barRects
-        .attr("x",function(d){return xScale(d.x)+0.5*(xScale(1)-absoluteBarWidth);})
-        .attr("y",function(d){return yScale(d.y1);})
+        .attr("x", function(d){return xScale(d.x)+0.5*(xScale(1)-absoluteBarWidth);})
+        .attr("y", function(d){return yScale(d.y1);})
         .attr("height", function(d,i){return yScale(d.y0)-yScale(d.y1);})
         .attr("width", absoluteBarWidth)
         .style("fill", prop("color"));

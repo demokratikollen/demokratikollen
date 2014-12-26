@@ -27,6 +27,9 @@ utils.colors = d3.map([
 utils.parties.forEach(
   function(key, party) { utils.colors.set(key, { key: party.key, color: party.color}); });
 
+utils.getPartyColor = function(abbr) {
+  return d3.rgb(demokratikollen.utils.colors.get(abbr.toLowerCase())["color"]);
+};
 
 utils.pageState = function(obj) {
   var delim = "-"
@@ -46,8 +49,8 @@ utils.pageState = function(obj) {
     if (values.length == orderedKeys.length) {
       values.forEach(function(value,i){
         if (value == "") value = null;
-        var tryInt = parseInt(value,10);
-        if (NaN != tryInt) value = tryInt;
+        var tryInt = parseInt(value, 10);
+        if (!isNaN(tryInt)) value = tryInt;
 
         state[orderedKeys[i]] = value;
       });
