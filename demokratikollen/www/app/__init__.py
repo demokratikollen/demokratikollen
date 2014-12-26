@@ -12,7 +12,6 @@ from demokratikollen.www.app.helpers.db import db
 import demokratikollen.www.app.views.data.member
 import demokratikollen.www.app.views.data.parliament
 import demokratikollen.www.app.views.data.parties
-import demokratikollen.www.app.views.data.cosigning
 import demokratikollen.www.app.views.pages
 from demokratikollen.www.app import views
 
@@ -66,7 +65,6 @@ def create_app(testing=False, caching=True):
         views.data.parliament.blueprint,
         views.data.member.blueprint,
         views.data.parties.blueprint,
-        views.data.cosigning.blueprint,
         views.pages.blueprint)
 
     # Register blueprint(s)

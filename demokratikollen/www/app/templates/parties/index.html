@@ -4,7 +4,7 @@
 <div class="row">
     <div class="col-sm-12 col-md-8">
         <h1>Antal samarbetsförslag i riksdagen</h1>
-        <p>Ett samarbetsförslag är en förslagspunkt i en motion signerad av ledamöter från två eller fler partier. Mängden samarbetsförslag kan vara en indikation på möjligheterna för partiöverskridande samarbeten för ledamöterna. Du kan själv filtrera datan per utskott med listan nedan.</p>      
+        <p>Ett samarbetsförslag är en förslagspunkt i en motion signerad av ledamöter från två eller fler partier. Mängden samarbetsförslag kan vara en indikation på möjligheterna för partiöverskridande samarbeten för ledamöterna. Du kan själv filtrera datan per utskott med listan nedan. Enskilda motioner är ej medräknade i statistiken.</p>      
     </div>
 </div>
 <div class="row">
@@ -155,16 +155,10 @@ figcaption {
 
 <script type="text/javascript">
 
-
-
-
 var pageState = demokratikollen.utils.pageState({
   "cosigningActiveCommittee": 0,
   "cosigningActiveBar": null
 });
-
-
-
 
 cosigningFigure = function(data) {
 
@@ -228,16 +222,16 @@ cosigningFigure = function(data) {
 };
 
 covotingFigure = function(data) {
-
+  console.log(data);
   var parent = d3.select("#party-bias");
 
   var width = parent[0][0].getBoundingClientRect().width,
       height = 400;
 
   var top = parent.append("svg")
-  .attr("width", width)
-  .attr("height", height)
-  .style("background-color", "#eee");
+    .attr("width", width)
+    .attr("height", height)
+    .style("background-color", "#eee");
 
   var mainChart = demokratikollen.graphics.verticalOrdinalLineChart()
     .width(width).height(height);
@@ -253,27 +247,13 @@ $(function(){
   cosigningFigure(data);
   });
 
-testdata={
-  labels: ["label 1", "label 2", "label 3"],
-  series: [
-   {
-    title: "series 1",
-    color: d3.rgb("#f00"),
-    values: [0.5,0.8, 1.0]
-   },
-   {
-    title: "series 2",
-    color: d3.rgb("#ff0"),
-    values: [-0.5,0.0, 0.2]
-   }
-  ]
-};
-covotingFigure(testdata);
-
+  d3.json('/data/covoting/party_bias_S_M.json', function(err, data){
+  if (err) return console.warn(err);
+  covotingFigure(data);
+  });
 
 });
 
-partyBiasData = {{ party_bias | tojson | safe}};
 
 </script>  
 

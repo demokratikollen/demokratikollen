@@ -374,7 +374,7 @@ parties = {
   setup: function(divId,data,party,year) {
     parties.party = party;
     parties.year = year;
-    parties.pColor = utils.parties.get(party).color;
+    parties.pColor = demokratikollen.utils.parties.get(party).color;
     parties.pColorMild = d3.interpolateRgb(d3.rgb('#eee'), parties.pColor)(0.5);
 
     var startColor = d3.rgb('#eee'),

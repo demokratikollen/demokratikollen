@@ -49,7 +49,7 @@ def main():
 
         output_parties = list()
         for party in parties:
-            agree_query = s.query(v1, v2, v3, PolledPoint) \
+            agree_query = s.query(v1, v2, v3, PolledPoint,CommitteeReport).join(CommitteeReport,PolledPoint.report)\
                                 .filter(PolledPoint.id == v1.polled_point_id) \
                                 .filter(v1.polled_point_id == v2.polled_point_id) \
                                 .filter(v1.party_id == partyA.id) \
@@ -59,8 +59,6 @@ def main():
                                 .filter(v1.vote_option != v2.vote_option) \
                                 .filter(v3.polled_point_id == v2.polled_point_id) \
                                 .filter(v3.party_id == party.id)
-
-            print(agree_query.count())
 
             party_bias = list()
             for (rm_idx, rm) in enumerate(riksmoten):
