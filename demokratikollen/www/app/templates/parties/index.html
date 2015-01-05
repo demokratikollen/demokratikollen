@@ -1,4 +1,4 @@
-{% extends "parties/base.html" %}
+﻿{% extends "parties/base.html" %}
 {% block content %}
 
 <div class="row">
@@ -15,7 +15,9 @@
 <div class="row">
     <div class="col-sm-12 col-md-4">
     <figure>
+        <div class="inset">
         <div id="party-bias"></div>
+        </div>
         </figure>
     </div>
 </div>
@@ -54,6 +56,15 @@
 {% block styles %}
 <style>
 
+.axis path, .axis line {
+  fill: none;
+  stroke: #888;
+  shape-rendering: crispEdges;
+}
+.axis text {
+    font-size: 11px;
+    fill: #888;
+}
 
 </style>
 
@@ -150,8 +161,7 @@ covotingFigure = function() {
 
   var top = parent.append("svg")
     .attr("width", width)
-    .attr("height", height)
-    .style("background-color", "#eee");
+    .attr("height", height);
 
   var filterParent = d3.select("#party-bias-filter");
 

@@ -34,17 +34,25 @@
           r.startDate = new Date(appointment.start_date);
           r.endDate = new Date(appointment.end_date);
 
+          cssClasses = [];
+
+          if (appointment.role == "Suppleant" || appointment.role == "Ersättare") {
+            cssClasses.push("substitute");
+          }
+
+          console.log(appointment);
           if (appointment.classtype == "speaker_appointment") {
             r.rowLabel = appointment.position;
-            r.cssClass = "speaker";
+            cssClasses.push("speaker");
             r.description = appointment.position
           } else if (appointment.classtype == "chamber_appointment") {
             if (appointment.role == "Riksdagsledamot") {
               r.rowLabel = "Riksdagsledamot";
               r.description = r.rowLabel;
+
               if (appointment.status == "Ledig") {
-                r.cssClass = 'passive';
-                r.description += " (ledig)"
+                cssClasses.push('passive');
+                r.description += " (ledig)";
               }
             } else if (appointment.role == "Ersättare") {
               r.rowLabel = "Ersättare i riksdagen";
@@ -56,13 +64,19 @@
 
           } else if (appointment.classtype == "group_appointment" ||
             appointment.classtype == "ministry_appointment") {
-            r.rowLabel = appointment.role + ', ' + group.name;
-            r.description = r.rowLabel;
+            if (appointment.role == "Suppleant" || appointment.role == "Ledamot") {
+              r.rowLabel = group.name;
+            } else {
+              r.rowLabel = appointment.role + ', ' + group.name;
+            }
+            r.description = appointment.role + ', ' + group.name;
           } else if (appointment.classtype == "committee_appointment") {
             r.rowLabel = group.name;
             r.description = appointment.role + " i " + group.name.toLowerCase();
-            if (appointment.role == "Suppleant") { r.cssClass = "substitute"; }
+            if (appointment.role == "Suppleant") { cssClasses.push("substitute"); }
           }
+
+          r.cssClass = cssClasses.join(" ")
 
           return r;
         });
@@ -77,7 +91,6 @@
 
 
       d3.json("/data/member/{{ member.id }}/appointments.json", function(data) {
-        console.log(prepData(data))
         timeline = d3.select("#timeline")
         .datum(prepData(data))
         .call(chart)
