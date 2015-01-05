@@ -15,3 +15,4 @@ def proposals_main(government):
     del record['_id']
     return record
 
+

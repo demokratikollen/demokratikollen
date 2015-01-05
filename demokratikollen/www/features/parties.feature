@@ -8,5 +8,3 @@ Feature: Test the parties main page.
     Scenario: There should be the correct elements.
         Given you browse to the "parties" page
         Then The response should contain an element "svg"
-        Then The response should contain an element ".marker-group"
-

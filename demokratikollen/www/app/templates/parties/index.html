@@ -2,10 +2,53 @@
 {% block content %}
 
 <div class="row">
-    <div class="col-lg-8">
-        <div id="party-bias"></div>        
+    <div class="col-sm-12 col-md-8">
+        <h2>Vem röstar med vem i kammaren?</h2>
+        <p>Den här figuren visar hur partierna förhåller sig till varandra vid voteringar i kammaren.</p>        <p>
+           Vi väljer ut två partier och placerar dem längst till vänster och höger i figuren. De definerar skalan i figuren. Vi placerar de övriga partierna på skalan efter vem de oftast håller med i voteringar. Om ett parti lika ofta håller med de båda hamnar det i mitten av figuren.
+        </p> 
+        <p>
+        Du kan själv välja vilka två partier som skall bilda skalan med hjälp av listorna under figuren.
+        </p>      
     </div>
 </div>
+<div class="row">
+    <div class="col-sm-12 col-md-4">
+    <figure>
+        <div id="party-bias"></div>        
+        </figure>
+    </div>
+</div>
+<div class="row">
+    <div class="col-sm-12 col-md-4">
+        <div id="party-bias-filter"></div>       
+    </div>
+</div>
+
+<div class="row">
+    <div class="col-sm-12 col-md-8">
+        <h2>Antal samarbetsförslag i riksdagen</h2>
+        <p>Ett samarbetsförslag är en förslagspunkt i en motion signerad av ledamöter från två eller fler partier. Mängden samarbetsförslag kan vara en indikation på möjligheterna för partiöverskridande samarbeten för ledamöterna. Du kan själv filtrera datan per utskott med listan nedan. Enskilda motioner är ej medräknade i statistiken.</p>      
+    </div>
+</div>
+<div class="row">
+    <div class="col-sm-6 col-md-4">
+      <div id="cosigning-filter"></div>        
+      <figure>
+        <div id="cosigning"></div>        
+            <figcaption>Staplarna indikerar hur många samarbetsförslag som behandlades under ett riksmöte. Klicka på en stapel för att visa de vanligaste partikombinationerna.</figcaption>
+    </figure>
+
+    </div>
+    <div class="col-sm-6 col-md-4">
+    <figure>
+        <div id="cosigning-detail"></div>        
+            <figcaption></figcaption>
+    </figure>
+
+    </div>
+</div>
+
     
 {% endblock %}
 {% block styles %}
@@ -13,23 +56,53 @@
 
 .axis path, .axis line {
   fill: none;
-  stroke: #000;
+  stroke: #888;
   shape-rendering: crispEdges;
 }
 .axis text {
-  font-size: 11px;
+    font-size: 11px;
+    fill: #888;
 }
-path.line {
+
+#cosigning .bar-rect {
+  shape-rendering: crispEdges;
+}
+#cosigning-detail .bar-title {
+  font-size: 11px;
+  font-weight: normal;
+}
+.bar-text {
+  font-size: 11px;
+  font-weight: bold;
+}
+.title-text {
+  font-size: 14px;
+}
+.click-rect {
+  pointer-events: all;
+  stroke:none;
+  fill:#111;
+  fill-opacity: 0.0;
+  cursor:pointer;
+}
+
+figcaption {
+  font-size:12px;
+  color: #111;
+}
+
+.line-path {
   fill:none;
   stroke-width: 2px;
 }
-circle.marker {
+.line-marker {
   fill:#ffffff;
   pointer-events: 'none';
   stroke-width: '2px';
 }
 
 </style> 
+
 {% endblock %}
 
 {% block scripts %}
@@ -37,84 +110,169 @@ circle.marker {
 
 <script type="text/javascript">
 
-party_bias = {
-    setup: function(){
+var pageState = demokratikollen.utils.pageState({
+  "cosigningActiveCommittee": 0,
+  "cosigningActiveBar": null,
+  "covotingActivePartyA": 1, // S
+  "covotingActivePartyB": 6 // M
+});
 
-        yticklabels = {{ party_bias_yticklabels | tojson | safe }};
-        parties = {{ party_bias_parties | tojson | safe}};
+cosigningFigure = function(data) {
 
-        partyColors = {"S": "#ED1B34", "M": "#52BDEC", "SD": "#FBC700", 
-                      "MP": "#53A045", "C": "#016A3A", "V": "#D9291C",
-                      "FP": "#004B92", "KD": "#073192"};
+  data.committees.forEach(function(c){
+    c.series.forEach(function(rm,rm_i){
+      rm.sort(function(a,b){return -(a.value-b.value);});
+      rm.forEach(function(p){
+        p.title = p.abbr;
+        p.color = d3.rgb("#879");
+      });
+    });
+  });
 
-        var margin = {top: 20, right: 20, bottom: 30, left: 60},
-            width = 300 - margin.left - margin.right,
-            height =400 - margin.top - margin.bottom;
+  var parent = d3.select("#cosigning");
+  var width = parent[0][0].getBoundingClientRect().width,
+      height = 200;
 
-        var svg = d3.select("#party-bias").append("svg")
-            .attr("width", width + margin.left + margin.right)
-            .attr("height", height + margin.top + margin.bottom)
-          .append("g")
-            .attr("transform", "translate(" + margin.left + "," + margin.top + ")");
+  var detailParent = d3.select("#cosigning-detail");
+  var detailWidth = detailParent[0][0].getBoundingClientRect().width,
+      detailHeight = 500;
+  var detailTop = detailParent.append("svg")
+      .attr("width",detailWidth)
+      .attr("height",detailHeight)
+      .style("background-color","#eee");
 
-        var x = d3.scale.linear()
-            .domain([-1.1,1.1])
-            .range([0, width]);
+  var filterParent = d3.select("#cosigning-filter");
+  var select = filterParent.append("select").attr("class", "graph-filter form-control input-sm");
+  select.attr("id","cosigningFilterSelect");
+  var options = select.selectAll("option").data(data.committees);
+  options.enter().append("option")      
+    .text(prop("name"))
+    .attr("value", function(d,i){return i;});
+  select.node().value = pageState("cosigningActiveCommittee");
 
-        var y = d3.scale.ordinal()
-            .domain(d3.range(yticklabels.length))
-            .rangePoints([height, 0]);
+  var top = parent.append("svg")
+    .attr("width", width)
+    .attr("height", height)
+    .style("background-color", "#eee");
 
-        var yAxis = d3.svg.axis()
-            .scale(y)
-            .tickFormat(function(d, i) { return yticklabels[d]; })
-            .orient("left");
-
-        var line = d3.svg.line()
-            .x(function(d,i) { return x(d[1]); })
-            .y(function(d,i) { return y(d[0]); })
-            .defined(function(d,i) { return !isNaN(d[1]); });
-
-        var paths = svg.selectAll( "path" )
-          .data(parties);
-
-        paths.enter().append("path");
-
-        paths
-          .classed({"line":true})
-          .style("stroke", function(d){return partyColors[d.abbr];})
-          .attr("d", function(d){return line(d.data);});
+  var detailChart = demokratikollen.graphics.horizontalBarChart()
+    .width(detailWidth).height(detailHeight);
+  var mainChart = demokratikollen.graphics.stackedBarChart()
+    .width(width).height(height)
+    .onBarActivated(function(d,i){
+      detailChart.title("Grupperingar riksmötet " + data.t[i]);
+      detailTop.datum(d.slice(0,  15).reverse()).call(detailChart);
+      pageState({"cosigningActiveBar": i});
+    })
+    .currentlyActive(pageState("cosigningActiveBar"));
 
 
-        var marker_groups = svg.selectAll(".marker-group")
-          .data(parties);
+  select.on("change", function() {
+    var i = d3.select(this).property("selectedIndex");
 
-        marker_groups.enter().append("g");
+    var series = data.committees[i].series;
+    top.datum({bars: series, labels: data.t}).call(mainChart);
+    pageState({"cosigningActiveCommittee": i});
+    
+  });
+  select.on("change").apply(select[0][0]); // initial display
+};
 
-        marker_groups
-          .classed({"marker-group":true});
+covotingFigure = function() {
+  var parties = [
+    {abbr:"V"},
+    {abbr:"S"},
+    {abbr:"MP"},
+    {abbr:"C"},
+    {abbr:"FP"},
+    {abbr:"KD"},
+    {abbr:"M"}
+  ];
 
-        var markers = marker_groups.selectAll("circle")
-          .data(function(d){return d.data.filter(function(x){return !isNaN(x[1]);})});
+  var parent = d3.select("#party-bias");
 
-        markers.enter().append("circle");
+  var width = parent[0][0].getBoundingClientRect().width,
+      height = 300;
 
-        markers
-          .classed({"marker":true})
-          .attr("cx", line.x())
-          .attr("cy", line.y())
-          .attr('r', 4)
-          .style('stroke', function(d){return partyColors[this.parentNode.__data__.abbr];});
+  var top = parent.append("svg")
+    .attr("width", width)
+    .attr("height", height)
+    .style("background-color", "#eee");
 
-        svg.append("g")
-            .attr("class", "y axis")
-            .call(yAxis);
-        
-        return this;
-    } // setup
-}
+  var filterParent = d3.select("#party-bias-filter");
 
-$(party_bias.setup());
+  filterParent.attr("align","center");
+  var selectA = filterParent.append("select").attr("class", "graph-filter input-sm");
+  selectA.style("width", "90px");
+  var optionsA = selectA.selectAll("option").data(parties);
+  optionsA.enter().append("option")      
+    .text(prop("abbr"))
+    .attr("value", function(d,i){return i;});
+  selectA.node().value = pageState("covotingActivePartyA");
+
+  filterParent.append("span").text("vs")
+    .style("padding", "5px");
+
+  var selectB = filterParent.append("select").attr("class", "graph-filter input-sm");
+  selectB.style("width", "90px");
+  var optionsB = selectB.selectAll("option").data(parties);
+  optionsB.enter().append("option")      
+    .text(prop("abbr"))
+    .attr("value", function(d,i){return i;});
+  selectB.node().value = pageState("covotingActivePartyB");
+
+  var mainChart = demokratikollen.graphics.verticalOrdinalLineChart()
+    .width(width).height(height);
+
+  var nodeA = selectA.node();
+  var nodeB = selectB.node();
+
+  var update = function() {
+
+    var iA = d3.select(nodeA).property("selectedIndex");
+    var iB = d3.select(nodeB).property("selectedIndex");
+    
+    var partyA = parties[iA];
+    var partyB = parties[iB];
+
+    d3.json('/data/covoting/party_bias_'+partyA.abbr+'_'+partyB.abbr+'.json', function(err, data){
+
+      pageState({"covotingActivePartyA": iA, "covotingActivePartyB": iB});  
+      
+      if (err) {
+        top.selectAll("*").remove();
+        return;
+      }
+
+      data.series.forEach(function (s){
+        s.color = demokratikollen.utils.getPartyColor(s.party_abbr);
+        s.title = s.party_abbr;
+      });
+
+      top.datum(data).call(mainChart);
+      
+    });
+    
+  }
+
+  selectA.on("change", update);
+  selectB.on("change", update);
+  update();
+
+};
+
+$(function(){
+  
+  d3.json('/data/cosigning/timeseries.json', function(err, data){
+  if (err) return console.warn(err);
+  cosigningFigure(data);
+  });
+
+  covotingFigure();
+
+});
+
+
 </script>  
 
 {% endblock %}

@@ -43,6 +43,7 @@ rect {
 {% block scripts %}
 {{ super() }}
 <script type="text/javascript">
+
   d3.json("{{ url_for('elections.election', year='2014', abbr=party.abbr|lower) }}",function(error,data) {
     if(error) console.warn(error);
     parties.setup('#election-map',data,"{{ party.abbr|lower }}","2014");

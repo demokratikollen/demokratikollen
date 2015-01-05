@@ -353,9 +353,9 @@ print("Adding committee report points")
 c.execute("""SELECT rm,bet,punkt,rubrik,beslutstyp,votering_id FROM dokutskottsforslag""")
 for rm,bet,punkt,rubrik,beslutstyp,votering_id in c:
     try:
+        rep = s.query(CommitteeReport).filter(CommitteeReport.session==rm,
+                        func.lower(CommitteeReport.code)==bet.lower()).one()
         if not votering_id:
-            rep = s.query(CommitteeReport).filter(CommitteeReport.session==rm,
-                            func.lower(CommitteeReport.code)==bet.lower()).one()
             s.add(AcclaimedPoint(
                     number=punkt,
                     title=rubrik,
@@ -363,6 +363,7 @@ for rm,bet,punkt,rubrik,beslutstyp,votering_id in c:
         else:
             point = s.query(PolledPoint).filter_by(r_votering_id=votering_id).one()
             point.title = rubrik
+            point.report = rep
     except NoResultFound:
         pass
 
