@@ -51,8 +51,6 @@ demokratikollen.graphics.AppointmentsTimeline = function() {
         maxDate = getMaxDate(data);
 
       
-      d3.select(this).classed("chart", true);
-
       var width = this.getBoundingClientRect().width - margin.left - margin.right,
           height = rowLabels.length * rowHeight;
 

@@ -1,10 +1,32 @@
+$chart-background-color: $greyish-8;
+
 @media (max-width: $screen-xs-max) {
 	.d3-tip.time-schedule { font-size: 12px; }
 }
 
-.chart rect.background { fill: $greyish-8; }
+figure {
+	.inset {
+		padding: 30px;
+		margin:10px 0;
+		border-radius: 6px;
+		background-color: $chart-background-color;
+		box-shadow: inset 1px 1px 1px $greyish-6;
+		border-width: 0 1px 1px 0;
+		border-color: $greyish-7;
+		border-style: solid;
 
-.chart svg.timeline {
+		@media (max-width: $screen-xs) {
+			margin-left:  -20px;
+  			margin-right: -20px;
+  			padding-left: 20px;
+  			padding-right: 20px;
+  			border-radius: 1px;
+		}
+	}
+}
+
+svg.timeline {
+	rect.background { fill: $chart-background-color; }
 	g.axis path { display: none; }
 	g.tick line { stroke: $greyish-9; stroke-width: 2px; } // Grid
 	g.axis text { font-size:110%; font-weight:bold; fill: $greyish-2; }
