@@ -74,32 +74,38 @@ figcaption {
 
 {% block content %}
         <h1>{{ party.name }}</h1>
-        <h2>Väljarstöd</h2>
         <div class="row">
-          <div class='col-md-2'>
+          <div class='col-sm-3'>
+            <h2>Stöd i landet</h2>
+            <p>Valresultat för {{ party.name.split()[0] }} i Sveriges kommuner i valet 2014.</p>
             <figure>
               <div id='election-map'></div>
-              <figcaption>Valresultat för {{ party.name.split()[0] }} i Sveriges kommuner.</figcaption>
+              <figcaption style="width:80%">För muspekaren över eller tryck på kartan för att se historiken i en kommun.</figcaption>
             </figure>
           </div>
           <!-- <div id='municipality-timeseries' class='col-md-6 col-xs-12'></div> -->
-          <div class='col-md-8'>
+          <div class='col-sm-9'>
+            <h2>Väljarsympatier</h2>
             <p>
-              Här visar vi information om de personer som valt {{ party.name.split()[0] }} som bästa parti i Statistiska Centralbyråns undersökning.
+              Figurerna nedan visar det stöd som {{ party.name.split()[0] }} fått i Statistiska Centralbyråns undersökning av "bästa parti".
             </p>
             <div class='row'>
-              <div class='col-md-4'>
+              <div class='col-sm-12 col-md-6'>
                 <figure>
-                  <div id='voter-support-gender'></div>
-                  <figcaption>Könstillhörighet.</figcaption>
+                  <h3>Könsfördelning</h3>
+                  <div class='inset'>
+                    <div id='voter-support-gender'></div>
+                  </div>
+                  <!-- <figcaption>Könstillhörighet.</figcaption> -->
                 </figure>
               </div>
-              <div class='col-md-4'>
+              <div class='col-sm-12 col-md-6'>
                 <figure>
+                  <h3>Utbildningsnivå</h3>
                   <div class='inset'>
                     <div id='voter-support-education'></div>
                   </div>
-                  <figcaption>Utbildningsnivå.</figcaption>
+                 <!--  <figcaption>Utbildningsnivå.</figcaption> -->
                 </figure>
               </div>
             </div>
@@ -133,13 +139,18 @@ $(function(){
       })
     })
 
+    var parent = d3.select('#voter-support-gender');
 
-    d3.select('#voter-support-gender')
-        .append("svg")
-        .attr("height", 100)
-        .attr("width", 300)
+    var width = parent[0][0].getBoundingClientRect().width,
+        height = 80;
+
+    parties.setupGenderChart(width,height);
+
+    parent.append("svg")
+        .attr("height", height)
+        .attr("width", width)
         .datum(chartData)
-        .call(parties.voterSupportGenderChart)
+        .call(parties.voterSupportGenderChart);
   });
 
   d3.json("/data/statistics/best_party/latest/education/{{party.abbr|lower}}.json",function(error,data) {
@@ -163,12 +174,12 @@ $(function(){
       });
     });
 
-    console.log(chartData);
-
     var parent = d3.select("#voter-support-education");
 
     var width = parent[0][0].getBoundingClientRect().width,
-        height = 200;
+        height = 150;
+
+    parties.setupEducationChart(width,height);
 
     var top = parent.append("svg")
       .attr("width", width)

@@ -371,13 +371,19 @@ parties = {
 
     return chart;
   },
-  setup: function(divId,data,party,year) {
+  setupGenderChart: function(w,h) {
     parties.voterSupportGenderChart = demokratikollen.graphics.horizontalBarChart()
-        .width(300)
-        .height(100);
+        .width(w)
+        .height(h)
+        .topMargin(0);
+  },
+  setupEducationChart: function(w,h) {
     parties.voterSupportEducationChart = demokratikollen.graphics.horizontalBarChart()
-        .width(300)
-        .height(200);
+        .width(w)
+        .height(h)
+        .topMargin(0);
+  },
+  setup: function(divId,data,party,year) {
     parties.party = party;
     parties.year = year;
     parties.pColor = demokratikollen.utils.parties.get(party).color;
@@ -396,7 +402,7 @@ parties = {
       var municipalities = topojson.feature(json, json.objects.municipalities);
       var regMap = d3.map(municipalities.features, function(d) { return d.id; });
       var mapChart = demokratikollen.graphics.mapChart(municipalities)
-            .width(150)
+            .width(180)
             .tooltipTextHtml(function(d) {
               return "<strong>"+regMap.get(d.id).properties.name+":</strong> "
                             +"<span class='votes'>" + d3.format('.1f')(100*d.votes) + "</span> % "+year;
