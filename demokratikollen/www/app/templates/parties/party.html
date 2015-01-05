@@ -75,7 +75,7 @@ figcaption {
 {% block content %}
         <h1>{{ party.name }}</h1>
         <div class="row">
-          <div class='col-sm-3'>
+          <div class='col-sm-5 col-md-3'>
             <h2>Stöd i landet</h2>
             <p>Valresultat för {{ party.name.split()[0] }} i Sveriges kommuner i valet 2014.</p>
             <figure>
@@ -84,7 +84,7 @@ figcaption {
             </figure>
           </div>
           <!-- <div id='municipality-timeseries' class='col-md-6 col-xs-12'></div> -->
-          <div class='col-sm-9'>
+          <div class='col-sm-7 col-md-9'>
             <h2>Väljarsympatier</h2>
             <p>
               Figurerna nedan visar det stöd som {{ party.name.split()[0] }} fått i Statistiska Centralbyråns undersökning av "bästa parti".
@@ -92,7 +92,7 @@ figcaption {
             <div class='row'>
               <div class='col-sm-12 col-md-6'>
                 <figure>
-                  <h3>Könsfördelning</h3>
+                  <h3>Indelat efter kön</h3>
                   <div class='inset'>
                     <div id='voter-support-gender'></div>
                   </div>
@@ -101,7 +101,7 @@ figcaption {
               </div>
               <div class='col-sm-12 col-md-6'>
                 <figure>
-                  <h3>Utbildningsnivå</h3>
+                  <h3>Indelat efter utbildning</h3>
                   <div class='inset'>
                     <div id='voter-support-education'></div>
                   </div>

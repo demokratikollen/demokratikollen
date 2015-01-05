@@ -402,7 +402,7 @@ parties = {
       var municipalities = topojson.feature(json, json.objects.municipalities);
       var regMap = d3.map(municipalities.features, function(d) { return d.id; });
       var mapChart = demokratikollen.graphics.mapChart(municipalities)
-            .width(180)
+            .width(250)
             .tooltipTextHtml(function(d) {
               return "<strong>"+regMap.get(d.id).properties.name+":</strong> "
                             +"<span class='votes'>" + d3.format('.1f')(100*d.votes) + "</span> % "+year;
