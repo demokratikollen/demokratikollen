@@ -372,6 +372,12 @@ parties = {
     return chart;
   },
   setup: function(divId,data,party,year) {
+    parties.voterSupportGenderChart = demokratikollen.graphics.horizontalBarChart()
+        .width(300)
+        .height(100);
+    parties.voterSupportEducationChart = demokratikollen.graphics.horizontalBarChart()
+        .width(300)
+        .height(200);
     parties.party = party;
     parties.year = year;
     parties.pColor = demokratikollen.utils.parties.get(party).color;

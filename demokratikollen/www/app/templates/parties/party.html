@@ -28,14 +28,82 @@ rect {
   stroke: steelblue;
   stroke-width: 1.5px;
 }
+
+
+.axis path, .axis line {
+  fill: none;
+  stroke: #888;
+  shape-rendering: crispEdges;
+}
+.axis text {
+    font-size: 11px;
+    fill: #888;
+}
+
+.bar-text {
+  font-size: 11px;
+  font-weight: bold;
+}
+.title-text {
+  font-size: 14px;
+}
+.click-rect {
+  pointer-events: all;
+  stroke:none;
+  fill:#111;
+  fill-opacity: 0.0;
+  cursor:pointer;
+}
+
+figcaption {
+  font-size:12px;
+  color: #111;
+}
+
+.line-path {
+  fill:none;
+  stroke-width: 2px;
+}
+.line-marker {
+  fill:#ffffff;
+  pointer-events: 'none';
+  stroke-width: '2px';
+}
 </style>
 {% endblock %}
 
 {% block content %}
         <h1>{{ party.name }}</h1>
+        <h2>Väljarstöd</h2>
         <div class="row">
-          <div id='election-map' class='col-md-6 col-xs-12'></div>
-          <div id='municipality-timeseries' class='col-md-6 col-xs-12'></div>
+          <div class='col-md-2'>
+            <figure>
+              <div id='election-map'></div>
+              <figcaption>Valresultat för {{ party.name.split()[0] }} i Sveriges kommuner.</figcaption>
+            </figure>
+          </div>
+          <!-- <div id='municipality-timeseries' class='col-md-6 col-xs-12'></div> -->
+          <div class='col-md-8'>
+            <p>
+              Här visar vi information om de personer som valt {{ party.name.split()[0] }} som bästa parti i Statistiska Centralbyråns undersökning.
+            </p>
+            <div class='row'>
+              <div class='col-md-4'>
+                <figure>
+                  <div id='voter-support-gender'></div>
+                  <figcaption>Könstillhörighet.</figcaption>
+                </figure>
+              </div>
+              <div class='col-md-4'>
+                <figure>
+                  <div class='inset'>
+                    <div id='voter-support-education'></div>
+                  </div>
+                  <figcaption>Utbildningsnivå.</figcaption>
+                </figure>
+              </div>
+            </div>
+          </div>
         </div>
  <!--    <svg id='election-map' class='canvas'></svg> -->
 {% endblock %}
@@ -43,11 +111,71 @@ rect {
 {% block scripts %}
 {{ super() }}
 <script type="text/javascript">
-
+$(function(){
   d3.json("{{ url_for('elections.election', year='2014', abbr=party.abbr|lower) }}",function(error,data) {
     if(error) console.warn(error);
     parties.setup('#election-map',data,"{{ party.abbr|lower }}","2014");
   });
 
+
+  d3.json("/data/statistics/best_party/latest/gender/{{party.abbr|lower}}.json",function(error,data) {
+    if(error) console.warn(error);
+    var c = demokratikollen.utils.getPartyColor('{{ party.abbr|lower }}'),
+        keyOrder = ["Kvinnor","Män"];
+    var chartData = [];
+
+    keyOrder.forEach(function(d) {
+      if(isNaN(parseFloat(data[d]))) return;
+      chartData.push({
+        title: d,
+        value: Math.round(parseFloat(data[d])*1000+0.00001)/10,
+        color: c
+      })
+    })
+
+
+    d3.select('#voter-support-gender')
+        .append("svg")
+        .attr("height", 100)
+        .attr("width", 300)
+        .datum(chartData)
+        .call(parties.voterSupportGenderChart)
+  });
+
+  d3.json("/data/statistics/best_party/latest/education/{{party.abbr|lower}}.json",function(error,data) {
+    if(error) console.warn(error);
+    var c = demokratikollen.utils.getPartyColor('{{ party.abbr|lower }}'),
+        keyOrder = [
+          {orig:"Förgymnasial utbildning",show:"Förgymnasial"},
+          {orig:"Gymnasial utbildning",show:"Gymnasial"},
+          {orig:"Eftergymnasial utbildning mindre än 3 år",show:"Eftergymnasial < 3 år"},
+          {orig:"Eftergymnasial utbildning 3 år eller mer",show:"Eftergymnasial 3+ år"},
+          {orig:"Okänd utbildning",show:"Okänd"}
+        ];
+    var chartData = [];
+
+    keyOrder.forEach(function(d) {
+      if(isNaN(parseFloat(data[d.orig]))) return;
+      chartData.push({
+        title: d.show,
+        value: Math.round(parseFloat(data[d.orig])*1000+0.00001)/10,
+        color: c
+      });
+    });
+
+    console.log(chartData);
+
+    var parent = d3.select("#voter-support-education");
+
+    var width = parent[0][0].getBoundingClientRect().width,
+        height = 200;
+
+    var top = parent.append("svg")
+      .attr("width", width)
+      .attr("height", height)
+      .datum(chartData)
+      .call(parties.voterSupportEducationChart);
+  });
+});
 </script>
 {% endblock %}

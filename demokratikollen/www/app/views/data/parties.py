@@ -1,6 +1,7 @@
 from flask import Blueprint, request, jsonify, render_template
 # from demokratikollen.www.app.models import parties
-from demokratikollen.www.app.models.parties import party_election, get_municipality_timeseries
+from demokratikollen.www.app.models.parties import party_election, get_municipality_timeseries,\
+                                                    get_best_party_gender,get_best_party_education
 
 from demokratikollen.www.app.helpers.db import db
 from demokratikollen.core.db_structure import Party
@@ -27,10 +28,20 @@ def municipality_timeseries(abbr,municipality_id):
     #     return render_template('404.html'), 404
     return jsonify(d)
 
+@blueprint.route('/statistics/best_party/<string:t>/gender/<string:abbr>.json')
+def best_party_gender(t,abbr):
+    d = get_best_party_gender(t,abbr)
+    return jsonify(d)
+
+@blueprint.route('/statistics/best_party/<string:t>/education/<string:abbr>.json')
+def best_party_education(t,abbr):
+    d = get_best_party_education(t,abbr)
+    return jsonify(d)
+
 
 @blueprint.route('/cosigning/timeseries.json', methods=['GET'])
 def timeseries():
-    
+
     ds = MongoDBDatastore()
     cosigning_data = ds.get_object("party_cosigning_timeseries")
     return jsonify(cosigning_data);
@@ -39,7 +50,7 @@ def timeseries():
 def cosigning_matrix(partyA):
 
     ds = MongoDBDatastore()
-    mongodb = ds.get_mongodb_database() 
+    mongodb = ds.get_mongodb_database()
     mongo_collection = mongodb.party_cosigning_matrix
     record= mongo_collection.find_one({"partyA": party_abbr})
     if record:
