@@ -66,7 +66,7 @@ demokratikollen.graphics.horizontalBarChart = function() {
         .attr("width", function(d,i){return xScale(d.value);})
         .attr("height", absoluteBarWidth)
         .style("fill", prop("color"));
-    
+
       barRects.exit()
         .style("fill-opacity",1e-5)
         .remove();
@@ -107,27 +107,32 @@ demokratikollen.graphics.horizontalBarChart = function() {
     if (!arguments.length) return onBarActivated;
     else onBarActivated = _;
     return chart;
- }   
+ }
  chart.width = function(_) {
     if (!arguments.length) return width;
     else width = _;
     return chart;
- }   
+ }
  chart.height = function(_) {
     if (!arguments.length) return height;
     else height = _;
     return chart;
- }   
+ }
+ chart.topMargin = function(_) {
+    if (!arguments.length) return margin.top;
+    else margin.top = _;
+    return chart;
+ }
  chart.maxAbsoluteBandWidth = function(_) {
     if (!arguments.length) return maxAbsoluteBandWidth;
     else maxAbsoluteBandWidth = _;
     return chart;
- }   
+ }
  chart.title = function(_) {
     if (!arguments.length) return title;
     else title = _;
     return chart;
- } 
+ }
 
  return chart;
 };

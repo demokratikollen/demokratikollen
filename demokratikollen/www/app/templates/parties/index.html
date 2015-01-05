@@ -1,4 +1,4 @@
-{% extends "parties/base.html" %}
+﻿{% extends "parties/base.html" %}
 {% block content %}
 
 <div class="row">
@@ -6,52 +6,52 @@
         <h2>Vem röstar med vem i kammaren?</h2>
         <p>Den här figuren visar hur partierna förhåller sig till varandra vid voteringar i kammaren.</p>        <p>
            Vi väljer ut två partier och placerar dem längst till vänster och höger i figuren. De definerar skalan i figuren. Vi placerar de övriga partierna på skalan efter vem de oftast håller med i voteringar. Om ett parti lika ofta håller med de båda hamnar det i mitten av figuren.
-        </p> 
+        </p>
         <p>
         Du kan själv välja vilka två partier som skall bilda skalan med hjälp av listorna under figuren.
-        </p>      
+        </p>
     </div>
 </div>
 <div class="row">
     <div class="col-sm-12 col-md-4">
     <figure>
         <div class="inset">
-        <div id="party-bias"></div>        
+        <div id="party-bias"></div>
         </div>
         </figure>
     </div>
 </div>
 <div class="row">
     <div class="col-sm-12 col-md-4">
-        <div id="party-bias-filter"></div>       
+        <div id="party-bias-filter"></div>
     </div>
 </div>
 
 <div class="row">
     <div class="col-sm-12 col-md-8">
         <h2>Antal samarbetsförslag i riksdagen</h2>
-        <p>Ett samarbetsförslag är en förslagspunkt i en motion signerad av ledamöter från två eller fler partier. Mängden samarbetsförslag kan vara en indikation på möjligheterna för partiöverskridande samarbeten för ledamöterna. Du kan själv filtrera datan per utskott med listan nedan. Enskilda motioner är ej medräknade i statistiken.</p>      
+        <p>Ett samarbetsförslag är en förslagspunkt i en motion signerad av ledamöter från två eller fler partier. Mängden samarbetsförslag kan vara en indikation på möjligheterna för partiöverskridande samarbeten för ledamöterna. Du kan själv filtrera datan per utskott med listan nedan. Enskilda motioner är ej medräknade i statistiken.</p>
     </div>
 </div>
 <div class="row">
     <div class="col-sm-6 col-md-4">
-      <div id="cosigning-filter"></div>        
+      <div id="cosigning-filter"></div>
       <figure>
-        <div id="cosigning"></div>        
+        <div id="cosigning"></div>
             <figcaption>Staplarna indikerar hur många samarbetsförslag som behandlades under ett riksmöte. Klicka på en stapel för att visa de vanligaste partikombinationerna.</figcaption>
     </figure>
 
     </div>
     <div class="col-sm-6 col-md-4">
     <figure>
-        <div id="cosigning-detail"></div>        
+        <div id="cosigning-detail"></div>
             <figcaption></figcaption>
     </figure>
 
     </div>
 </div>
 
-    
+
 {% endblock %}
 {% block styles %}
 <style>
@@ -66,44 +66,7 @@
     fill: #888;
 }
 
-#cosigning .bar-rect {
-  shape-rendering: crispEdges;
-}
-#cosigning-detail .bar-title {
-  font-size: 11px;
-  font-weight: normal;
-}
-.bar-text {
-  font-size: 11px;
-  font-weight: bold;
-}
-.title-text {
-  font-size: 14px;
-}
-.click-rect {
-  pointer-events: all;
-  stroke:none;
-  fill:#111;
-  fill-opacity: 0.0;
-  cursor:pointer;
-}
-
-figcaption {
-  font-size:12px;
-  color: #111;
-}
-
-.line-path {
-  fill:none;
-  stroke-width: 2px;
-}
-.line-marker {
-  fill:#ffffff;
-  pointer-events: 'none';
-  stroke-width: '2px';
-}
-
-</style> 
+</style>
 
 {% endblock %}
 
@@ -147,7 +110,7 @@ cosigningFigure = function(data) {
   var select = filterParent.append("select").attr("class", "graph-filter form-control input-sm");
   select.attr("id","cosigningFilterSelect");
   var options = select.selectAll("option").data(data.committees);
-  options.enter().append("option")      
+  options.enter().append("option")
     .text(prop("name"))
     .attr("value", function(d,i){return i;});
   select.node().value = pageState("cosigningActiveCommittee");
@@ -175,7 +138,7 @@ cosigningFigure = function(data) {
     var series = data.committees[i].series;
     top.datum({bars: series, labels: data.t}).call(mainChart);
     pageState({"cosigningActiveCommittee": i});
-    
+
   });
   select.on("change").apply(select[0][0]); // initial display
 };
@@ -198,8 +161,7 @@ covotingFigure = function() {
 
   var top = parent.append("svg")
     .attr("width", width)
-    .attr("height", height)
-    .style("background-color", "#eee");
+    .attr("height", height);
 
   var filterParent = d3.select("#party-bias-filter");
 
@@ -207,7 +169,7 @@ covotingFigure = function() {
   var selectA = filterParent.append("select").attr("class", "graph-filter input-sm");
   selectA.style("width", "90px");
   var optionsA = selectA.selectAll("option").data(parties);
-  optionsA.enter().append("option")      
+  optionsA.enter().append("option")
     .text(prop("abbr"))
     .attr("value", function(d,i){return i;});
   selectA.node().value = pageState("covotingActivePartyA");
@@ -218,7 +180,7 @@ covotingFigure = function() {
   var selectB = filterParent.append("select").attr("class", "graph-filter input-sm");
   selectB.style("width", "90px");
   var optionsB = selectB.selectAll("option").data(parties);
-  optionsB.enter().append("option")      
+  optionsB.enter().append("option")
     .text(prop("abbr"))
     .attr("value", function(d,i){return i;});
   selectB.node().value = pageState("covotingActivePartyB");
@@ -233,14 +195,14 @@ covotingFigure = function() {
 
     var iA = d3.select(nodeA).property("selectedIndex");
     var iB = d3.select(nodeB).property("selectedIndex");
-    
+
     var partyA = parties[iA];
     var partyB = parties[iB];
 
     d3.json('/data/covoting/party_bias_'+partyA.abbr+'_'+partyB.abbr+'.json', function(err, data){
 
-      pageState({"covotingActivePartyA": iA, "covotingActivePartyB": iB});  
-      
+      pageState({"covotingActivePartyA": iA, "covotingActivePartyB": iB});
+
       if (err) {
         top.selectAll("*").remove();
         return;
@@ -252,9 +214,9 @@ covotingFigure = function() {
       });
 
       top.datum(data).call(mainChart);
-      
+
     });
-    
+
   }
 
   selectA.on("change", update);
@@ -264,7 +226,7 @@ covotingFigure = function() {
 };
 
 $(function(){
-  
+
   d3.json('/data/cosigning/timeseries.json', function(err, data){
   if (err) return console.warn(err);
   cosigningFigure(data);
@@ -275,6 +237,6 @@ $(function(){
 });
 
 
-</script>  
+</script>
 
 {% endblock %}

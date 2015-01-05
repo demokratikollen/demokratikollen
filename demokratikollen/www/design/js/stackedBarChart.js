@@ -5,7 +5,7 @@ data: object x-labels "labels" and bar-data "bars"."
 "bars" is a list, each element is a list of objects describing pieces.
 {
   labels: ["X-label 1", "X-label 2"],
-  bars: 
+  bars:
       [
         [
           {
@@ -30,7 +30,7 @@ data: object x-labels "labels" and bar-data "bars"."
             value: 2,
             color: d3.rgb("#888")
           }
-        ]  
+        ]
       ]
 }
 */
@@ -44,7 +44,7 @@ demokratikollen.graphics.stackedBarChart = function() {
   var onBarActivated = null;
 
   var currentlyActive = null;
-  
+
 
   function chart(selection) {
     selection.each(function(data){
@@ -133,7 +133,7 @@ demokratikollen.graphics.stackedBarChart = function() {
         .attr("height", function(d,i){return yScale(d.y0)-yScale(d.y1);})
         .attr("width", absoluteBarWidth)
         .style("fill", prop("color"));
-    
+
       barRects.exit()
         .style("fill-opacity",1e-5)
         .remove();
@@ -188,7 +188,7 @@ demokratikollen.graphics.stackedBarChart = function() {
         });
 
       // reactivate selection when updating data
-      if (currentlyActive != null) activateBar(currentlyActive); 
+      if (currentlyActive != null) activateBar(currentlyActive);
     });
   };
 
@@ -196,32 +196,37 @@ demokratikollen.graphics.stackedBarChart = function() {
     if (!arguments.length) return onBarActivated;
     else onBarActivated = _;
     return chart;
- }   
+ }
  chart.width = function(_) {
     if (!arguments.length) return width;
     else width = +_;
     return chart;
- }   
+ }
  chart.height = function(_) {
     if (!arguments.length) return height;
     else height = +_;
     return chart;
- }   
+ }
+ chart.bottomMargin = function(_) {
+    if (!arguments.length) return margin.bottom;
+    else margin.bottom = +_;
+    return chart;
+ }
  chart.maxAbsoluteBandWidth = function(_) {
     if (!arguments.length) return maxAbsoluteBandWidth;
     else maxAbsoluteBandWidth = +_;
     return chart;
- }   
+ }
  chart.currentlyActive = function(_) {
     if (!arguments.length) return currentlyActive;
     else currentlyActive = _;
     return chart;
- } 
+ }
  chart.title = function(_) {
     if (!arguments.length) return title;
     else title = _;
     return chart;
- } 
+ }
 
  return chart;
 };

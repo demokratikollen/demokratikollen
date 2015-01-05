@@ -50,3 +50,29 @@ def get_municipality_timeseries(party_abbr,m_id):
 
 
     return timeseries
+
+
+def get_best_party_gender(t,abbr):
+    data = mdb.get_object("best_party_gender")
+    if t == "latest":
+        t = sorted(data.keys(),reverse=True)[0]
+
+    out_data = data[t][abbr.lower()]
+    for k,v in out_data.items():
+        if math.isnan(v):
+            out_data[k] = "NaN"
+
+    return out_data
+
+
+def get_best_party_education(t,abbr):
+    data = mdb.get_object("best_party_education")
+    if t == "latest":
+        t = sorted(data.keys(),reverse=True)[0]
+
+    out_data = data[t][abbr.lower()]
+    for k,v in out_data.items():
+        if math.isnan(v):
+            out_data[k] = "NaN"
+
+    return out_data
