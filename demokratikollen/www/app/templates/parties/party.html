@@ -69,11 +69,24 @@ figcaption {
   pointer-events: 'none';
   stroke-width: '2px';
 }
+
+#party-history-chart path, #party-history-chart  line {
+    fill: none;
+    stroke-width: 1px;
+    stroke: #555;
+  }
 </style>
 {% endblock %}
 
 {% block content %}
         <h1>{{ party.name }}</h1>
+        <div class="row">
+        <figure>
+        <div class="inset">
+          <div id="party-history-chart"></div>
+        </div>
+        </figure>
+        </div>
         <div class="row">
           <div class='col-sm-5 col-md-3'>
             <h2>Stöd i landet</h2>
@@ -188,5 +201,228 @@ $(function(){
       .call(parties.voterSupportEducationChart);
   });
 });
+</script>
+<script type="text/javascript">
+  electionData = [
+    {start: '2002-09-20T00:00:00', end: '2006-09-20T00:00:00', numChairs: 108},
+    {start: '2006-09-20T00:00:00', end: '2010-09-20T00:00:00', numChairs: 100},
+    {start: '2010-09-20T00:00:00', end: '2014-09-20T00:00:00', numChairs: 70}]
+
+  pollData = [
+    {time: '2002-01-01T00:00:00', pollResult: 0.34},
+    {time: '2002-07-01T00:00:00', pollResult: 0.33},
+    {time: '2003-01-01T00:00:00', pollResult: 0.31},
+    {time: '2003-07-01T00:00:00', pollResult: 0.33},
+    {time: '2004-01-01T00:00:00', pollResult: 0.30},
+    {time: '2004-07-01T00:00:00', pollResult: 0.27},
+    {time: '2005-01-01T00:00:00', pollResult: 0.26},
+    {time: '2005-07-01T00:00:00', pollResult: 0.29},
+    {time: '2006-01-01T00:00:00', pollResult: 0.29},
+    {time: '2006-07-01T00:00:00', pollResult: 0.28},
+    {time: '2007-01-01T00:00:00', pollResult: 0.29},
+    {time: '2007-07-01T00:00:00', pollResult: 0.26},
+    {time: '2008-01-01T00:00:00', pollResult: 0.23},
+    {time: '2008-07-01T00:00:00', pollResult: 0.25},
+    {time: '2009-01-01T00:00:00', pollResult: 0.24},
+    {time: '2009-07-01T00:00:00', pollResult: 0.22},
+    {time: '2010-01-01T00:00:00', pollResult: 0.21},
+    {time: '2010-07-01T00:00:00', pollResult: 0.23}
+    ];
+
+  partyLeaderData = [
+    {start: '2002-01-01T00:00:00', end: '2004-06-01T00:00:00', name: "Åsa Jinder"},
+    {start: '2004-07-01T00:00:00', end: '2006-07-01T00:00:00', name: "Horace Engdahl"},
+    {start: '2006-07-01T00:00:00', end: '2008-07-01T00:00:00', name: "Per Morberg"},
+    {start: '2010-07-01T00:00:00', end: '2018-07-01T00:00:00', name: "Darth Vader"},
+  ]
+
+  infoParagraphs = d3.select("#party-history-chart")
+    .selectAll("p")
+    .data([0, 1, 2])
+    .enter()
+    .append("p")
+    .html("&nbsp;");
+
+  electionData.concat(partyLeaderData).forEach(function (d) {
+    d.start = new Date(d.start);
+    d.end = new Date(d.end);
+  });
+
+  pollData.forEach(function (d) {
+    d.time = new Date(d.time);
+  });
+
+  var minDate = d3.min(electionData, function (d) { return d.start; }),
+    maxDate = d3.max(electionData, function (d) { return d.end; });
+
+  pollData = pollData.filter(function (d) { return d.time >= minDate && d.time <= maxDate; });
+
+  var timeUnit = d3.time.year,
+    electionDomain = [0, d3.max(electionData, function (d) { return d.numChairs; })],
+    pollDomain = [0, d3.max(pollData, function (d) { return d.pollResult; })],
+    tickLabelWidth = 75;
+
+  width = 400, height = 250;
+  margin = {top: 20, left: 50, right: 20, bottom: 20};
+  var svg = d3.select("#party-history-chart")
+    .append("svg")
+    .attr("width", width + margin.left + margin.right)
+    .attr("height", height + margin.top + margin.bottom)
+    .append("g")
+    .attr("transform", "translate(" + margin.left + "," + margin.top + ")");
+
+  var timeScale = d3.time.scale()
+    .domain([minDate, maxDate])
+    .range([0, width])
+    .nice(timeUnit);
+
+  var electionScale = d3.scale.linear()
+    .domain(electionDomain)
+    .range([height, 0])
+    .nice();
+
+  var pollScale = d3.scale.linear()
+    .domain(pollDomain)
+    .range([height, 0])
+    .nice();
+
+  var tickValues = timeScale.ticks(Math.floor(width / tickLabelWidth));
+//  tickValues = unique(tickValues.map(timeUnit.floor));
+
+  var xAxis = d3.svg.axis()
+    .scale(timeScale)
+    .orient("bottom")
+    .tickValues(tickValues);
+
+  xAxis = svg.append("g")
+    .classed("axis x", true)
+    .attr("transform", "translate(0," + height + ")")
+    .call(xAxis);
+
+  xAxis.selectAll("text")
+    .style("text-anchor", "start");
+
+  var yAxis = d3.svg.axis()
+    .scale(electionScale)
+    .orient("left");
+
+  svg.append("g").classed("yaxis", true)
+    .call(yAxis)
+
+  svg.selectAll("rect")
+    .data(partyLeaderData)
+    .enter()
+    .append("rect")
+    .attr("y", -1)
+    .attr("x", function (d) { return timeScale(d.start); })
+    .attr("width", function (d) { return timeScale(d.end) - timeScale(d.start); })
+    .attr("height", height)
+    .style("fill", function (d, i) { return i % 2 == 0 ? "#ccc" : "#ddd"; });
+
+  svg.append("g")
+    .selectAll("electionLines")
+    .data(electionData)
+    .enter()
+    .append("line")
+    .attr("x1", function (d) { return timeScale(d.start); })
+    .attr("x2", function (d) { return timeScale(d.end); })
+    .attr("y1", function (d) { return electionScale(d.numChairs); })
+    .attr("y2", function (d) { return electionScale(d.numChairs); });
+
+  pollPath = d3.svg.line()
+    .x(function (d) { return timeScale(d.time); })
+    .y(function (d) { return pollScale(d.pollResult); })
+
+  svg.append("path")
+    .attr("d", pollPath(pollData));
+
+  // Interactivity part
+
+  function makeVerticalLine(cssClass, x, y) {
+    cssClasses = ["interactive"].concat(cssClass)
+    selector = "." + cssClasses.join(".");
+    s = svg.selectAll(selector)
+        .data([0])
+      
+      s.enter()
+        .append("line")
+        .classed(cssClasses.join(" "), true)
+        .style("pointer-events", "none");
+        
+      s.attr("x1", x)
+        .attr("x2", x)
+        .attr("y1", 0)
+        .attr("y2", height);
+  }
+
+  function findPartyLeader(t) {
+    result = partyLeaderData.filter(function (d) { return d.start <= t && t <= d.end; })[0];
+    return "Partiledare: " + (result ? result.name : "okänd");
+  }
+
+  function findElectionDatum(t) {
+    result = electionData.filter(function (d) { return d.start <= t && t <= d.end; })[0];
+    return "Antal mandat: " + (result ? result.numChairs : "okänt");
+  }
+
+  function findPollDatum(t) {
+    result = pollData.filter(function (d) { return d.time <= t; });
+    result = result[result.length - 1]
+    return "Senaste opinionsundersökning: " + (result ? (result.pollResult * 100 + "% (" + result.time + ")") : "okänt");
+  }
+
+  var config = {
+    xMin: 0,
+    xMax: width,
+    yMin: 0,
+    yMax: height,
+    hover: function (x, y) {
+      makeVerticalLine("hover", x, y);
+    },
+    leave: function () {
+      s = svg.selectAll(".interactive.hover")
+        .remove();
+    },
+    click: function (x, y) {
+      makeVerticalLine("fixed", x, y);
+      t = timeScale.invert(x);
+
+      infoParagraphs
+        .data([findPartyLeader(t), findElectionDatum(t), findPollDatum(t)])
+        .html(function (d) { return d; });
+    }
+  };
+
+
+  interactiveArea = svg.append("rect")
+    .classed("interactive", true)
+    .attr("width", width)
+    .attr("height", height)
+    .style("fill", "transparent");
+
+  function onMouseMove() {
+    var eventData = d3.mouse(this),
+      x = eventData[0],
+      y = eventData[1];
+      config.hover(x, y);
+  }
+
+  function onMouseOut() {
+      config.leave();
+  }
+
+  function onClick() {
+    var eventData = d3.mouse(this),
+      x = eventData[0],
+      y = eventData[1];
+      config.click(x, y);
+  }
+
+  interactiveArea.on("mousemove.interactive", onMouseMove);
+  interactiveArea.on("mouseout.interactive", onMouseOut);
+  interactiveArea.on("mouseup.interactive", onClick);
+
+
+
 </script>
 {% endblock %}
