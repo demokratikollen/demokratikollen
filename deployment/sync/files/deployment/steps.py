@@ -183,6 +183,7 @@ def run_calculations(deploy_settings):
                 'python calculations/party_covoting.py',
                 'python calculations/sankey_data.py',
                 'python calculations/election_data.py',
+                'python calculations/search.py',
                 'python calculations/cosigning.py']
     for cmd in commands:
         deploy_settings['log'].info("Starting {0} on {1}".format(cmd, p['curr_containers']['bgtasks']))
