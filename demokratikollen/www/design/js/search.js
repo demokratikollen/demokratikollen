@@ -129,9 +129,9 @@
       }
 
       d3.select('#main-search')
-            // .on("focusout",function() {
-            //   d3.select(this).classed("open",false);
-            // })
+            .on("focusout",function() {
+              d3.select(this).classed("open",false);
+            })
             .on("focusin",function() {
               var q = searchboxElement.property("value");
               if (q.length < 2) return;
