@@ -70,11 +70,6 @@ figcaption {
   stroke-width: '2px';
 }
 
-#party-history-chart path, #party-history-chart  line {
-    fill: none;
-    stroke-width: 1px;
-    stroke: #555;
-  }
 </style>
 {% endblock %}
 
@@ -83,7 +78,7 @@ figcaption {
         <div class="row">
         <figure>
         <div class="inset">
-          <div id="party-history-chart"></div>
+          <div class="party-history-fig"></div>
         </div>
         </figure>
         </div>
@@ -236,7 +231,7 @@ $(function(){
     {start: '2010-07-01T00:00:00', end: '2018-07-01T00:00:00', name: "Darth Vader"},
   ]
 
-  infoParagraphs = d3.select("#party-history-chart")
+  infoParagraphs = d3.select(".party-history-fig")
     .selectAll("p")
     .data([0, 1, 2])
     .enter()
@@ -261,8 +256,9 @@ $(function(){
 
   width = 400, height = 250;
   margin = {top: 20, left: 50, right: 20, bottom: 20};
-  var svg = d3.select("#party-history-chart")
+  var svg = d3.select("div.party-history-fig")
     .append("svg")
+    .classed("party-history-fig", true)
     .attr("width", width + margin.left + margin.right)
     .attr("height", height + margin.top + margin.bottom)
     .append("g")
@@ -324,7 +320,17 @@ $(function(){
     .attr("x", function (d) { return timeScale(d.start); })
     .attr("width", function (d) { return timeScale(d.end) - timeScale(d.start); })
     .attr("height", height)
-    .style("fill", function (d, i) { return i % 2 == 0 ? "#ccc" : "#ddd"; });
+    .classed("party-leader", true)
+    .classed("even", function (d, i) { return i % 2 == 0; })
+    .classed("odd", function (d, i) { return i % 2 != 0; });
+
+  pollPath = d3.svg.line()
+    .x(function (d) { return timeScale(d.time); })
+    .y(function (d) { return yScale(d.value); })
+
+  plotArea.append("path")
+    .attr("d", pollPath(pollData))
+    .classed("poll-result", true);
 
   plotArea.append("g")
     .selectAll("electionLines")
@@ -334,14 +340,8 @@ $(function(){
     .attr("x1", function (d) { return timeScale(d.start); })
     .attr("x2", function (d) { return timeScale(d.end); })
     .attr("y1", function (d) { return yScale(d.value); })
-    .attr("y2", function (d) { return yScale(d.value); });
-
-  pollPath = d3.svg.line()
-    .x(function (d) { return timeScale(d.time); })
-    .y(function (d) { return yScale(d.value); })
-
-  plotArea.append("path")
-    .attr("d", pollPath(pollData));
+    .attr("y2", function (d) { return yScale(d.value); })
+    .classed("election-result", true);
 
   // Interactivity part
 

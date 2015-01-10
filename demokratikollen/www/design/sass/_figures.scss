@@ -41,6 +41,35 @@ svg.timeline {
 	g.lines circle { stroke: $greyish-2; fill: $greyish-9; stroke-width: 2px; }
 }
 
+svg.party-history-fig {
+	line.interactive {
+		stroke-width: 1px;
+		stroke: $greyish-2;
+	}
+	line.interactive.hover {
+		stroke-dasharray: 5, 2;
+		stroke: $greyish-3;
+	}
+
+	.election-result {
+		stroke-width: 4px;
+		stroke: $greyish-3;
+	}
+	.poll-result {
+		fill: none;
+		stroke-width: 2px;
+		stroke: $greyish-4;
+	}
+
+	rect.party-leader.even {
+		fill: $brownish-7;
+	}
+
+	rect.party-leader.odd {
+		fill: $brownish-6;
+	}
+}
+
 .d3-tip {
 	line-height: 1.2;
 	padding: 10px;
