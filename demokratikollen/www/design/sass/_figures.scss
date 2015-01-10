@@ -66,7 +66,7 @@ svg.party-history-fig {
 	}
 
 	rect.party-leader.odd {
-		fill: $brownish-6;
+		fill: lighten($brownish-7, 5%);
 	}
 }
 
