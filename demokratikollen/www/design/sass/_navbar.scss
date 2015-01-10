@@ -88,11 +88,6 @@
             width: 100% !important;
           }
         }
-
-        ul {
-          @extend .dropdown-menu;
-          width: 100%;
-        }
       }
     }
   }
@@ -113,96 +108,3 @@
     }
   }
 }
-
-$tt-dropdown-bg-color: $greyish-9;
-$tt-dropdown-select-color: $brand-primary;
-
-// Search-box styling for real-time search
-span.twitter-typeahead {
-  .tt-dropdown-menu {
-    position: absolute;
-    top: 100%;
-    left: 0;
-    z-index: 1000 !important;
-    display: none;
-    float: left;
-    // min-width: 160px;
-    width: 100%;
-    padding: 0;
-    padding-top: 5px;
-    margin: 5px 0 0;
-    list-style: none;
-    font-size: 14px;
-    text-align: left;
-    background-color: $tt-dropdown-bg-color;
-    border: 1px solid #cccccc;
-    border: 1px solid rgba(0, 0, 0, 0.15);
-    border-radius: $border-radius-base;
-    @include box-shadow(0 6px 12px rgba(0, 0, 0, 0.175));
-    background-clip: padding-box;
-  }
-  .tt-suggestion {
-    padding: 0;
-    margin: 0;
-  }
-
-  .tt-suggestion > p {
-    display: block;
-    padding: 3px 20px;
-    clear: both;
-    font-weight: normal;
-    line-height: 1.42857143;
-    color: #333333;
-    white-space: nowrap;
-    margin-top: 0 !important;
-    margin-bottom: 5px !important;
-  }
-
-  .tt-suggestion > p:hover,
-  .tt-suggestion > p:focus {
-    color: #ffffff;
-    text-decoration: none;
-    outline: 0;
-    background-color: $tt-dropdown-select-color;
-  }
-  .tt-suggestion.tt-cursor > p {
-    color: #ffffff;
-    background-color: $tt-dropdown-select-color;
-  }
-  width: 100%;
-}
-
-.input-group {
-  span.twitter-typeahead {
-    display: block !important;
-  }
-  .tt-dropdown-menu {
-    top: 32px !important;
-  }
-}
-
-.input-group.input-group-lg {
-  .tt-dropdown-menu {
-    top: 44px !important;
-  }
-}
-.input-group.input-group-sm {
-  .tt-dropdown-menu {
-    top: 28px !important;
-  }
-}
-#main-search {
-  .empty-message {
-    padding: 5px 10px !important;
-    text-align: center;
-  }
-
-  .category-title {
-    margin: 0 20px 5px 20px;
-    padding: 3px 0;
-    border-bottom: 1px solid #ccc;
-  }
-}
-// .form-group {
-//   margin-bottom: 50px;
-// }

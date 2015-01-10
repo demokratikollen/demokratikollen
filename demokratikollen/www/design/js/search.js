@@ -5,7 +5,7 @@
   var innerProducts;
 
   context.initSearch = function(){
-    
+
     var searchboxElement = d3.select(searchboxSelector);
     var trigramLookup = d3.map();
     var n = 3;
@@ -106,7 +106,7 @@
           m.keyword.secondaries.forEach(function(secondary){
             var secondaryGroup = result.groups[secondary[0]];
             if (secondaryGroup.objects.length >= maxHitsPerGroup) return;
-            
+
             if (-1 == secondaryGroup.objects.indexOf(secondary[1])) {
               secondaryGroup.objects.push(secondary[1]);
             }
@@ -128,14 +128,28 @@
 
       }
 
+      d3.select('#main-search')
+            // .on("focusout",function() {
+            //   d3.select(this).classed("open",false);
+            // })
+            .on("focusin",function() {
+              var q = searchboxElement.property("value");
+              if (q.length < 2) return;
+              d3.select(this).classed("open",true);
+            });
+
       searchboxElement.on("keyup", function(){
 
 
         var q = this.value;
-        if (q.length < 2) return;
+        if (q.length < 2) {
+          d3.select('#main-search').classed("open",false);
+          return;
+        }
 
         var results = search(q);
-        
+
+        d3.select('#main-search').classed("open",true);
         var ul = d3.select("#searchresults");
 
         var tophit = ul.selectAll(".tophit").data([results.top]);
