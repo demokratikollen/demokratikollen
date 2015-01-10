@@ -183,7 +183,10 @@ def run_calculations(deploy_settings):
                 'python calculations/party_covoting.py',
                 'python calculations/sankey_data.py',
                 'python calculations/election_data.py',
-                'python calculations/cosigning.py']
+                'python calculations/search.py',
+                'python calculations/cosigning.py',
+                'python calculations/scb_best_party_gender.py',
+                'python calculations/scb_best_party_education.py']
     for cmd in commands:
         deploy_settings['log'].info("Starting {0} on {1}".format(cmd, p['curr_containers']['bgtasks']))
 
@@ -221,7 +224,7 @@ def pre_deployment(deploy_settings):
     pass
 
 def post_deployment(deploy_settings):
-    
+
     deploy_settings['log'].info("Saving parameters and removing lockfile")
 
     # Save the current parameters.

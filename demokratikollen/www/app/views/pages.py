@@ -9,7 +9,7 @@ from demokratikollen.www.app.helpers.cache import cache
 from demokratikollen.www.app.helpers.db import db
 from demokratikollen.core.db_structure import Member, ChamberAppointment, Party
 from demokratikollen.www.app.models.proposals import proposals_main
-from flask import Blueprint, request
+from flask import Blueprint, request, jsonify
 from sqlalchemy.orm.exc import NoResultFound
 from sqlalchemy import func
 from demokratikollen.core.utils.mongodb import MongoDBDatastore
@@ -57,3 +57,9 @@ def party(abbr):
     except NoResultFound as e:
         return render_template('404.html'), 404
     return render_template("/parties/party.html",party=p)
+
+@blueprint.route('/search.json', methods=['GET'])
+def timeseries():
+
+    ds = MongoDBDatastore()
+    return jsonify(ds.get_object("search")); 

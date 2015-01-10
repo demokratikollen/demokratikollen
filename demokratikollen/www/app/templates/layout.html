@@ -45,13 +45,7 @@
                   <div class="search">
                     <div class="search-typeahead" id="main-search">
                       <span class="input-group-addon"><span aria-hidden="true"></span></span>
-                      <input type="text" placeholder="Sök">
-                      <ul>
-                        <li role="presentation"><a role="menuitem" tabindex="-1" href="#">Action</a></li>
-                        <li role="presentation"><a role="menuitem" tabindex="-1" href="#">Another action</a></li>
-                        <li role="presentation"><a role="menuitem" tabindex="-1" href="#">Something else here</a></li>
-                        <li role="presentation"><a role="menuitem" tabindex="-1" href="#">Separated link</a></li>
-                      </ul>
+                      <input type="text" placeholder="Sök" id="searchbox">
                     </div>
                   </div><!-- /input-group -->
                 </form>
@@ -75,7 +69,16 @@
 
     <div id="content-wrapper">
       <div class="container">
-        <p id="test"></p>
+      <div class="row">
+        <div class="col-md-12">
+          
+                      <ul id="searchresults">
+
+                      </ul>
+
+        </div>
+      </div>
+
         {% block content %}{% endblock %}
       </div>
     </div>
@@ -88,7 +91,7 @@
     {%- block scripts %}
     <script src="{{ url_for('static', filename='js/dependencies.min.js') }}"></script>
     <script src="{{ url_for('static', filename='js/scripts.min.js') }}"></script>
-    <script type="text/javascript">$(Search.Setup);</script>
+    <script type="text/javascript">$(demokratikollen.initSearch());</script>
     {%- endblock %}
   </body>
 </html>
