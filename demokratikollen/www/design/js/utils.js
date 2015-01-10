@@ -77,6 +77,14 @@ utils.pageState = function(obj) {
 };
 
 
+utils.uniqueId = (function() {
+  var counter = 0;
+  return function(prefix) {
+    if (!prefix) { prefix = ''; }
+    return prefix + '-unique-' + counter;
+  }
+})();
+
 
 
 })(demokratikollen.utils);

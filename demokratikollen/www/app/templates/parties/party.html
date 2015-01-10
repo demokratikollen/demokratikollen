@@ -204,9 +204,9 @@ $(function(){
 </script>
 <script type="text/javascript">
   electionData = [
-    {start: '2002-09-20T00:00:00', end: '2006-09-20T00:00:00', numChairs: 108},
-    {start: '2006-09-20T00:00:00', end: '2010-09-20T00:00:00', numChairs: 100},
-    {start: '2010-09-20T00:00:00', end: '2014-09-20T00:00:00', numChairs: 70}]
+    {start: '2002-09-20T00:00:00', end: '2006-09-20T00:00:00', value: 108 / 349},
+    {start: '2006-09-20T00:00:00', end: '2010-09-20T00:00:00', value: 100 / 349},
+    {start: '2010-09-20T00:00:00', end: '2014-09-20T00:00:00', value: 70 / 349}]
 
   pollData = [
     {time: '2002-01-01T00:00:00', pollResult: 0.34},
@@ -255,11 +255,8 @@ $(function(){
   var minDate = d3.min(electionData, function (d) { return d.start; }),
     maxDate = d3.max(electionData, function (d) { return d.end; });
 
-  pollData = pollData.filter(function (d) { return d.time >= minDate && d.time <= maxDate; });
-
   var timeUnit = d3.time.year,
-    electionDomain = [0, d3.max(electionData, function (d) { return d.numChairs; })],
-    pollDomain = [0, d3.max(pollData, function (d) { return d.pollResult; })],
+    yDomain = [0, d3.max(electionData.concat(pollData), function (d) { return d.value; })],
     tickLabelWidth = 75;
 
   width = 400, height = 250;
@@ -271,18 +268,27 @@ $(function(){
     .append("g")
     .attr("transform", "translate(" + margin.left + "," + margin.top + ")");
 
+  plotClipId = demokratikollen.utils.uniqueId('party-history-fig');
+  var plotClip = svg
+    .append('clipPath')
+    .attr("id", plotClipId)
+    .append('rect')
+    .attr("width", width)
+    .attr("height", height)
+    .style("fill", "transparent");
+
+  var plotArea = svg
+    .append('g')
+    .attr('clip-path', 'url(#' + plotClipId + ')');
+
+
   var timeScale = d3.time.scale()
     .domain([minDate, maxDate])
     .range([0, width])
     .nice(timeUnit);
 
-  var electionScale = d3.scale.linear()
-    .domain(electionDomain)
-    .range([height, 0])
-    .nice();
-
-  var pollScale = d3.scale.linear()
-    .domain(pollDomain)
+  var yScale = d3.scale.linear()
+    .domain(yDomain)
     .range([height, 0])
     .nice();
 
@@ -303,13 +309,14 @@ $(function(){
     .style("text-anchor", "start");
 
   var yAxis = d3.svg.axis()
-    .scale(electionScale)
+    .scale(yScale)
+    .tickFormat(yScale.tickFormat(5, "%"))
     .orient("left");
 
-  svg.append("g").classed("yaxis", true)
+  svg.append("g").classed("axis y", true)
     .call(yAxis)
 
-  svg.selectAll("rect")
+  plotArea.selectAll("rect")
     .data(partyLeaderData)
     .enter()
     .append("rect")
@@ -319,21 +326,21 @@ $(function(){
     .attr("height", height)
     .style("fill", function (d, i) { return i % 2 == 0 ? "#ccc" : "#ddd"; });
 
-  svg.append("g")
+  plotArea.append("g")
     .selectAll("electionLines")
     .data(electionData)
     .enter()
     .append("line")
     .attr("x1", function (d) { return timeScale(d.start); })
     .attr("x2", function (d) { return timeScale(d.end); })
-    .attr("y1", function (d) { return electionScale(d.numChairs); })
-    .attr("y2", function (d) { return electionScale(d.numChairs); });
+    .attr("y1", function (d) { return yScale(d.value); })
+    .attr("y2", function (d) { return yScale(d.value); });
 
   pollPath = d3.svg.line()
     .x(function (d) { return timeScale(d.time); })
-    .y(function (d) { return pollScale(d.pollResult); })
+    .y(function (d) { return yScale(d.value); })
 
-  svg.append("path")
+  plotArea.append("path")
     .attr("d", pollPath(pollData));
 
   // Interactivity part
@@ -362,13 +369,13 @@ $(function(){
 
   function findElectionDatum(t) {
     result = electionData.filter(function (d) { return d.start <= t && t <= d.end; })[0];
-    return "Antal mandat: " + (result ? result.numChairs : "okänt");
+    return "Antal mandat: " + (result ? result.value : "okänt");
   }
 
   function findPollDatum(t) {
     result = pollData.filter(function (d) { return d.time <= t; });
     result = result[result.length - 1]
-    return "Senaste opinionsundersökning: " + (result ? (result.pollResult * 100 + "% (" + result.time + ")") : "okänt");
+    return "Senaste opinionsundersökning: " + (result ? (result.value * 100 + "% (" + result.time + ")") : "okänt");
   }
 
   var config = {
