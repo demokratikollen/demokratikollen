@@ -61,7 +61,7 @@
           innerProducts[i] = 0;
         }
 
-        var queryGramCounts = countGrams(query);
+        var queryGramCounts = countGrams(query.toLowerCase());
 
         queryGramCounts.forEach(function(queryGram, queryGramCount) {
           var keywordList = trigramLookup.get(queryGram);
