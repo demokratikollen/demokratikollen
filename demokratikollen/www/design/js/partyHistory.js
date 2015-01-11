@@ -94,6 +94,18 @@ demokratikollen.graphics.PartyHistory = function() {
         .classed("odd", function (d, i) { return i % 2 != 0; });
 
 
+      plotArea.append("g")
+        .selectAll("line.term")
+        .data(data.terms)
+        .enter()
+        .append("line")
+        .classed("term", true)
+        .attr("x1", function (d) { return xScale(d.start); })
+        .attr("x2", function (d) { return xScale(d.end); })
+        .attr("y1", function (d) { return yScale(d.value); })
+        .attr("y2", function (d) { return yScale(d.value); });
+
+
       pollPath = d3.svg.line()
         .x(function (d) { return xScale(d.time); })
         .y(function (d) { return yScale(d.value); });
@@ -112,16 +124,6 @@ demokratikollen.graphics.PartyHistory = function() {
         .attr('r', markerSize);
 
 
-      plotArea.append("g")
-        .selectAll("line.term")
-        .data(data.terms)
-        .enter()
-        .append("line")
-        .classed("term", true)
-        .attr("x1", function (d) { return xScale(d.start); })
-        .attr("x2", function (d) { return xScale(d.end); })
-        .attr("y1", function (d) { return yScale(d.value); })
-        .attr("y2", function (d) { return yScale(d.value); });
 
       // These two lines limit the number of time tick values and only keeps those that are
       // at timeUnit level or above (e.g. does not show months if timeUnit is year)
@@ -148,7 +150,7 @@ demokratikollen.graphics.PartyHistory = function() {
         .call(yAxis);
 
 
-      
+
 
   // Interactivity part
     /*

@@ -41,7 +41,7 @@ svg.timeline {
 	g.lines circle { stroke: $greyish-2; fill: $greyish-9; stroke-width: 2px; }
 }
 
-svg.party-history-fig {
+.party-history svg {
 	line.interactive {
 		stroke-width: 1px;
 		stroke: $greyish-2;
@@ -51,22 +51,26 @@ svg.party-history-fig {
 		stroke: $greyish-3;
 	}
 
-	.election-result {
+	line.term {
 		stroke-width: 4px;
-		stroke: $greyish-3;
+		stroke: $greyish-2;
 	}
-	.poll-result {
+	path.poll {
 		fill: none;
 		stroke-width: 2px;
-		stroke: $greyish-4;
+		stroke: $greyish-3;
 	}
+    circle.poll {
+        fill: $greyish-3;
+        stroke-width: 0;
+    }
 
 	rect.party-leader.even {
-		fill: $brownish-7;
+		fill: $brownish-5;
 	}
 
 	rect.party-leader.odd {
-		fill: lighten($brownish-7, 5%);
+		fill: $brownish-6;
 	}
 }
 
