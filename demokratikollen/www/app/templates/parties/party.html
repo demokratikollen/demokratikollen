@@ -78,7 +78,7 @@ figcaption {
         <div class="row">
         <figure>
         <div class="inset">
-          <div class="party-history-fig"></div>
+          <div id="party-history-fig"></div>
         </div>
         </figure>
         </div>
@@ -231,205 +231,28 @@ $(function(){
     {start: '2010-07-01T00:00:00', end: '2018-07-01T00:00:00', name: "Darth Vader"},
   ]
 
-  infoParagraphs = d3.select(".party-history-fig")
-    .selectAll("p")
-    .data([0, 1, 2])
-    .enter()
-    .append("p")
-    .html("&nbsp;");
+  var data = {
+    polls: pollData,
+    partyLeaders: partyLeaderData,
+    terms: electionData
+  }
 
-  electionData.concat(partyLeaderData).forEach(function (d) {
+  data.partyLeaders.concat(data.terms).forEach(function (d) { 
     d.start = new Date(d.start);
     d.end = new Date(d.end);
   });
 
-  pollData.forEach(function (d) {
+  data.polls.forEach(function (d) {
     d.time = new Date(d.time);
   });
 
-  var minDate = d3.min(electionData, function (d) { return d.start; }),
-    maxDate = d3.max(electionData, function (d) { return d.end; });
+  console.log(data);
 
-  var timeUnit = d3.time.year,
-    yDomain = [0, d3.max(electionData.concat(pollData), function (d) { return d.value; })],
-    tickLabelWidth = 75;
+  partyHistoryChart = demokratikollen.graphics.PartyHistory();
 
-  width = 400, height = 250;
-  margin = {top: 20, left: 50, right: 20, bottom: 20};
-  var svg = d3.select("div.party-history-fig")
-    .append("svg")
-    .classed("party-history-fig", true)
-    .attr("width", width + margin.left + margin.right)
-    .attr("height", height + margin.top + margin.bottom)
-    .append("g")
-    .attr("transform", "translate(" + margin.left + "," + margin.top + ")");
-
-  plotClipId = demokratikollen.utils.uniqueId('party-history-fig');
-  var plotClip = svg
-    .append('clipPath')
-    .attr("id", plotClipId)
-    .append('rect')
-    .attr("width", width)
-    .attr("height", height)
-    .style("fill", "transparent");
-
-  var plotArea = svg
-    .append('g')
-    .attr('clip-path', 'url(#' + plotClipId + ')');
-
-
-  var timeScale = d3.time.scale()
-    .domain([minDate, maxDate])
-    .range([0, width])
-    .nice(timeUnit);
-
-  var yScale = d3.scale.linear()
-    .domain(yDomain)
-    .range([height, 0])
-    .nice();
-
-  var tickValues = timeScale.ticks(Math.floor(width / tickLabelWidth));
-//  tickValues = unique(tickValues.map(timeUnit.floor));
-
-  var xAxis = d3.svg.axis()
-    .scale(timeScale)
-    .orient("bottom")
-    .tickValues(tickValues);
-
-  xAxis = svg.append("g")
-    .classed("axis x", true)
-    .attr("transform", "translate(0," + height + ")")
-    .call(xAxis);
-
-  xAxis.selectAll("text")
-    .style("text-anchor", "start");
-
-  var yAxis = d3.svg.axis()
-    .scale(yScale)
-    .tickFormat(yScale.tickFormat(5, "%"))
-    .orient("left");
-
-  svg.append("g").classed("axis y", true)
-    .call(yAxis)
-
-  plotArea.selectAll("rect")
-    .data(partyLeaderData)
-    .enter()
-    .append("rect")
-    .attr("y", -1)
-    .attr("x", function (d) { return timeScale(d.start); })
-    .attr("width", function (d) { return timeScale(d.end) - timeScale(d.start); })
-    .attr("height", height)
-    .classed("party-leader", true)
-    .classed("even", function (d, i) { return i % 2 == 0; })
-    .classed("odd", function (d, i) { return i % 2 != 0; });
-
-  pollPath = d3.svg.line()
-    .x(function (d) { return timeScale(d.time); })
-    .y(function (d) { return yScale(d.value); })
-
-  plotArea.append("path")
-    .attr("d", pollPath(pollData))
-    .classed("poll-result", true);
-
-  plotArea.append("g")
-    .selectAll("electionLines")
-    .data(electionData)
-    .enter()
-    .append("line")
-    .attr("x1", function (d) { return timeScale(d.start); })
-    .attr("x2", function (d) { return timeScale(d.end); })
-    .attr("y1", function (d) { return yScale(d.value); })
-    .attr("y2", function (d) { return yScale(d.value); })
-    .classed("election-result", true);
-
-  // Interactivity part
-
-  function makeVerticalLine(cssClass, x, y) {
-    cssClasses = ["interactive"].concat(cssClass)
-    selector = "." + cssClasses.join(".");
-    s = svg.selectAll(selector)
-        .data([0])
-      
-      s.enter()
-        .append("line")
-        .classed(cssClasses.join(" "), true)
-        .style("pointer-events", "none");
-        
-      s.attr("x1", x)
-        .attr("x2", x)
-        .attr("y1", 0)
-        .attr("y2", height);
-  }
-
-  function findPartyLeader(t) {
-    result = partyLeaderData.filter(function (d) { return d.start <= t && t <= d.end; })[0];
-    return "Partiledare: " + (result ? result.name : "okänd");
-  }
-
-  function findElectionDatum(t) {
-    result = electionData.filter(function (d) { return d.start <= t && t <= d.end; })[0];
-    return "Antal mandat: " + (result ? result.value : "okänt");
-  }
-
-  function findPollDatum(t) {
-    result = pollData.filter(function (d) { return d.time <= t; });
-    result = result[result.length - 1]
-    return "Senaste opinionsundersökning: " + (result ? (result.value * 100 + "% (" + result.time + ")") : "okänt");
-  }
-
-  var config = {
-    xMin: 0,
-    xMax: width,
-    yMin: 0,
-    yMax: height,
-    hover: function (x, y) {
-      makeVerticalLine("hover", x, y);
-    },
-    leave: function () {
-      s = svg.selectAll(".interactive.hover")
-        .remove();
-    },
-    click: function (x, y) {
-      makeVerticalLine("fixed", x, y);
-      t = timeScale.invert(x);
-
-      infoParagraphs
-        .data([findPartyLeader(t), findElectionDatum(t), findPollDatum(t)])
-        .html(function (d) { return d; });
-    }
-  };
-
-
-  interactiveArea = svg.append("rect")
-    .classed("interactive", true)
-    .attr("width", width)
-    .attr("height", height)
-    .style("fill", "transparent");
-
-  function onMouseMove() {
-    var eventData = d3.mouse(this),
-      x = eventData[0],
-      y = eventData[1];
-      config.hover(x, y);
-  }
-
-  function onMouseOut() {
-      config.leave();
-  }
-
-  function onClick() {
-    var eventData = d3.mouse(this),
-      x = eventData[0],
-      y = eventData[1];
-      config.click(x, y);
-  }
-
-  interactiveArea.on("mousemove.interactive", onMouseMove);
-  interactiveArea.on("mouseout.interactive", onMouseOut);
-  interactiveArea.on("mouseup.interactive", onClick);
-
-
+  d3.select("#party-history-fig")
+    .datum(data)
+    .call(partyHistoryChart);
 
 </script>
 {% endblock %}
