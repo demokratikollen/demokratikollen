@@ -38,7 +38,7 @@ def proposals():
 
     return render_template("/proposals/index.html",
                                 data = proposals_main_data
-                            )
+                               )
 
 @blueprint.route('/om', methods=['GET'])
 def about():

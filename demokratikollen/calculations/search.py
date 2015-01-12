@@ -23,8 +23,8 @@ def main():
     for (idx, member) in enumerate(s.query(Member)):
         members.append(dict(
                 title = member.first_name + " " + member.last_name + " (" + member.party.abbr + ")",
-                img_url = 'TODO',#member.image_url_small,
-                url = 'TODO'#member.url
+                img_url = member.image_url_sm,
+                url = '/'+member.url_name
             ))
         member_indices[member.id] = idx
 
@@ -33,8 +33,8 @@ def main():
     for (idx, party) in enumerate(s.query(Party)):
         parties.append(dict(
                 title = party.name,
-                img_url = 'TODO set party image url',#party.image_url_small,
-                url = 'TODO set party.url' #party.url
+                img_url = '/static/img/parties/'+party.abbr.lower()+'.png',
+                url = '/'+party.abbr.lower()
             ))
         party_indices[party.id] = idx
 
