@@ -112,10 +112,10 @@ figcaption {
 <script type="text/javascript">
 
 var pageState = demokratikollen.utils.pageState({
-  "cosigningActiveCommittee": 0,
-  "cosigningActiveBar": null,
-  "covotingActivePartyA": 1, // S
-  "covotingActivePartyB": 6 // M
+  "cosigningActiveCommittee": {defaultValue: 0, urlName: "cc"},
+  "cosigningActiveBar": {defaultValue: null, urlName: "cb"},
+  "covotingActivePartyA": {defaultValue: 1, urlName: "pa"}, // S
+  "covotingActivePartyB": {defaultValue: 6, urlName: "pb"} // M
 });
 
 cosigningFigure = function(data) {
