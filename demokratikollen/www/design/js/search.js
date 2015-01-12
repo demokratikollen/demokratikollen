@@ -138,6 +138,15 @@
               d3.select(this).classed("open",true);
             });
 
+      var results = [];
+      searchboxElement.on("keydown", function() {
+        if (d3.event.keyCode == 13) { // Enter key
+          if (results) {
+            d3.event.preventDefault();
+            location.href = results.top.url;
+          }
+        }
+      });
       searchboxElement.on("keyup", function(){
 
 
@@ -147,14 +156,17 @@
           return;
         }
 
-        var results = search(q);
+        results = search(q);
+
+
 
         d3.select('#main-search').classed("open",true);
         var ul = d3.select("#searchresults");
 
         var tophit = ul.selectAll(".tophit").data([results.top]);
         tophit.enter().append("li").attr("class", "tophit").attr("role", "presentation");
-        tophit.text(prop("title"))
+        tophit
+          .text(prop("title"));
 
         var groups = ul.selectAll(".group").data(results.groups);
         var enteringGroups = groups.enter().append("ul").attr("class","group");
