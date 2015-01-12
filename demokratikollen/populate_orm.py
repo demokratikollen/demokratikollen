@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 from demokratikollen.core.db_structure import *
-from sqlalchemy import create_engine, func
+from sqlalchemy import create_engine, func, distinct
 from sqlalchemy.orm import sessionmaker
 from sqlalchemy.orm.exc import NoResultFound
 from demokratikollen.core.utils import postgres as pg_utils
@@ -71,11 +71,56 @@ for birth_year,first_name,last_name,gender,party_abbr,intressent_id in c:
     except NoResultFound:
         print("No result was found for abbr {}.".format(party_abbr))
         raise
-    members[intressent_id] = Member(first_name=first_name,last_name=last_name,
+    members[intressent_id] = Member(intressent_id=intressent_id,
+                                    first_name=first_name,last_name=last_name,
                                     birth_year=birth_year,gender=gender,party=party,
-                                    image_url="http://data.riksdagen.se/filarkiv/bilder/ledamot/{}_192.jpg".format(intressent_id))
+                                    image_url_md="http://data.riksdagen.se/filarkiv/bilder/ledamot/{}_192.jpg".format(intressent_id),
+                                    image_url_lg="http://data.riksdagen.se/filarkiv/bilder/ledamot/{}_max.jpg".format(intressent_id),
+                                    image_url_sm="http://data.riksdagen.se/filarkiv/bilder/ledamot/{}_80.jpg".format(intressent_id),
+                                    url_name='')
     s.add(members[intressent_id])
 # s.commit()
+
+print("computing unique url_name for members.")
+
+
+# From
+# http://stackoverflow.com/questions/517923/what-is-the-best-way-to-remove-accents-in-a-python-unicode-string
+import unicodedata as ud
+def rmdiacritics(char):
+    '''
+    Return the base character of char, by "removing" any
+    diacritics like accents or curls and strokes and the like.
+    '''
+    desc = ud.name(char)
+    cutoff = desc.find(' WITH ')
+    if cutoff != -1:
+        desc = desc[:cutoff]
+    return ud.lookup(desc)
+
+def url_safe(s):
+    ret = ''.join(rmdiacritics(c) for c in s.strip().lower())
+    ret = ret.replace(" ", "-")
+    return ret
+
+for m in s.query(Member):
+    url_name = url_safe(m.first_name) + "-" + url_safe(m.last_name)
+    m.url_name = url_name
+
+
+for url_name in (x for (x,) in s.query(distinct(Member.url_name)) ):
+    count = s.query(func.count(Member.id)) \
+        .filter(Member.url_name == url_name) \
+        .scalar()
+    if count != 1:
+        print("{} {} found.".format(count, url_name))
+        multiples = s.query(Member) \
+                        .filter(Member.url_name == url_name) \
+                        .order_by(Member.intressent_id)
+        for (k,m) in enumerate(multiples):
+            print("{} (appending -{})".format(m,k+1))
+            m.url_name = m.url_name + "-{}".format(k+1)
+
 
 # Select only betänkanden from dokument
 print("Adding committee reports.")
