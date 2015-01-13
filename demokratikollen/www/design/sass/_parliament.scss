@@ -1,19 +1,14 @@
-#parliament_figure {
+#parliament_figure_wrapper {
 
-  .row.svg_canvas {
+  #member_collection {
     @extend .col-xs-12;
   }
 
   .row.date_slider {
-    @extend .col-xs-12;
-  }
+    @extend .col-xs-10;
+    @extend .col-xs-offset-1;
 
-  .row.buttons {
-    @extend .col-xs-12;
-    margin: 10px 0px 0px 0px;
-    button {
-      @extend .btn
-    }
+    padding-top: 2%;
 
   }
 }
