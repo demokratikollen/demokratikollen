@@ -35,6 +35,7 @@ var js_deps = [
     jqueryUiDir+'ui/core.js',
     jqueryUiDir+'ui/widget.js',
     jqueryUiDir+'ui/mouse.js',
+    'bower_components/jqueryui-touch-punch/jquery.ui.touch-punch.js',
     jqueryUiDir+'ui/slider.js',
     jqueryUiSliderPipsDir+'jquery-ui-slider-pips.js',
     // Bootstrap plugins

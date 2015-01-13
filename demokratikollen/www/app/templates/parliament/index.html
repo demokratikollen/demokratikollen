@@ -25,10 +25,9 @@
 {%- endblock %}
 
 {% block content %}
-<div id="parliament_figure">
+<div id="parliament_figure_wrapper">
   <div class="row svg_canvas">
-    <div class="column">
-      <svg id="parliament_svg" viewBox='0 0 940 470' preserveAspectRatio="xMinYMin meet"></svg>
+    <div id="parliament_figure" class="column">
     </div>
   </div>
   <div class="row date_slider">
@@ -36,16 +35,12 @@
       <div id="date_slider"></div>
     </div>
   </div>
-  <div class="row buttons">
-    <div class="column">
-      <button id="parliament_button">Riksdagen</button>
-      <button id="gender_button">Könsfördelning</button>
-    </div>
-  </div>
 </div>
 {% endblock %}
 
 {% block scripts %}
     {{ super() }}
-    <script type="text/javascript" src="{{ url_for('static', filename='js/parliament.js') }}"></script>
+    <script>
+      parliamentChairs.Setup();
+    </script>
 {%- endblock %}

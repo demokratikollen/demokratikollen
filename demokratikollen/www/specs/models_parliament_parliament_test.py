@@ -54,7 +54,7 @@ class TestGender(TestCase):
             self.assertEqual(datum['member_id'], out_data[i][0])
 
     def test_sorts_data_correctly(self):
-        out_data = [(1,'S'),(2,'MP'),(3,'V')]
+        out_data = [(1,'S'),(2,'MP'),(3,'V'),(4, 'SD'),(5,'M')]
 
         parliament.get_parliament_db_statement = MagicMock()
         cursor = parliament.get_parliament_db_statement.return_value
@@ -62,7 +62,7 @@ class TestGender(TestCase):
 
         response = parliament.parliament(date=d)
 
-        correct_order = [2,1,3]
+        correct_order = [3,1,2,4,5]
 
         for i, datum in enumerate(response['data']):
             self.assertEqual(datum['member_id'], correct_order[i])

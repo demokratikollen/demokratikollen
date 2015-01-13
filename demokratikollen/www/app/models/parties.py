@@ -9,6 +9,22 @@ import operator
 
 mdb = MongoDBDatastore()
 
+def party_comparator(p1):
+    party_sort = {
+        '-': 0,
+        'v': 1,
+        's': 2,
+        'mp': 3,
+        'sd': 4,
+        'nyd': 5,
+        'c': 6,
+        'fp': 7,
+        'kd': 8,
+        'm': 9
+    }
+    return party_sort[p1.lower()]
+
+
 db_name = {
         'c':'Centerpartiet',
         'fp':'Folkpartiet',
