@@ -5,7 +5,7 @@
   var innerProducts;
 
   context.initSearch = function(){
-    
+
     var searchboxElement = d3.select(searchboxSelector);
     var trigramLookup = d3.map();
     var n = 3;
@@ -61,7 +61,7 @@
           innerProducts[i] = 0;
         }
 
-        var queryGramCounts = countGrams(query);
+        var queryGramCounts = countGrams(query.toLowerCase());
 
         queryGramCounts.forEach(function(queryGram, queryGramCount) {
           var keywordList = trigramLookup.get(queryGram);
@@ -106,7 +106,7 @@
           m.keyword.secondaries.forEach(function(secondary){
             var secondaryGroup = result.groups[secondary[0]];
             if (secondaryGroup.objects.length >= maxHitsPerGroup) return;
-            
+
             if (-1 == secondaryGroup.objects.indexOf(secondary[1])) {
               secondaryGroup.objects.push(secondary[1]);
             }
@@ -128,19 +128,45 @@
 
       }
 
+      d3.select('#main-search')
+            .on("focusout",function() {
+              d3.select(this).classed("open",false);
+            })
+            .on("focusin",function() {
+              var q = searchboxElement.property("value");
+              if (q.length < 2) return;
+              d3.select(this).classed("open",true);
+            });
+
+      var results = [];
+      searchboxElement.on("keydown", function() {
+        if (d3.event.keyCode == 13) { // Enter key
+          if (results) {
+            d3.event.preventDefault();
+            location.href = results.top.url;
+          }
+        }
+      });
       searchboxElement.on("keyup", function(){
 
 
         var q = this.value;
-        if (q.length < 2) return;
+        if (q.length < 2) {
+          d3.select('#main-search').classed("open",false);
+          return;
+        }
 
-        var results = search(q);
-        
+        results = search(q);
+
+
+
+        d3.select('#main-search').classed("open",true);
         var ul = d3.select("#searchresults");
 
         var tophit = ul.selectAll(".tophit").data([results.top]);
         tophit.enter().append("li").attr("class", "tophit").attr("role", "presentation");
-        tophit.text(prop("title"))
+        tophit
+          .text(prop("title"));
 
         var groups = ul.selectAll(".group").data(results.groups);
         var enteringGroups = groups.enter().append("ul").attr("class","group");

@@ -38,28 +38,49 @@ def proposals():
 
     return render_template("/proposals/index.html",
                                 data = proposals_main_data
-                            )
+                               )
 
 @blueprint.route('/om', methods=['GET'])
 def about():
     return render_template("/about.html")
 
-@blueprint.route('/member/<int:member_id>', methods=['GET'])
-def member_test(member_id):
-    member = db.session.query(Member).join(Party).filter(Member.id == member_id).first()
-    return render_template("/parliament/member.html", member=member)
-
-@blueprint.route('/partierna/<abbr>.html', methods=['GET'])
-def party(abbr):
-    try:
-        p = db.session.query(Party).filter(func.lower(Party.abbr)==abbr.lower()).one()
-
-    except NoResultFound as e:
-        return render_template('404.html'), 404
-    return render_template("/parties/party.html",party=p)
+    
 
 @blueprint.route('/search.json', methods=['GET'])
 def timeseries():
 
     ds = MongoDBDatastore()
     return jsonify(ds.get_object("search")); 
+
+def render_party(p):
+    return render_template("/parties/party.html",party=p)
+def render_member(m):
+    return render_template("/parliament/member.html", member=m)
+
+@blueprint.route('/<arg>', methods=['GET'])
+def missing(arg):
+    # first try party abbreviations
+    try:
+        p = db.session.query(Party).filter(func.lower(Party.abbr)==arg.lower()).one()
+        return render_party(p)
+    except NoResultFound as e:
+        pass        
+
+    # try party full name
+    try:
+        p = db.session.query(Party).filter(func.lower(Party.name)==arg.lower()).one()
+        return render_party(p)
+    except NoResultFound as e:
+        pass
+
+    # try member url_name
+    try:
+        m = db.session.query(Member).filter(Member.url_name==arg.lower()).one()
+        return render_member(m)
+    except NoResultFound as e:
+        pass
+
+    return render_template('404.html'), 404
+
+
+

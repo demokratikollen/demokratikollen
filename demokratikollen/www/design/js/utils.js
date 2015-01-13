@@ -32,31 +32,35 @@ utils.getPartyColor = function(abbr) {
 };
 
 utils.pageState = function(obj) {
-  var delim = "-"
+
   var state = {};
-  var orderedKeys = [];
+  var urlNames = {};
+  var keys = {};
   for (var key in obj) {
     if (obj.hasOwnProperty(key)) {
-      state[key] = obj[key];
-      orderedKeys.push(key);
+      state[key] = obj[key].defaultValue;
+      urlNames[key] = obj[key].urlName;
+      keys[obj[key].urlName] = key;
     }
   }
-  orderedKeys.sort();
   
   // try to read incoming state from URL
   if (location.hash.length > 1) {
-    var values = location.hash.substr(1).split(delim);
-    if (values.length == orderedKeys.length) {
-      values.forEach(function(value,i){
-        if (value == "") value = null;
-        var tryInt = parseInt(value, 10);
-        if (!isNaN(tryInt)) value = tryInt;
+    var queryStringParts = location.hash.substr(1).split("&");
+    queryStringParts.forEach(function(part,i){
+      var keyValuePair = part.split("=");
+      var urlName = keyValuePair[0];
+      if (!keys.hasOwnProperty(urlName)) {
+        console.warn("Undefined urlName in pageState: ", urlName);
+        return;
+      }
+      var value = decodeURIComponent(keyValuePair[1]);
+      if (value == "") value = null;
+      var tryInt = parseInt(value, 10);
+      if (!isNaN(tryInt)) value = tryInt;
 
-        state[orderedKeys[i]] = value;
-      });
-    } else {
-      console.log("Warning: given pageStatus hash not compatible with state specification.");
-    }
+      state[keys[urlName]] = value;
+    });
   } 
 
   return function(obj) {
@@ -64,6 +68,7 @@ utils.pageState = function(obj) {
     if (obj.length) {
       var key = obj;
       if (state.hasOwnProperty(key)) return state[key];
+      else return console.warn("Unknown state key: ", obj);
     }
 
     for (var key in obj) {
@@ -71,7 +76,15 @@ utils.pageState = function(obj) {
         state[key] = obj[key];
       }
     }
-    var newHash = orderedKeys.map(function(key){return state[key];}).join(delim);
+
+    var parts = [];
+    for (var key in state) {
+      if (state.hasOwnProperty(key)) {
+        parts.push(urlNames[key]+'='+encodeURIComponent(state[key]));
+      }
+    }
+
+    var newHash = parts.join("&");
     location.hash = '#'+newHash; 
   };
 };
