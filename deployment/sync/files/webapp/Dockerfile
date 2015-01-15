@@ -15,4 +15,4 @@ ENV NEW_RELIC_CONFIG_FILE /etc/newrelic/newrelic.ini
 
 EXPOSE 8000
 
-CMD newrelic-admin run-command gunicorn -c /usr/src/apps/demokratikollen/gunicorn_config.py demokratikollen.www.gunicorn_production:app
+CMD newrelic-admin run-program gunicorn -c /usr/src/apps/demokratikollen/gunicorn_config.py demokratikollen.www.gunicorn_production:app
