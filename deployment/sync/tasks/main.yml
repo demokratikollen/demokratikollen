@@ -11,7 +11,7 @@
   synchronize: src=../demokratikollen/ dest=/home/wercker/docker/webapp/demokratikollen/ rsync_opts=--exclude=temp
 
 - name: Copy the newrelic config file to the webapp
-  shell: cp /etc/newrelic/newrelic.ini /home/wercker/docker/webapp/demokratikollen/newrelic.ini
+  shell: cp /etc/newrelic/newrelic.ini /home/wercker/docker/webapp/newrelic.ini
 
 - name: Copy the source to the bgtask 
   synchronize: src=../demokratikollen/ dest=/home/wercker/docker/bgtasks/demokratikollen/ rsync_opts=--exclude=temp
