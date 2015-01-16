@@ -28,7 +28,9 @@ class TestGender(TestCase):
         parliament.get_parliament_db_statement.assert_called_with(d)
 
     def test_sets_correct_stats(self):
-        out_data = [(1,'S'),(2,'MP'),(3,'V')]
+        out_data = [(1,'S','url1', 'imgurl1', 'first_name1', 'last_name1'),
+                    (2,'MP','url2', 'imgurl2', 'first_name2', 'last_name2'),
+                    (3,'V','url3', 'imgurl13', 'first_name3', 'last_name3')]
 
         parliament.get_parliament_db_statement = MagicMock()
         cursor = parliament.get_parliament_db_statement.return_value
@@ -40,7 +42,9 @@ class TestGender(TestCase):
         self.assertEqual(response['statistics']['n_members'], 3)
 
     def test_sets_data_correctly(self):
-        out_data = [(1,'S'),(2,'MP'),(3,'V')]
+        out_data = [(1,'S','url1', 'imgurl1', 'first_name1', 'last_name1'),
+                    (2,'MP','url2', 'imgurl2', 'first_name2', 'last_name2'),
+                    (3,'V','url3', 'imgurl13', 'first_name3', 'last_name3')]
 
         parliament.get_parliament_db_statement = MagicMock()
         cursor = parliament.get_parliament_db_statement.return_value
@@ -54,7 +58,9 @@ class TestGender(TestCase):
             self.assertEqual(datum['member_id'], out_data[i][0])
 
     def test_sorts_data_correctly(self):
-        out_data = [(1,'S'),(2,'MP'),(3,'V'),(4, 'SD'),(5,'M')]
+        out_data = [(1,'S','url1', 'imgurl1', 'first_name1', 'last_name1'),
+                    (2,'MP','url2', 'imgurl2', 'first_name2', 'last_name2'),
+                    (3,'V','url3', 'imgurl13', 'first_name3', 'last_name3')]
 
         parliament.get_parliament_db_statement = MagicMock()
         cursor = parliament.get_parliament_db_statement.return_value
@@ -62,7 +68,7 @@ class TestGender(TestCase):
 
         response = parliament.parliament(date=d)
 
-        correct_order = [3,1,2,4,5]
+        correct_order = [3,1,2]
 
         for i, datum in enumerate(response['data']):
             self.assertEqual(datum['member_id'], correct_order[i])
