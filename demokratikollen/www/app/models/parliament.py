@@ -14,7 +14,7 @@ def parliament(date):
 
     response = {'statistics': {'n_members': 0}, 'data': [], }
     for member in members.all():
-        response['data'].append(dict(member_id=member[0],party=member[1]))
+        response['data'].append(dict(member_id=member[0],party=member[1], url_name=member[2], image_url=member[3], name=(member[4] + " " + member[5])))
         response['statistics']['n_members'] += 1
 
     # sort the data on party.
@@ -23,7 +23,7 @@ def parliament(date):
     return response
 
 def get_parliament_db_statement(date):
-    members = db.session.query(Member.id, Party.abbr). \
+    members = db.session.query(Member.id, Party.abbr, Member.url_name, Member.image_url_md, Member.first_name, Member.last_name). \
                 join(ChamberAppointment). \
                 join(Party). \
                 filter(ChamberAppointment.role=='Riksdagsledamot'). \
