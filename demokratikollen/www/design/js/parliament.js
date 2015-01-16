@@ -36,66 +36,87 @@ demokratikollen.graphics.dateMemberCollectionFigure.Setup = function(figureDiv, 
     }
   });
 
+  //Add the tooltip div.
+  var tooltip = d3.select("body").append("div")
+    .attr("class", "member-node-tooltip")
+    .style("opacity",0);
+
+  tooltip.append("img");
+  tooltip.append("p");
+
   return d3.select("svg#member_collection");
 }
 
 demokratikollen.graphics.dateMemberCollectionFigure.DrawMemberNodes = function(data) {
   var canvas = d3.select('svg#member_collection');
 
-  var nodes = canvas.selectAll('g.member_node').data(data, function(d, i) {
+  var anchors = canvas.selectAll('a.member_node').data(data, function(d, i) {
     return d.member_id
   });
 
   //remove elements
-  nodes.exit().remove();
+  anchors.exit().remove();
 
-  var new_nodes = nodes.enter()
-    .append('g')
+  var new_anchors = anchors.enter()
+    .append("a")
+    .attr("xlink:href", function(d) { return "/" + d.url_name; } )
     .attr("transform", function(d) {
       return "translate(" + d.x + "," + (-d.r * 4) + ")"
     });
 
-  new_nodes.append("title")
+  new_anchors.append("title")
     .text(function(d) {
       return "member_id:" + d.member_id + ", x:" + d.x + ", y:" + d.y;
     });
 
-  new_nodes.append("circle")
-    .style("stroke-width", '1px')
+
+  new_anchors.append("circle")
     .style("fill", function(d) {
       return demokratikollen.utils.getPartyColor(d.party).toString()
-    });
+    })
+    .attr("r", function(d) { return d.r; });
+
+  new_anchors.on("mouseover", function (d) {
+    d3.select("div.member-node-tooltip").style("opacity", 1);
+    d3.select("div.member-node-tooltip img").attr("src", d.image_url);
+    d3.select("div.member-node-tooltip p").text(d.name);
+  });
+
+  new_anchors.on("mousemove", function(d) {
+    var tooltipOffsetY = 20;
+    var div = d3.select("div.member-node-tooltip").style("top", (event.pageY + tooltipOffsetY)+"px").style("left",(event.pageX)+"px");
+  });
+
+  new_anchors.on("mouseout", function(d) {
+    d3.select("div.member-node-tooltip").style("opacity", 0);
+  })
 
   //Sort the nodes.
-  nodes.sort(function(a, b) {
+  anchors.sort(function(a, b) {
     if (a.y > b.y)
       return -1;
     else return 1;
   });
 
-  nodes.attr('class', 'member_node');
+  anchors.attr('class', 'member_node');
 
   //update the position and animate.
-  nodes.transition().duration(1000)
+  anchors.transition().duration(1000)
     .attr("transform", function(d) {
       x = d.x;
       y = d.y;
       return "translate(" + x + "," + y + ")";
     });
 
-
-  //update the radius of the circle if needed.
-  nodes.selectAll('circle').data(data).transition().attr("r", function(d) {
-    return d.r;
-  });
 }
+
 parliamentChairs = {
   Setup: function() {
-    this.canvas = demokratikollen.graphics.dateMemberCollectionFigure.Setup("div#parliament_figure", "div#date_slider", 940, 470, this);
+    this.canvas = demokratikollen.graphics.dateMemberCollectionFigure.Setup("div#parliament_svg_div", "div#parliament_date_slider div.date_slider", 940, 470, this);
     this.UpdateFromDateSlider(this);
   },
   UpdateFromDateSlider: function(self) {
-    var date_seconds = $("#date_slider").slider("value");
+    var date_seconds = $("div#parliament_date_slider div.date_slider").slider("value");
     var date = new Date();
     date.setTime(date_seconds);
 
