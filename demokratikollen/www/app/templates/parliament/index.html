@@ -1,39 +1,10 @@
 {% extends "parliament/base.html" %}
 
-{% block styles -%}
-
-{{ super() }}
-    <style>
-
-    svg#parliament_svg line {
-      stroke: black;
-      stroke-width: 8px;
-    }
-
-    svg#parliament_svg circle{
-      stroke: black;
-      stroke-width: 8px;
-      fill: none;
-    }
-
-    g.member_node circle{
-      stroke: black;
-      stroke-width: 1px;
-    }
-
-    </style>
-{%- endblock %}
-
 {% block content %}
-<div id="parliament_figure_wrapper">
-  <div class="row svg_canvas">
-    <div id="parliament_figure" class="column">
-    </div>
+  <div id="parliament_svg_div" class="row">
   </div>
-  <div class="row date_slider">
-    <div class="column">
-      <div id="date_slider"></div>
-    </div>
+  <div id="parliament_date_slider" class="row">
+      <div class="date_slider"></div>
   </div>
 </div>
 {% endblock %}
