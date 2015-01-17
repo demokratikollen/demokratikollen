@@ -64,12 +64,6 @@ demokratikollen.graphics.dateMemberCollectionFigure.DrawMemberNodes = function(d
       return "translate(" + d.x + "," + (-d.r * 4) + ")"
     });
 
-  new_anchors.append("title")
-    .text(function(d) {
-      return "member_id:" + d.member_id + ", x:" + d.x + ", y:" + d.y;
-    });
-
-
   new_anchors.append("circle")
     .style("fill", function(d) {
       return demokratikollen.utils.getPartyColor(d.party).toString()
@@ -78,13 +72,15 @@ demokratikollen.graphics.dateMemberCollectionFigure.DrawMemberNodes = function(d
 
   new_anchors.on("mouseover", function (d) {
     d3.select("div.member-node-tooltip").style("opacity", 1);
-    d3.select("div.member-node-tooltip img").attr("src", d.image_url);
     d3.select("div.member-node-tooltip p").text(d.name);
+    d3.select("div.member-node-tooltip img").attr("src", '');
   });
 
   new_anchors.on("mousemove", function(d) {
     var tooltipOffsetY = 20;
-    var div = d3.select("div.member-node-tooltip").style("top", (event.pageY + tooltipOffsetY)+"px").style("left",(event.pageX)+"px");
+    var div = d3.select("div.member-node-tooltip").style("top", (d3.event.pageY + tooltipOffsetY)+"px").style("left",(d3.event.pageX)+"px");
+    d3.select("div.member-node-tooltip img").attr("src", d.image_url);
+
   });
 
   new_anchors.on("mouseout", function(d) {
