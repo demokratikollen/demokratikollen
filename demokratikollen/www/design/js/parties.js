@@ -94,7 +94,7 @@ demokratikollen.graphics.mapChart = function(regions) {
         })
         .on("mousemove", function(d){
           if(ttHeight == undefined) ttHeight = tooltipOffsetY;
-          tooltip.style("top", (event.pageY-ttHeight)+"px").style("left",(event.pageX)+"px");
+          tooltip.style("top", (d3.event.pageY-ttHeight)+"px").style("left",(d3.event.pageX)+"px");
         })
         .on("mouseout", function(d){
           tooltip.transition()

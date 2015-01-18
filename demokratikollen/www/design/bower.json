@@ -17,7 +17,8 @@
     "jquery-ui-slider-pips": "~1.7.2",
     "topojson": "~1.6.18",
     "typeahead.js": "~0.10.5",
-    "fuse.js": "~1.2.2"
+    "fuse.js": "~1.2.2",
+    "jqueryui-touch-punch": "*"
   },
   "resolutions": {
     "d3": "~3.5.2"

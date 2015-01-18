@@ -1,0 +1,80 @@
+
+$sr-result-title-font-size: $font-size-base;
+$sr-heading-font-size: $font-size-small;
+
+// Open state for the dropdown
+.open {
+  // Show the menu
+  > #searchresults {
+    display: block;
+  }
+}
+
+#searchresults {
+  position: absolute;
+  top: 100%;
+  width: 100%;
+  left: 0;
+  z-index: $zindex-dropdown;
+  display: none; // none by default, but block on "open" of the menu
+  float: left;
+  min-width: 160px;
+  padding: 5px 0;
+  margin: 2px 0 0; // override default ul
+  list-style: none;
+  text-align: left; // Ensures proper alignment if parent has it changed (e.g., modal footer)
+  background-color: $dropdown-bg;
+  border: 1px solid $dropdown-fallback-border; // IE8 fallback
+  border: 1px solid $dropdown-border;
+  border-radius: $border-radius-base;
+  @include box-shadow(0 6px 12px rgba(0,0,0,.175));
+  background-clip: padding-box;
+
+  ul {
+    width: 100%;
+    padding: 0;
+    margin: 0; // override default ul
+    list-style: none;
+  }
+
+  ul.group::before {
+    content: "";
+    width: 100%;
+    display: block;
+    height: 1px;
+    margin: 10px 0 2px 0;
+    background: $dropdown-divider-bg;
+    // @include nav-divider('red');
+  }
+
+  // Dividers (basically an hr) within the dropdown
+  // ul.group li {
+  //   @include nav-divider($dropdown-divider-bg);
+  // }
+
+  // Dropdown section headers
+  ul.group > li {
+    display: block;
+    padding: 3px 20px;
+    font-size: $sr-heading-font-size;
+    line-height: $line-height-base;
+    color: $dropdown-header-color;
+    white-space: nowrap; // as with > li > a
+    text-transform: uppercase;
+    // font-weight: bold;
+  }
+
+  // Links within the dropdown menu
+  > li,
+  ul.group-items > li {
+    display: block;
+    padding: 3px 20px;
+    clear: both;
+    font-size: $sr-result-title-font-size;
+    font-weight: bold;
+    line-height: $line-height-base;
+    color: $dropdown-link-color;
+    white-space: nowrap; // prevent links from randomly breaking onto new lines
+  }
+}
+

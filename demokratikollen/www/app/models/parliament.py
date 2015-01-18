@@ -6,37 +6,7 @@ from demokratikollen.core.db_structure import Member, Appointment, \
 from sqlalchemy import and_
 from sqlalchemy.orm import joinedload
 from datetime import datetime
-
-def gender(date,party=''):
-
-    members = get_gender_db_statement(date,party);
-    
-    response = {'statistics': {'n_males': 0, 'n_females': 0, 'total': 0}, 'data': [], }
-    for member in members.all():
-        response['data'].append(dict(member_id=member[0],gender=member[1],party=member[2]))
-        if member[1] == 'kvinna':
-            response['statistics']['n_females'] += 1
-        else:
-            response['statistics']['n_males'] += 1
-        response['statistics']['total'] += 1
-
-    # sort the data on party.
-    response['data'] = sorted(response['data'], key=lambda k: k['party'])
-
-    return response
-
-def get_gender_db_statement(date, party=''):
-    members = db.session.query(Member.id, Member.gender, Party.abbr). \
-                join(ChamberAppointment). \
-                join(Party). \
-                filter(ChamberAppointment.role=='Riksdagsledamot'). \
-                filter(ChamberAppointment.start_date <= date). \
-                filter(ChamberAppointment.end_date >= date) .\
-                distinct(Member.id)
-    if party:
-        members = members.filter(Party.abbr==party)
-
-    return members
+from demokratikollen.www.app.models.parties import party_comparator
 
 def parliament(date):
 
@@ -44,16 +14,16 @@ def parliament(date):
 
     response = {'statistics': {'n_members': 0}, 'data': [], }
     for member in members.all():
-        response['data'].append(dict(member_id=member[0],party=member[1]))
+        response['data'].append(dict(member_id=member[0],party=member[1], url_name=member[2], image_url=member[3], name=(member[4] + " " + member[5])))
         response['statistics']['n_members'] += 1
 
     # sort the data on party.
-    response['data'] = sorted(response['data'], key=lambda k: k['party'])
+    response['data'] = sorted(response['data'], key=lambda member: party_comparator(member['party']))
 
     return response
 
 def get_parliament_db_statement(date):
-    members = db.session.query(Member.id, Party.abbr). \
+    members = db.session.query(Member.id, Party.abbr, Member.url_name, Member.image_url_md, Member.first_name, Member.last_name). \
                 join(ChamberAppointment). \
                 join(Party). \
                 filter(ChamberAppointment.role=='Riksdagsledamot'). \
