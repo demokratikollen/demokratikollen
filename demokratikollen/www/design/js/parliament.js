@@ -1,109 +1,124 @@
-demokratikollen.graphics.dateMemberCollectionFigure = {};
-demokratikollen.graphics.dateMemberCollectionFigure.Setup = function(figureDiv, dateSliderDiv, x_size, y_size, callbackObject) { //create the svg for the figure.
-  $(figureDiv).append("<svg id='member_collection' viewBox='0 0 940 470' preserveAspectRatio='xMinYMin meet'>");
+demokratikollen.graphics.dateMemberCollectionFigure = {
+  Setup: function(figureDiv, dateSliderDiv, x_size, y_size, callbackObject) { //create the svg for the figure.
+    $(figureDiv).append("<svg id='member_collection' viewBox='0 0 940 470' preserveAspectRatio='xMinYMin meet'>");
 
-  // Setup the slider.
-  var date = new Date();
-  var s_today = date.getTime();
+    $(figureDiv).append("<input type='checkbox' id='animation_toggle' checked>Fancy animations</input>")
 
-  var date_slider = $(dateSliderDiv).slider({
-    value: s_today,
-    min: callbackObject.minDate,
-    max: s_today,
-    step: callbackObject.dateTick,
-    change: function(event, ui) {
-      var self = callbackObject;
-      self.UpdateFromDateSlider(self);
-    }
-  });
+    // Setup the slider.
+    var date = new Date();
+    var s_today = date.getTime();
 
-  date_slider.slider("pips", {
-    rest: 'label',
-    step: 8,
-    formatLabel: function(value) {
-      date = new Date();
-      date.setTime(value);
-      return date.toISOString().slice(0, 4);
-    }
-
-  });
-
-  date_slider.slider("float", {
-    formatLabel: function(value) {
-      date = new Date();
-      date.setTime(value);
-      return date.toISOString().slice(0, 4);
-    }
-  });
-
-  //Add the tooltip div.
-  var tooltip = d3.select("body").append("div")
-    .attr("class", "member-node-tooltip")
-    .style("opacity",0);
-
-  tooltip.append("img");
-  tooltip.append("p");
-
-  return d3.select("svg#member_collection");
-}
-
-demokratikollen.graphics.dateMemberCollectionFigure.DrawMemberNodes = function(data) {
-  var canvas = d3.select('svg#member_collection');
-
-  var anchors = canvas.selectAll('a.member_node').data(data, function(d, i) {
-    return d.member_id
-  });
-
-  //remove elements
-  anchors.exit().remove();
-
-  var new_anchors = anchors.enter()
-    .append("a")
-    .attr("xlink:href", function(d) { return "/" + d.url_name; } )
-    .attr("transform", function(d) {
-      return "translate(" + d.x + "," + (-d.r * 4) + ")"
+    var date_slider = $(dateSliderDiv).slider({
+      value: s_today,
+      min: callbackObject.minDate,
+      max: s_today,
+      step: callbackObject.dateTick,
+      change: function(event, ui) {
+        var self = callbackObject;
+        self.UpdateFromDateSlider(self);
+      }
     });
 
-  new_anchors.append("circle")
-    .style("fill", function(d) {
-      return demokratikollen.utils.getPartyColor(d.party).toString()
+    date_slider.slider("pips", {
+      rest: 'label',
+      step: 8,
+      formatLabel: function(value) {
+        date = new Date();
+        date.setTime(value);
+        return date.toISOString().slice(0, 4);
+      }
+
+    });
+
+    date_slider.slider("float", {
+      formatLabel: function(value) {
+        date = new Date();
+        date.setTime(value);
+        return date.toISOString().slice(0, 4);
+      }
+    });
+
+    //Add the tooltip div.
+    var tooltip = d3.select("body").append("div")
+      .attr("class", "member-node-tooltip")
+      .style("opacity", 0);
+
+    tooltip.append("img");
+    tooltip.append("p");
+
+    return d3.select("svg#member_collection");
+  },
+  DrawMemberNodes: function(data) {
+    var self = demokratikollen.graphics.dateMemberCollectionFigure;
+    var canvas = d3.select('svg#member_collection');
+
+    var anchors = canvas.selectAll('a.member_node').data(data, function(d, i) {
+      return d.member_id
+    });
+
+    //remove elements
+    anchors.exit().remove();
+
+    var new_anchors = anchors.enter()
+      .append("a")
+      .attr("xlink:href", function(d) {
+        return "/" + d.url_name;
+      })
+      .attr("transform", function(d) {
+        return "translate(" + d.x + "," + (-d.r * 4) + ")"
+      })
+      .attr('class', 'member_node');
+
+    new_anchors.append("circle")
+      .style("fill", function(d) {
+        return demokratikollen.utils.getPartyColor(d.party).toString()
+      })
+      .attr("r", function(d) {
+        return d.r;
+      });
+
+    new_anchors.on("mouseover", function(d) {
+      d3.select("div.member-node-tooltip").style("opacity", 1);
+      d3.select("div.member-node-tooltip p").text(d.name);
+      d3.select("div.member-node-tooltip img").attr("src", '');
+    });
+
+    new_anchors.on("mousemove", function(d) {
+      var tooltipOffsetY = 20;
+      var div = d3.select("div.member-node-tooltip").style("top", (d3.event.pageY + tooltipOffsetY) + "px").style("left", (d3.event.pageX) + "px");
+      d3.select("div.member-node-tooltip img").attr("src", d.image_url);
+
+    });
+
+    new_anchors.on("mouseout", function(d) {
+      d3.select("div.member-node-tooltip").style("opacity", 0);
     })
-    .attr("r", function(d) { return d.r; });
 
-  new_anchors.on("mouseover", function (d) {
-    d3.select("div.member-node-tooltip").style("opacity", 1);
-    d3.select("div.member-node-tooltip p").text(d.name);
-    d3.select("div.member-node-tooltip img").attr("src", '');
-  });
+    var animationType = d3.select("#animation_toggle").property("checked");
 
-  new_anchors.on("mousemove", function(d) {
-    var tooltipOffsetY = 20;
-    var div = d3.select("div.member-node-tooltip").style("top", (d3.event.pageY + tooltipOffsetY)+"px").style("left",(d3.event.pageX)+"px");
-    d3.select("div.member-node-tooltip img").attr("src", d.image_url);
+    if(animationType)
+    {
+      //update the position and animate.
+      var anchors_transition = !self.slowBrowser ? anchors.transition().duration(1000) : anchors;
 
-  });
+      var t = anchors_transition.attr("transform", function(d) {
+        return "translate(" + d.x + "," + d.y + ")";
+      });
+    }
+    else
+    {
+      //move the circles to correct positions and crossfade.
+      anchors.attr("transform", function(d) {
+        return "translate(" + d.x + "," + d.y + ")";
+      })
+      new_anchors.style("opacity",0);
+      var anchors_transition = !self.slowBrowser ? anchors.transition().duration(1000) : anchors;
+      anchors_transition.style("opacity",1);
 
-  new_anchors.on("mouseout", function(d) {
-    d3.select("div.member-node-tooltip").style("opacity", 0);
-  })
 
-  //Sort the nodes.
-  anchors.sort(function(a, b) {
-    if (a.y > b.y)
-      return -1;
-    else return 1;
-  });
-
-  anchors.attr('class', 'member_node');
-
-  //update the position and animate.
-  anchors.transition().duration(1000)
-    .attr("transform", function(d) {
-      x = d.x;
-      y = d.y;
-      return "translate(" + x + "," + y + ")";
-    });
-
+    }
+  },
+  slowBrowser: false
 }
 
 parliamentChairs = {
@@ -196,8 +211,11 @@ parliamentChairs = {
         return self.partySupport[d.party] < 12 ? 'hidden' : 'visible'
       });
 
-
-    decorations.transition(1000).attr("transform", function(d) {
+    //Ugly hack but for the moment there is no options since firefox can't do animated svgs :(
+    //Either wait for firefox to behave or do this fig entirely in html.
+    var isFirefox = typeof InstallTrigger !== 'undefined';
+    var decorations_transition = !isFirefox ? decorations.transition() : decorations;
+    decorations_transition.attr("transform", function(d) {
       var y = y0 - radius * Math.sin(d.angle);
       var x = x0 + radius * Math.cos(d.angle);
       return "translate(" + x + "," + y + "),rotate(" + (-d.angle + Math.PI / 2) * 180 / Math.PI + ")";
@@ -224,7 +242,8 @@ parliamentChairs = {
               a += Math.PI;
             return p + a;
           },
-          0)/party_nodes.length;
+          0)
+        /party_nodes.length;
 
         parties.push({
           party: key,
