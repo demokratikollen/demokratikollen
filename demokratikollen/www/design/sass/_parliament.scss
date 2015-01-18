@@ -3,7 +3,7 @@ a.member_node circle{
   stroke-width: 1px;
 }
 
-a.member_node circle:hover {
+a.member_node circle:hover, a.taphover.hover circle {
   stroke-width: 2px;
   opacity: 0.7;
 }

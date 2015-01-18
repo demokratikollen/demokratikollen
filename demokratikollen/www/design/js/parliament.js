@@ -2,7 +2,16 @@ demokratikollen.graphics.dateMemberCollectionFigure = {
   Setup: function(figureDiv, dateSliderDiv, x_size, y_size, callbackObject) { //create the svg for the figure.
     $(figureDiv).append("<svg id='member_collection' viewBox='0 0 940 470' preserveAspectRatio='xMinYMin meet'>");
 
-    $(figureDiv).append("<input type='checkbox' id='animation_toggle' checked>Fancy animations</input>")
+    //$(figureDiv).append("<input type='checkbox' id='animation_toggle' checked>Fancy animations</input>")
+
+    //hide the tool-tip window if we touch something else than a circle
+    d3.select("body").on("touchstart", function() { 
+      if(d3.event.targetTouches[0].target.parentElement.nodeName !== "a")
+      {
+        d3.selectAll("a.taphover").classed("hover", false);
+        d3.select("div.member-node-tooltip").style("opacity", 0);
+      }
+    });
 
     // Setup the slider.
     var date = new Date();
@@ -67,7 +76,7 @@ demokratikollen.graphics.dateMemberCollectionFigure = {
       .attr("transform", function(d) {
         return "translate(" + d.x + "," + (-d.r * 4) + ")"
       })
-      .attr('class', 'member_node');
+      .classed({'member_node': true, 'taphover': true});
 
     new_anchors.append("circle")
       .style("fill", function(d) {
@@ -77,24 +86,56 @@ demokratikollen.graphics.dateMemberCollectionFigure = {
         return d.r;
       });
 
-    new_anchors.on("mouseover", function(d) {
+    var show_tooltip = function(d) {
       d3.select("div.member-node-tooltip").style("opacity", 1);
       d3.select("div.member-node-tooltip p").text(d.name);
       d3.select("div.member-node-tooltip img").attr("src", '');
-    });
+    };
 
-    new_anchors.on("mousemove", function(d) {
+    var position_tooltip = function(d) {
       var tooltipOffsetY = 20;
       var div = d3.select("div.member-node-tooltip").style("top", (d3.event.pageY + tooltipOffsetY) + "px").style("left", (d3.event.pageX) + "px");
       d3.select("div.member-node-tooltip img").attr("src", d.image_url);
+    };
 
-    });
-
-    new_anchors.on("mouseout", function(d) {
+    var hide_tooltip = function() {
       d3.select("div.member-node-tooltip").style("opacity", 0);
-    })
+    };
 
-    var animationType = d3.select("#animation_toggle").property("checked");
+    var touch_tooltip = function(d) {
+      var self = this;
+      var link = d3.select(self);      
+
+      if (link.classed('hover')) {
+        return true;
+      } else {
+
+        d3.selectAll("a.taphover").classed('hover', function () { return this !== self ? false : true; });
+
+        //popup the tooltip.
+        show_tooltip(d);
+        var tooltipOffsetY = 20;
+        d3.select("div.member-node-tooltip").style("top", (d3.event.targetTouches[0].pageY + tooltipOffsetY) + "px").style("left", (d3.event.targetTouches[0].pageX) + "px");
+        d3.select("div.member-node-tooltip img").attr("src", d.image_url);
+
+        d3.event.preventDefault();
+        return false; //extra, and to make sure the function has consistent return points
+      }
+    };
+
+    new_anchors.on("mouseover", show_tooltip);
+    new_anchors.on("mousemove", position_tooltip);
+    new_anchors.on("mouseout", hide_tooltip);
+
+    new_anchors.on("touchstart", touch_tooltip);
+
+    //d3.select("body").on('touchstart', function () {
+    //  console.log(this);
+    //  d3.selectAll("a.taphover").classed({'hover': false});
+    //  hide_tooltip();
+    //});
+
+    var animationType = false; //d3.select("#animation_toggle").property("checked");
 
     if(animationType)
     {
