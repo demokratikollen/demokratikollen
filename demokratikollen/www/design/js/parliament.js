@@ -5,12 +5,9 @@ demokratikollen.graphics.dateMemberCollectionFigure = {
     //$(figureDiv).append("<input type='checkbox' id='animation_toggle' checked>Fancy animations</input>")
 
     //hide the tool-tip window if we touch something else than a circle
-    d3.select("body").on("touchstart", function() { 
-      if(d3.event.targetTouches[0].target.parentElement.nodeName !== "a")
-      {
-        d3.selectAll("a.taphover").classed("hover", false);
-        d3.select("div.member-node-tooltip").style("opacity", 0);
-      }
+    d3.select("body").on("click", function() { 
+      console.log(d3.event);
+      d3.select("div.member-node-tooltip").style("opacity", 0);
     });
 
     // Setup the slider.
@@ -51,9 +48,11 @@ demokratikollen.graphics.dateMemberCollectionFigure = {
     var tooltip = d3.select("body").append("div")
       .attr("class", "member-node-tooltip")
       .style("opacity", 0);
+    
+    var anchor = tooltip.append("a")
 
-    tooltip.append("img");
-    tooltip.append("p");
+    anchor.append("img");
+    anchor.append("p");
 
     return d3.select("svg#member_collection");
   },
@@ -90,11 +89,12 @@ demokratikollen.graphics.dateMemberCollectionFigure = {
       d3.select("div.member-node-tooltip").style("opacity", 1);
       d3.select("div.member-node-tooltip p").text(d.name);
       d3.select("div.member-node-tooltip img").attr("src", '');
+      d3.select("div.member-node-tooltip a").attr("href", "/" + d.url_name);
     };
 
-    var position_tooltip = function(d) {
+    var position_tooltip = function(d,x,y) {
       var tooltipOffsetY = 20;
-      var div = d3.select("div.member-node-tooltip").style("top", (d3.event.pageY + tooltipOffsetY) + "px").style("left", (d3.event.pageX) + "px");
+      var div = d3.select("div.member-node-tooltip").style("top", (y + tooltipOffsetY) + "px").style("left", x + "px");
       d3.select("div.member-node-tooltip img").attr("src", d.image_url);
     };
 
@@ -103,37 +103,23 @@ demokratikollen.graphics.dateMemberCollectionFigure = {
     };
 
     var touch_tooltip = function(d) {
-      var self = this;
-      var link = d3.select(self);      
-
-      if (link.classed('hover')) {
-        return true;
-      } else {
-
-        d3.selectAll("a.taphover").classed('hover', function () { return this !== self ? false : true; });
-
-        //popup the tooltip.
-        show_tooltip(d);
-        var tooltipOffsetY = 20;
-        d3.select("div.member-node-tooltip").style("top", (d3.event.targetTouches[0].pageY + tooltipOffsetY) + "px").style("left", (d3.event.targetTouches[0].pageX) + "px");
-        d3.select("div.member-node-tooltip img").attr("src", d.image_url);
-
         d3.event.preventDefault();
-        return false; //extra, and to make sure the function has consistent return points
-      }
-    };
+
+        var x = d3.event.targetTouches[0].pageX;
+        var y = d3.event.targetTouches[0].pageY;
+
+        show_tooltip(d);
+        position_tooltip(d,x,y);
+
+        return false;
+      };
 
     new_anchors.on("mouseover", show_tooltip);
-    new_anchors.on("mousemove", position_tooltip);
+    new_anchors.on("mousemove", function(d) { position_tooltip(d, d3.event.pageX, d3.event.pageY)});
     new_anchors.on("mouseout", hide_tooltip);
 
+    //catch touches to show popup.
     new_anchors.on("touchstart", touch_tooltip);
-
-    //d3.select("body").on('touchstart', function () {
-    //  console.log(this);
-    //  d3.selectAll("a.taphover").classed({'hover': false});
-    //  hide_tooltip();
-    //});
 
     var animationType = false; //d3.select("#animation_toggle").property("checked");
 
@@ -216,7 +202,12 @@ parliamentChairs = {
       return data.party
     });
 
-    decorations.exit().remove();
+    var transition_out = function(d) {
+      var y = -500;
+      var x = x0 + radius * Math.cos(d.angle);
+      return "translate(" + x + "," + y + ")"; };
+
+    decorations.exit().transition().duration(1000).attr("transform", transition_out).remove();
 
     var new_decorations = decorations.enter()
       .append("g")
@@ -239,28 +230,19 @@ parliamentChairs = {
       .attr("text-anchor", "middle")
       .attr("font-size", "45px");
 
-    decorations.selectAll("text.party_support")
-      .text(function(d) {
-        return self.partySupport[d.party]
-      })
-      .style('visibility', function(d) {
-        return self.partySupport[d.party] < 12 ? 'hidden' : 'visible'
-      });
+    //if the decorations are created for the first time position the outside the screen.
+    new_decorations.attr("transform", transition_out);
 
-    decorations.selectAll("text.party_abbr")
-      .style('visibility', function(d) {
-        return self.partySupport[d.party] < 12 ? 'hidden' : 'visible'
-      });
-
-    //Ugly hack but for the moment there is no options since firefox can't do animated svgs :(
-    //Either wait for firefox to behave or do this fig entirely in html.
-    var isFirefox = typeof InstallTrigger !== 'undefined';
-    var decorations_transition = !isFirefox ? decorations.transition() : decorations;
-    decorations_transition.attr("transform", function(d) {
+    decorations.transition().duration(1000).attr("transform", function(d) {
       var y = y0 - radius * Math.sin(d.angle);
       var x = x0 + radius * Math.cos(d.angle);
       return "translate(" + x + "," + y + "),rotate(" + (-d.angle + Math.PI / 2) * 180 / Math.PI + ")";
     });
+
+    //hide parties with too few members (due to people chaning party)
+    decorations.filter(function(d) { return self.partySupport[d.party] < 12 ? true : false })
+               .tiny_parties.transition().duration(1000).attr("transform", transition_out);
+
 
   },
   GetPartyAngles: function(data) {
