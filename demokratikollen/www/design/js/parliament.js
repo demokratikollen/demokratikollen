@@ -6,8 +6,8 @@ demokratikollen.graphics.dateMemberCollectionFigure = {
 
     //hide the tool-tip window if we touch something else than a circle
     d3.select("body").on("click", function() { 
-      console.log(d3.event);
-      d3.select("div.member-node-tooltip").style("opacity", 0);
+      if(d3.event.target.parentNode.parentNode.className !== 'member-node-tooltip')
+        d3.select("div.member-node-tooltip").style("opacity", 0);
     });
 
     // Setup the slider.
@@ -100,6 +100,7 @@ demokratikollen.graphics.dateMemberCollectionFigure = {
 
     var hide_tooltip = function() {
       d3.select("div.member-node-tooltip").style("opacity", 0);
+      d3.select("a.hover").classed({'hover': false});
     };
 
     var touch_tooltip = function(d) {
@@ -110,6 +111,9 @@ demokratikollen.graphics.dateMemberCollectionFigure = {
 
         show_tooltip(d);
         position_tooltip(d,x,y);
+
+        //add a hover to the circle.
+        d3.select(this).classed({'hover': true});
 
         return false;
       };
@@ -241,7 +245,7 @@ parliamentChairs = {
 
     //hide parties with too few members (due to people chaning party)
     decorations.filter(function(d) { return self.partySupport[d.party] < 12 ? true : false })
-               .tiny_parties.transition().duration(1000).attr("transform", transition_out);
+               .transition().duration(1000).attr("transform", transition_out);
 
 
   },

@@ -33,6 +33,11 @@ a.member_node circle:hover, a.taphover.hover circle {
   background: rgb(0, 0, 0);
   color: #fff;
   border-radius: 8px;
+  z-index: 99;
+
+  a {
+    color: #fff;
+  }
 
   img {
     width: 100%;
