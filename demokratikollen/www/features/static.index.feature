@@ -2,7 +2,7 @@ Feature: Test the index static page.
 
   Scenario: There should be an index page
      Given You browse to the index page
-     Then The page title should be "Demokratikollen"
+     Then The page title should be "Riksdagen - Demokratikollen"
 
   Scenario: No header button should be activated
      Given You browse to the index page

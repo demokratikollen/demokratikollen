@@ -18,18 +18,20 @@ from demokratikollen.core.utils.mongodb import MongoDBDatastore
 
 blueprint = Blueprint('pages', __name__)
 
+def render_parliament():
+    return render_template("/parliament/index.html")
+
 # Set the route and accepted methods
 @blueprint.route('/', methods=['GET'])
 def index():
-    return render_template("/index.html")
+    return render_parliament()
 
 @blueprint.route('/riksdagen', methods=['GET'])
 def parliament():
-    return render_template("/parliament/index.html")
+    return render_parliament()
 
 @blueprint.route('/partierna', methods=['GET'])
 def parties():
-
     return render_template("/parties/index.html")
 
 @blueprint.route('/forslagen', methods=['GET'])

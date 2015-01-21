@@ -164,8 +164,9 @@
         var ul = d3.select("#searchresults");
 
         var tophit = ul.selectAll(".tophit").data([results.top]);
-        tophit.enter().append("li").attr("class", "tophit").attr("role", "presentation");
-        tophit
+        tophit.enter().append("li").attr("class", "tophit").attr("role", "presentation").append("a");
+        tophit.select("a")        
+          .attr("href", prop("url"))
           .text(prop("title"));
 
         var groups = ul.selectAll(".group").data(results.groups);
@@ -178,9 +179,12 @@
         groups.exit().remove();
 
         var items = groups.select("ul").selectAll("li").data(function(d){return d.objects;});
-        items.enter().append("li").attr("class", "group-item").attr("role", "presentation");
+        items.enter().append("li").attr("class", "group-item").attr("role", "presentation")
+           .append("a");
 
-        items.text(prop("title"));
+        items.select("a")
+          .attr("href", prop("url"))
+          .text(prop("title"));
 
         items.exit().remove();
 

@@ -70,11 +70,25 @@ $sr-heading-font-size: $font-size-small;
     display: block;
     padding: 3px 20px;
     clear: both;
+  }
+
+  li > a {
+    display: block;
+    clear: both;
     font-size: $sr-result-title-font-size;
     font-weight: bold;
     line-height: $line-height-base;
     color: $dropdown-link-color;
     white-space: nowrap; // prevent links from randomly breaking onto new lines
+    text-decoration: none;
   }
+
+  li.tophit {
+    background-color: $greyish-8;
+  }
+  li.tophit:hover, ul.group-items > li:hover {
+    background-color: $greyish-8;
+  }
+
 }
 
