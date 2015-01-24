@@ -42,35 +42,46 @@ svg.timeline {
 }
 
 .party-history svg {
-	line.interactive {
-		stroke-width: 1px;
-		stroke: $greyish-2;
-	}
-	line.interactive.hover {
-		stroke-dasharray: 5, 2;
-		stroke: $greyish-3;
-	}
 
-	line.term {
-		stroke-width: 4px;
-		stroke: $greyish-2;
-	}
-	path.poll {
-		fill: none;
-		stroke-width: 2px;
-		stroke: $greyish-3;
-	}
+    line.term {
+        stroke-width: 4px;
+        stroke: $greyish-4;
+    }
+    line.term.selected {
+        stroke-width: 6px;
+        stroke: $greyish-2;
+
+    }
+    path.poll {
+        fill: none;
+        stroke-width: 2px;
+        stroke: $greyish-3;
+    }
     circle.poll {
         fill: $greyish-3;
         stroke-width: 0;
+        
+
+    }
+    circle.poll.selected {
+        fill: $greyish-0;
+        stroke-width: 4;
+        stroke: $greyish-0;
     }
 
-	rect.party-leader.even {
-		fill: $brownish-5;
-	}
+    rect.party-leader.even {
+        fill: $greyish-5;
+    }
 
-	rect.party-leader.odd {
-		fill: $brownish-6;
+    rect.party-leader.odd {
+        fill: $greyish-6;
+    }
+}
+
+.picker-cross {
+	line {
+		stroke-width: 1px;
+		stroke: $greyish-2;
 	}
 }
 

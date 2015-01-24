@@ -8,7 +8,6 @@ demokratikollen.graphics.PartyHistory = function() {
     timeUnit = d3.time.year,
     xTickLabelWidth = 100,
     markerSize = 4,
-    selectedMarkerSize = 6,
     cssClass = "party-history";
 
   function unique(arr) {
@@ -30,6 +29,8 @@ demokratikollen.graphics.PartyHistory = function() {
 
       var info = container.append("div")
         .classed("info", true);
+
+      percentFormat = d3.format(",.1%")
 
       var legend = container.append("div")
         .classed("legend", true);
@@ -105,8 +106,7 @@ demokratikollen.graphics.PartyHistory = function() {
 
         partyLeaderRects.classed("selected", prop("selected"));
 
-        termLines = plotArea.append("g")
-          .selectAll("line.term")
+        termLines = plotArea.selectAll("line.term")
           .data(data.terms);
         
         termLines.enter()
@@ -119,9 +119,12 @@ demokratikollen.graphics.PartyHistory = function() {
 
         termLines.classed("selected", prop("selected"));
 
-        plotArea.append("path")
+        plotArea.selectAll("path.poll")
+          .data([data.polls])
+          .enter()
+          .append("path")
           .classed("poll", true)
-          .attr("d", pollPath(data.polls));
+          .attr("d", pollPath);
 
         pollMarkers = plotArea.selectAll("circle.poll")
           .data(data.polls);
@@ -130,33 +133,19 @@ demokratikollen.graphics.PartyHistory = function() {
           .append("circle")
           .classed("poll", true)
           .attr("cx", function(d) { return xScale(d.time); })
-          .attr("cy", function(d) { return yScale(d.value); });
+          .attr("cy", function(d) { return yScale(d.value); })
+          .attr('r', markerSize);
 
         pollMarkers
-          .classed("selected", prop("selected"))
-          .attr('r', function (d) { return d.selected ? markerSize : selectedMarkerSize; });
+          .classed("selected", prop('selected'));
 
-        var t = data.selection.t,
-          infoText = info
-            .selectAll("p")
-            .data(data.selection.texts);
-          
-        infoText.enter().append("p");
-
-        infoText.html(function (d) { return d; });
-
-        var verticalLine = svg.selectAll("line.interactive")
-          .data([t]);
-          
-        verticalLine.enter()
-          .append("line")
-          .classed("interactive", true)
-          .style("pointer-events", "none");
-          
-        verticalLine.attr("x1", xScale)
-          .attr("x2", xScale)
-          .attr("y1", 0)
-          .attr("y2", plotAreaHeight);
+        if (data.texts) {
+          var paragraphs = info.selectAll("p").data(data.texts);
+          paragraphs.enter().append("p");
+          paragraphs.html(function (d) { return d; });
+        }
+        
+        
       }
 
       // These two lines limit the number of time tick values and only keeps those that are
@@ -183,78 +172,66 @@ demokratikollen.graphics.PartyHistory = function() {
         .classed("axis y", true)
         .call(yAxis);
 
+      draw();
 
+      var update = (function () {
+        var findItem = {},
+          generateText = {};
 
-      function findPartyLeader(t) {
-        result = data.partyLeaders.filter(function (d) { return d.start <= t && t <= d.end; })[0];
-        console.log(result);
-        return "Partiledare: " + (result ? result.name : "okänd");
-      }
+        findItem['partyLeader'] = function (t) {
+          return data.partyLeaders.filter(function (d) { return d.start <= t && t <= d.end; })[0];
+        }
 
-      function findTerm(t) {
-        result = data.terms.filter(function (d) { return d.start <= t && t <= d.end; })[0];
-        return "Antal mandat: " + (result ? result.value : "okänt");
-      }
+        findItem['term'] = function (t) {
+          return data.terms.filter(function (d) { return d.start <= t && t <= d.end; })[0];
+        }
 
-      function findPoll(t) {
-        result = data.polls.filter(function (d) { return d.time <= t; });
-        result = result[result.length - 1]
-        return "Senaste opinionsundersökning: " + (result ? (result.value * 100 + "% (" + result.time + ")") : "okänt");
-      }
+        findItem['poll'] = function (t) {
+          return data.polls.filter(function (d) { return d.time <= t; }).reverse()[0];
+        }
 
-      function mark(x, y) {
-        data.selection.t = xScale.invert(x);
-        data.selection.texts = [
-          findPartyLeader(data.selection.t),
-          findTerm(data.selection.t),
-          findPoll(data.selection.t)];
-        draw();
-      }
+        var items = ['partyLeader', 'term', 'poll'],
+          currentSelection = null;
 
-      var config = {
-        xMin: 0,
-        xMax: width,
-        yMin: 0,
-        yMax: height,
-        hover: mark,
-        leave: function () {
-          mark(xScale(new Date()));
-        },
-        click: mark
-      };
+        function redrawIfChanged(x, y) {
+          
+          var changed = false,
+            t = xScale.invert(x),
+            oldSelection = currentSelection;
 
+          data.selection = {'t': t};
 
-      interactiveArea = svg.append("rect")
-        .classed("interactive", true)
+          function trySetSelected(value) {
+            return function (d) { if (d) { d.selected = value; } }
+          }
+
+          currentSelection = items.map(function (item) { return findItem[item](t); });
+          
+          if (oldSelection) { 
+            oldSelection.forEach(trySetSelected(false));
+          } else {
+            oldSelection = currentSelection.map(function () { return null; });
+          }
+          currentSelection.forEach(trySetSelected(true));
+          for (var i=0; i<items.length; i++) {
+            data.selection[items[i]] = currentSelection[i];
+            changed = changed | (currentSelection[i] != oldSelection[i]);
+          }
+          if (changed) { draw(); }
+        }
+        return redrawIfChanged;
+      })();
+
+      var picker = demokratikollen.graphics.PickerCross()
+        .onMouseMove(update);
+      
+      var interactiveArea = plotArea.append("g");
+      interactiveArea.append("rect")
         .attr("width", width)
         .attr("height", height)
-        .style("fill", "transparent");
+        .style("fill", 'transparent')
 
-      function onMouseMove() {
-        var eventData = d3.mouse(this),
-          x = eventData[0],
-          y = eventData[1];
-          config.hover(x, y);
-      }
-
-      function onMouseOut() {
-          config.leave();
-      }
-
-      function onClick() {
-        var eventData = d3.mouse(this),
-          x = eventData[0],
-          y = eventData[1];
-          config.click(x, y);
-      }
-
-      interactiveArea.on("mousemove.interactive", onMouseMove);
-      interactiveArea.on("mouseout.interactive", onMouseOut);
-      interactiveArea.on("mouseup.interactive", onClick);
-
-      data.selection = {t: new Date(), texts: ["", "", ""]};
-
-      draw();
+      picker(interactiveArea);
 
     } );
   }
