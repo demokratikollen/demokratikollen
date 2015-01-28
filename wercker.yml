@@ -66,4 +66,4 @@ deploy:
         - script:
             name: Deployment
             code: | 
-                ansible-playbook -v -i deployment/inventory deployment/playbook.yml
+                ansible-playbook -v -i inventory deployment/playbook.yml
