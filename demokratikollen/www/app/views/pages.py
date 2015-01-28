@@ -1,11 +1,13 @@
 # -*- coding: utf-8 -*-
 
+from datetime import datetime
+
 # Import flask dependencies
 from flask import request, render_template, \
                   flash, g, session, redirect, url_for
 
 # Import the database object from the main app module
-from demokratikollen.www.app.helpers.cache import cache
+from demokratikollen.www.app.helpers.cache import cache, http_expires
 from demokratikollen.www.app.helpers.db import db
 from demokratikollen.core.db_structure import Member, ChamberAppointment, Party
 from demokratikollen.www.app.models.proposals import proposals_main
@@ -53,10 +55,11 @@ def sitemap():
     return render_template("/sitemap.xml", pages=pages)
 
 @blueprint.route('/search.json', methods=['GET'])
+@cache.cached(3600*24*30)
+@http_expires(3600*24*30)
 def timeseries():
-
     ds = MongoDBDatastore()
-    return jsonify(ds.get_object("search")); 
+    return jsonify(ds.get_object("search"))
 
 def render_party(p):
     return render_template("/parties/party.html",party=p)
