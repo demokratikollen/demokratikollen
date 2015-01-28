@@ -7,7 +7,7 @@ demokratikollen.graphics.dateMemberCollectionFigure = {
     //hide the tool-tip window if we touch something else than a circle
     d3.select("body").on("click", function() { 
       if(d3.event.target.parentNode.parentNode.className !== 'member-node-tooltip')
-        d3.select("div.member-node-tooltip").style("opacity", 0);
+        d3.select("div.member-node-tooltip").style("display", 'none');
     });
 
     // Setup the slider.
@@ -47,7 +47,7 @@ demokratikollen.graphics.dateMemberCollectionFigure = {
     //Add the tooltip div.
     var tooltip = d3.select("body").append("div")
       .attr("class", "member-node-tooltip")
-      .style("opacity", 0);
+      .style("display", 'none');
     
     var anchor = tooltip.append("a")
 
@@ -86,7 +86,7 @@ demokratikollen.graphics.dateMemberCollectionFigure = {
       });
 
     var show_tooltip = function(d) {
-      d3.select("div.member-node-tooltip").style("opacity", 1);
+      d3.select("div.member-node-tooltip").style("display", '');
       d3.select("div.member-node-tooltip p").text(d.name);
       d3.select("div.member-node-tooltip img").attr("src", '');
       d3.select("div.member-node-tooltip a").attr("href", "/" + d.url_name);
@@ -99,7 +99,7 @@ demokratikollen.graphics.dateMemberCollectionFigure = {
     };
 
     var hide_tooltip = function() {
-      d3.select("div.member-node-tooltip").style("opacity", 0);
+      d3.select("div.member-node-tooltip").style("display", 'none');
       d3.select("a.hover").classed({'hover': false});
     };
 
