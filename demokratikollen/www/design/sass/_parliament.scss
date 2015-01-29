@@ -6,6 +6,7 @@ a.member_node circle{
 a.member_node circle:hover, a.taphover.hover circle {
   stroke-width: 2px;
   opacity: 0.7;
+  filter: alpha(opacity=70);
 }
 
 #parliament_svg_div {
