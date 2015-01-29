@@ -9,17 +9,28 @@ a.member_node circle:hover, a.taphover.hover circle {
   filter: alpha(opacity=70);
 }
 
-#parliament_svg_div {
+#parliament-figure div.col{
   @extend .col-xs-10;
   @extend .col-xs-offset-1;
 }
 
-#parliament_date_slider {
+#parliament-date-slider div.col {
   @extend .col-xs-10;
   @extend .col-xs-offset-1;
 
   padding-top: 2%;
 
+}
+
+div.row.figure-description div.col{
+  @extend .col-xs-10;
+  @extend .col-xs-offset-1;
+  text-align: justify;
+}
+
+div.row.figure-description {
+  padding-top: 10px;
+  padding-bottom: 10px;
 }
 
 .member-node-tooltip {

@@ -154,11 +154,11 @@ demokratikollen.graphics.dateMemberCollectionFigure = {
 
 parliamentChairs = {
   Setup: function() {
-    this.canvas = demokratikollen.graphics.dateMemberCollectionFigure.Setup("div#parliament_svg_div", "div#parliament_date_slider div.date_slider", 940, 470, this);
+    this.canvas = demokratikollen.graphics.dateMemberCollectionFigure.Setup("div#parliament-figure figure", "div#parliament-date-slider div.date_slider", 940, 470, this);
     this.UpdateFromDateSlider(this);
   },
   UpdateFromDateSlider: function(self) {
-    var date_seconds = $("div#parliament_date_slider div.date_slider").slider("value");
+    var date_seconds = $("div#parliament-date-slider div.date_slider").slider("value");
     var date = new Date();
     date.setTime(date_seconds);
 
