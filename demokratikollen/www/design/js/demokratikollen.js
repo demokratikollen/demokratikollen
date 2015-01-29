@@ -16,6 +16,24 @@ function compose(f,g) {
   };
 }
 
+//cookienotice
+$(function() {
+
+    //check if the cookie notice cookie is set? 
+    if(!$.cookie('cookieconsent'))
+    {    
+        var cookieNoticeContainer = $("cookienotice");
+        cookieNoticeContainer.fadeIn(2000);
+        $("#cookie-consent-button").on("click", function () {
+            cookieNoticeContainer.fadeOut();
+            $.cookie('cookieconsent', 'true', { expires: 365, path: '/' });
+        });
+    }
+
+
+});
+
+
 //google analytics
 (function(i,s,o,g,r,a,m){i['GoogleAnalyticsObject']=r;i[r]=i[r]||function(){
 (i[r].q=i[r].q||[]).push(arguments)},i[r].l=1*new Date();a=s.createElement(o),

@@ -85,6 +85,17 @@
         <p class="left">&copy; 2014 Demokratikollen</p><p class="right"><a href="/om">Om demokratikollen</a></p>
       </div>
     </footer>
+
+    <cookienotice>
+      <div>
+        <p class="center">
+          Demokratikollen använder kakor för att kunna ge dig som besökare en bättre upplevelse. För mer information, <a href="#">se våran sekretesspolicy</a>
+        </p>
+        <input id="cookie-consent-button" type="button" value="Visa inte detta meddelande igen">
+
+      </div>
+    </cookienotice>
+
     {%- block scripts %}
     <script src="{{ url_for('static', filename='js/dependencies.min.js') }}"></script>
     <script src="{{ url_for('static', filename='js/scripts.min.js') }}"></script>
