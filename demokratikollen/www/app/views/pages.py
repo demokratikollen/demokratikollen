@@ -26,7 +26,7 @@ def render_parliament():
 # Set the route and accepted methods
 @blueprint.route('/', methods=['GET'])
 def index():
-    return render_parliament()
+    return render_template("/index.html")
 
 @blueprint.route('/riksdagen', methods=['GET'])
 def parliament():
