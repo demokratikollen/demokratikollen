@@ -20,6 +20,14 @@ $tb-content-padding:20px;
   @include box-shadow(none);
 }
 
+h1,h2,h3,h4,h5,h6 {
+  text-align: left;
+}
+
+.row .text-col {
+  @extend .col-md-8;
+}
+
 @import "navbar";
 @import "search-results";
 @import "footer";

@@ -395,7 +395,7 @@ $navbar-inverse-border:                     darken($navbar-inverse-bg, 10%) !def
 // Inverted navbar links
 $navbar-inverse-link-color:                 lighten($gray-light, 40%) !default;
 $navbar-inverse-link-hover-color:           #fff !default;
-$navbar-inverse-link-hover-bg:              lighten($navbar-inverse-bg,5%) !default;
+$navbar-inverse-link-hover-bg:              lighten($navbar-inverse-bg,10%) !default;
 $navbar-inverse-link-active-color:          $navbar-inverse-link-hover-color !default;
 $navbar-inverse-link-active-bg:             $navbar-inverse-link-hover-bg !default;
 $navbar-inverse-link-disabled-color:        #444 !default;

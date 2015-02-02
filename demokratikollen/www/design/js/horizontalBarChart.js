@@ -22,6 +22,7 @@ demokratikollen.graphics.horizontalBarChart = function() {
   var width = 400, height = 200;
   var maxAbsoluteBandWidth = 40;
   var onBarActivated = null;
+  var formatter = function(d){return d.value;};
 
   function chart(selection) {
     selection.each(function(data){
@@ -77,7 +78,7 @@ demokratikollen.graphics.horizontalBarChart = function() {
       barTexts.enter().append("text").attr("class","bar-text");
 
       barTexts
-        .text(function(d){return d.value;})
+        .text(formatter)
         .style("text-anchor","start")
         .style("alignment-baseline","middle")
         .attr("x", function(d,i){return xScale(d.value);})
@@ -131,6 +132,11 @@ demokratikollen.graphics.horizontalBarChart = function() {
  chart.title = function(_) {
     if (!arguments.length) return title;
     else title = _;
+    return chart;
+ }
+ chart.formatter = function(_) {
+    if (!arguments.length) return formatter;
+    else formatter = _;
     return chart;
  }
 

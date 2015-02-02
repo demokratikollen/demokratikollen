@@ -10,21 +10,23 @@ a.member_node circle:hover, a.taphover.hover circle {
 }
 
 #parliament-figure div.col{
-  @extend .col-xs-10;
-  @extend .col-xs-offset-1;
+  @extend .col-xs-12;
+  // @extend .col-xs-offset-1;
 }
 
 #parliament-date-slider div.col {
-  @extend .col-xs-10;
-  @extend .col-xs-offset-1;
+  @extend .col-xs-12;
+  // @extend .col-xs-offset-1;
 
   padding-top: 2%;
+  padding-left: 30px;
+  padding-right: 40px;
 
 }
 
 div.row.figure-description div.col{
-  @extend .col-xs-10;
-  @extend .col-xs-offset-1;
+  @extend .col-xs-12;
+  // @extend .col-xs-offset-1;
   text-align: justify;
 }
 
