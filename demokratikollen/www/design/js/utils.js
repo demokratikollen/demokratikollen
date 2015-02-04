@@ -31,6 +31,11 @@ utils.getPartyColor = function(abbr) {
   return d3.rgb(demokratikollen.utils.colors.get(abbr.toLowerCase())["color"]);
 };
 
+utils.getInnerWidth = function (selection) {
+  var cs = window.getComputedStyle(selection.node());
+  return cs.width.substr(0, cs.width.length-2);
+}
+
 utils.pageState = function(obj) {
 
   var state = {};
