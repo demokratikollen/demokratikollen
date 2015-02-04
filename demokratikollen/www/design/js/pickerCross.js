@@ -129,7 +129,7 @@ demokratikollen.graphics.PickerCross = function() {
   }
 
   chart.margin = function(value) {
-    if (!arguments.length) return magin;
+    if (!arguments.length) return margin;
     magin = value;
     return chart;
   }
