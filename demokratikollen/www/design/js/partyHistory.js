@@ -220,7 +220,8 @@ demokratikollen.graphics.PartyHistory = function() {
       })();
 
       var picker = demokratikollen.graphics.PickerCross()
-        .onMouseMove(function(x, y) { select(xScale.invert(x)); });
+        .onMouseMove(function(x, y) { select(xScale.invert(x)); })
+        .onMouseOut(function(x,y) { select(new Date()); });
       
       var interactiveArea = plotArea.append("g");
       interactiveArea.append("rect")
