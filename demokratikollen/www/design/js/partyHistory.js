@@ -174,36 +174,33 @@ demokratikollen.graphics.PartyHistory = function() {
 
       draw();
 
-      var update = (function () {
-        var findItem = {},
-          generateText = {};
+      var select = (function() {
+        var findItem = {
+          partyLeader: function (t) {
+            return data.partyLeaders.filter(function (d) { return d.start <= t && t <= d.end; })[0];
+          },
+          term: function (t) {
+            return data.terms.filter(function (d) { return d.start <= t && t <= d.end; })[0];
+          },
+          poll: function (t) {
+            return data.polls.filter(function (d) { return d.time <= t; }).reverse()[0];
+          }
+        };
 
-        findItem['partyLeader'] = function (t) {
-          return data.partyLeaders.filter(function (d) { return d.start <= t && t <= d.end; })[0];
-        }
-
-        findItem['term'] = function (t) {
-          return data.terms.filter(function (d) { return d.start <= t && t <= d.end; })[0];
-        }
-
-        findItem['poll'] = function (t) {
-          return data.polls.filter(function (d) { return d.time <= t; }).reverse()[0];
-        }
+        var generateText = {};
 
         var items = ['partyLeader', 'term', 'poll'],
           currentSelection = null;
 
-        function redrawIfChanged(x, y) {
-          
+        function trySetSelected(value) {
+          return function (d) { if (d) { d.selected = value; } }
+        }
+
+        function updateSelection(t) {
           var changed = false,
-            t = xScale.invert(x),
             oldSelection = currentSelection;
 
-          data.selection = {'t': t};
-
-          function trySetSelected(value) {
-            return function (d) { if (d) { d.selected = value; } }
-          }
+          data.selection = {t: t};
 
           currentSelection = items.map(function (item) { return findItem[item](t); });
           
@@ -219,11 +216,11 @@ demokratikollen.graphics.PartyHistory = function() {
           }
           if (changed) { draw(); }
         }
-        return redrawIfChanged;
+        return updateSelection;
       })();
 
       var picker = demokratikollen.graphics.PickerCross()
-        .onMouseMove(update);
+        .onMouseMove(function(x, y) { select(xScale.invert(x)); });
       
       var interactiveArea = plotArea.append("g");
       interactiveArea.append("rect")
