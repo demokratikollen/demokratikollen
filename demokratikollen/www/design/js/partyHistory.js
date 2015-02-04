@@ -1,4 +1,5 @@
 /*global demokratikollen, d3, prop */
+
 demokratikollen.graphics.PartyHistory = function () {
 
   var width = 400,
@@ -27,10 +28,9 @@ demokratikollen.graphics.PartyHistory = function () {
         .style("height", height);
 
       var info = container.append("div")
-        .classed("info", true);
+        .classed("info", true)
+        .style("margin-left", (svgMargin.left + 10) + 'px');
 
-      container.append("div")
-        .classed("legend", true);
 
       var plotAreaWidth = width - svgMargin.left - svgMargin.right,
         plotAreaHeight = height - svgMargin.top - svgMargin.bottom;
@@ -169,8 +169,6 @@ demokratikollen.graphics.PartyHistory = function () {
         .classed("axis y", true)
         .call(yAxis);
 
-      draw();
-
       var select = (function () {
         var items = ['partyLeader', 'term', 'poll'],
           currentSelection = null;
@@ -248,6 +246,8 @@ demokratikollen.graphics.PartyHistory = function () {
         }
         return updateSelection;
       }());
+
+      select(new Date());
 
       /*jslint unparam: true*/
       var picker = demokratikollen.graphics.PickerCross()
