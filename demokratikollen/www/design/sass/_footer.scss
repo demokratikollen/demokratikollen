@@ -28,10 +28,11 @@ footer {
   height: $footer-height;
   line-height: $footer-height;
   padding: 0;
-  background-color: $gray-lighter;
+  background-color: $greyish-8;
   position: relative;
   margin-top: -$footer-height;
   clear:both;
+  border-top: 1px solid $greyish-7;
 
   div:first-child {
     @extend .container;
@@ -39,9 +40,9 @@ footer {
     p {
       margin: 0;
       font-size: $font-size-small;
-      color: $gray-light;
+      color: $greyish-4;
       a {
-        color: $gray;
+        color: $greyish-3;
       }
     }
 

@@ -4,6 +4,7 @@ from demokratikollen.www.app.models.parties import party_election, get_municipal
                                                     get_best_party_gender,get_best_party_education
 
 from demokratikollen.www.app.helpers.db import db
+from demokratikollen.www.app.helpers.cache import cache
 from demokratikollen.core.db_structure import Party
 
 
@@ -40,6 +41,7 @@ def best_party_education(t,abbr):
 
 
 @blueprint.route('/cosigning/timeseries.json', methods=['GET'])
+@cache.cached(3600*24)
 def timeseries():
 
     ds = MongoDBDatastore()
@@ -47,6 +49,7 @@ def timeseries():
     return jsonify(cosigning_data);
 
 @blueprint.route('/cosigning/matrix/<string:partyA>.json', methods=['GET'])
+@cache.memoize(3600*24)
 def cosigning_matrix(partyA):
 
     ds = MongoDBDatastore()
@@ -61,6 +64,7 @@ def cosigning_matrix(partyA):
 
 
 @blueprint.route('/covoting/party_bias_<string:partyA>_<string:partyB>.json', methods=['GET'])
+@cache.memoize(3600*24)
 def party_bias(partyA,partyB):
 
     s=db.session

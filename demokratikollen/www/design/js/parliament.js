@@ -2,7 +2,13 @@ demokratikollen.graphics.dateMemberCollectionFigure = {
   Setup: function(figureDiv, dateSliderDiv, x_size, y_size, callbackObject) { //create the svg for the figure.
     $(figureDiv).append("<svg id='member_collection' viewBox='0 0 940 470' preserveAspectRatio='xMinYMin meet'>");
 
-    $(figureDiv).append("<input type='checkbox' id='animation_toggle' checked>Fancy animations</input>")
+    //$(figureDiv).append("<input type='checkbox' id='animation_toggle' checked>Fancy animations</input>")
+
+    //hide the tool-tip window if we touch something else than a circle
+    d3.select("body").on("click", function() { 
+      if(d3.event.target.parentNode.parentNode.className !== 'member-node-tooltip')
+        d3.select("div.member-node-tooltip").style("display", 'none');
+    });
 
     // Setup the slider.
     var date = new Date();
@@ -41,10 +47,12 @@ demokratikollen.graphics.dateMemberCollectionFigure = {
     //Add the tooltip div.
     var tooltip = d3.select("body").append("div")
       .attr("class", "member-node-tooltip")
-      .style("opacity", 0);
+      .style("display", 'none');
+    
+    var anchor = tooltip.append("a")
 
-    tooltip.append("img");
-    tooltip.append("p");
+    anchor.append("img");
+    anchor.append("p");
 
     return d3.select("svg#member_collection");
   },
@@ -67,7 +75,7 @@ demokratikollen.graphics.dateMemberCollectionFigure = {
       .attr("transform", function(d) {
         return "translate(" + d.x + "," + (-d.r * 4) + ")"
       })
-      .attr('class', 'member_node');
+      .classed({'member_node': true, 'taphover': true});
 
     new_anchors.append("circle")
       .style("fill", function(d) {
@@ -77,24 +85,47 @@ demokratikollen.graphics.dateMemberCollectionFigure = {
         return d.r;
       });
 
-    new_anchors.on("mouseover", function(d) {
-      d3.select("div.member-node-tooltip").style("opacity", 1);
+    var show_tooltip = function(d) {
+      d3.select("div.member-node-tooltip").style("display", '');
       d3.select("div.member-node-tooltip p").text(d.name);
       d3.select("div.member-node-tooltip img").attr("src", '');
-    });
+      d3.select("div.member-node-tooltip a").attr("href", "/" + d.url_name);
+    };
 
-    new_anchors.on("mousemove", function(d) {
+    var position_tooltip = function(d,x,y) {
       var tooltipOffsetY = 20;
-      var div = d3.select("div.member-node-tooltip").style("top", (d3.event.pageY + tooltipOffsetY) + "px").style("left", (d3.event.pageX) + "px");
+      var div = d3.select("div.member-node-tooltip").style("top", (y + tooltipOffsetY) + "px").style("left", x + "px");
       d3.select("div.member-node-tooltip img").attr("src", d.image_url);
+    };
 
-    });
+    var hide_tooltip = function() {
+      d3.select("div.member-node-tooltip").style("display", 'none');
+      d3.select("a.hover").classed({'hover': false});
+    };
 
-    new_anchors.on("mouseout", function(d) {
-      d3.select("div.member-node-tooltip").style("opacity", 0);
-    })
+    var touch_tooltip = function(d) {
+        d3.event.preventDefault();
 
-    var animationType = d3.select("#animation_toggle").property("checked");
+        var x = d3.event.targetTouches[0].pageX;
+        var y = d3.event.targetTouches[0].pageY;
+
+        show_tooltip(d);
+        position_tooltip(d,x,y);
+
+        //add a hover to the circle.
+        d3.select(this).classed({'hover': true});
+
+        return false;
+      };
+
+    new_anchors.on("mouseover", show_tooltip);
+    new_anchors.on("mousemove", function(d) { position_tooltip(d, d3.event.pageX, d3.event.pageY)});
+    new_anchors.on("mouseout", hide_tooltip);
+
+    //catch touches to show popup.
+    new_anchors.on("touchstart", touch_tooltip);
+
+    var animationType = false; //d3.select("#animation_toggle").property("checked");
 
     if(animationType)
     {
@@ -123,11 +154,11 @@ demokratikollen.graphics.dateMemberCollectionFigure = {
 
 parliamentChairs = {
   Setup: function() {
-    this.canvas = demokratikollen.graphics.dateMemberCollectionFigure.Setup("div#parliament_svg_div", "div#parliament_date_slider div.date_slider", 940, 470, this);
+    this.canvas = demokratikollen.graphics.dateMemberCollectionFigure.Setup("div#parliament-figure figure.canvas", "div#parliament-date-slider div.date_slider", 940, 470, this);
     this.UpdateFromDateSlider(this);
   },
   UpdateFromDateSlider: function(self) {
-    var date_seconds = $("div#parliament_date_slider div.date_slider").slider("value");
+    var date_seconds = $("div#parliament-date-slider div.date_slider").slider("value");
     var date = new Date();
     date.setTime(date_seconds);
 
@@ -175,7 +206,12 @@ parliamentChairs = {
       return data.party
     });
 
-    decorations.exit().remove();
+    var transition_out = function(d) {
+      var y = -500;
+      var x = x0 + radius * Math.cos(d.angle);
+      return "translate(" + x + "," + y + ")"; };
+
+    decorations.exit().transition().duration(1000).attr("transform", transition_out).remove();
 
     var new_decorations = decorations.enter()
       .append("g")
@@ -198,28 +234,19 @@ parliamentChairs = {
       .attr("text-anchor", "middle")
       .attr("font-size", "45px");
 
-    decorations.selectAll("text.party_support")
-      .text(function(d) {
-        return self.partySupport[d.party]
-      })
-      .style('visibility', function(d) {
-        return self.partySupport[d.party] < 12 ? 'hidden' : 'visible'
-      });
+    //if the decorations are created for the first time position the outside the screen.
+    new_decorations.attr("transform", transition_out);
 
-    decorations.selectAll("text.party_abbr")
-      .style('visibility', function(d) {
-        return self.partySupport[d.party] < 12 ? 'hidden' : 'visible'
-      });
-
-    //Ugly hack but for the moment there is no options since firefox can't do animated svgs :(
-    //Either wait for firefox to behave or do this fig entirely in html.
-    var isFirefox = typeof InstallTrigger !== 'undefined';
-    var decorations_transition = !isFirefox ? decorations.transition() : decorations;
-    decorations_transition.attr("transform", function(d) {
+    decorations.transition().duration(1000).attr("transform", function(d) {
       var y = y0 - radius * Math.sin(d.angle);
       var x = x0 + radius * Math.cos(d.angle);
       return "translate(" + x + "," + y + "),rotate(" + (-d.angle + Math.PI / 2) * 180 / Math.PI + ")";
     });
+
+    //hide parties with too few members (due to people chaning party)
+    decorations.filter(function(d) { return self.partySupport[d.party] < 12 ? true : false })
+               .transition().duration(1000).attr("transform", transition_out);
+
 
   },
   GetPartyAngles: function(data) {

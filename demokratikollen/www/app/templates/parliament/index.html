@@ -1,11 +1,39 @@
 {% extends "parliament/base.html" %}
 
 {% block content %}
-  <div id="parliament_svg_div" class="row">
+<div class="row figure-description">
+  <div class="text-col">
+  	<h2> Fördelning av mandat i Sveriges riksdag</h2>
+  	<p> I nedanstående figur visas nuvarande och historisk mandatfördelning i Sverige riksdag. För muspekaren över (eller klicka på om du använder en mobil) en cirkel för att se ledamoten. För att komma vidare, klicka på cirkeln eller porträttet. </p>
   </div>
-  <div id="parliament_date_slider" class="row">
-      <div class="date_slider"></div>
+</div>
+<div class="row" id="parliament-figure">
+  <div class="col-md-10">
+    <figure>
+      <div class="inset">
+        <div class="row">     
+    		  <figure class="canvas"></figure> 
+        </div>
+        <div id="parliament-date-slider" class="row">
+          <div class="col">
+            <div class="date_slider"></div>
+          </div>
+        </div>
+      </div>
+    </figure>
   </div>
+</div>
+    
+
+<div class="row figure-description">
+  	<div class="text-col">
+  		<h3>Ser något konstigt ut?</h3>
+  		<p>
+  		Datan från riksdagen innehåller tyvärr endast information om ledamöternas nuvarande partitillhörighet. Om du väljer en historisk tidpunkt visas därför alla ledamöter med färgen för det parti de tillhör idag. Detta gör att den historiska mandatfördelningen kan ha sett något annorlunda ut än vad som visas i figuren. Cirklar med grå färg är ledamöter som har lämnat sitt parti och inte suttit i riksdagen för ett annat parti sen dess.
+  		</p>
+  	</div>
+  </div>
+
 </div>
 {% endblock %}
 

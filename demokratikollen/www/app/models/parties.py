@@ -1,4 +1,5 @@
 from demokratikollen.www.app.helpers.db import db
+from demokratikollen.www.app.helpers.cache import cache
 from demokratikollen.core.db_structure import Party
 from demokratikollen.core.utils.mongodb import MongoDBDatastore
 import math
@@ -24,7 +25,6 @@ def party_comparator(p1):
     }
     return party_sort[p1.lower()]
 
-
 db_name = {
         'c':'Centerpartiet',
         'fp':'Folkpartiet',
@@ -36,6 +36,7 @@ db_name = {
         'v':'Vänsterpartiet'
     }
 
+@cache.memoize(3600*24*30)
 def party_election(party_abbr,year):
     party = db_name[party_abbr.lower()]
     year = str(year)
@@ -57,6 +58,7 @@ def party_election(party_abbr,year):
 
     return out_dict
 
+@cache.memoize(3600*24*30)
 def get_municipality_timeseries(party_abbr,m_id):
     party = db_name[party_abbr.lower()]
     m_id = str(m_id)
@@ -67,7 +69,7 @@ def get_municipality_timeseries(party_abbr,m_id):
 
     return timeseries
 
-
+@cache.memoize(3600*24*30)
 def get_best_party_gender(t,abbr):
     data = mdb.get_object("best_party_gender")
     if t == "latest":
@@ -80,7 +82,7 @@ def get_best_party_gender(t,abbr):
 
     return out_data
 
-
+@cache.memoize(3600*24*30)
 def get_best_party_education(t,abbr):
     data = mdb.get_object("best_party_education")
     if t == "latest":

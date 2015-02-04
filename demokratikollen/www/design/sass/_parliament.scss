@@ -3,22 +3,36 @@ a.member_node circle{
   stroke-width: 1px;
 }
 
-a.member_node circle:hover {
+a.member_node circle:hover, a.taphover.hover circle {
   stroke-width: 2px;
   opacity: 0.7;
+  filter: alpha(opacity=70);
 }
 
-#parliament_svg_div {
-  @extend .col-xs-10;
-  @extend .col-xs-offset-1;
+#parliament-figure div.col{
+  @extend .col-xs-12;
+  // @extend .col-xs-offset-1;
 }
 
-#parliament_date_slider {
-  @extend .col-xs-10;
-  @extend .col-xs-offset-1;
+#parliament-date-slider div.col {
+  @extend .col-xs-12;
+  // @extend .col-xs-offset-1;
 
   padding-top: 2%;
+  padding-left: 30px;
+  padding-right: 40px;
 
+}
+
+div.row.figure-description div.col{
+  @extend .col-xs-12;
+  // @extend .col-xs-offset-1;
+  text-align: justify;
+}
+
+div.row.figure-description {
+  padding-top: 10px;
+  padding-bottom: 10px;
 }
 
 .member-node-tooltip {
@@ -33,7 +47,11 @@ a.member_node circle:hover {
   background: rgb(0, 0, 0);
   color: #fff;
   border-radius: 8px;
-  pointer-events: none;
+  z-index: 99;
+
+  a {
+    color: #fff;
+  }
 
   img {
     width: 100%;

@@ -31,6 +31,8 @@ var js_deps = [
     'bower_components/jquery/dist/jquery.js',
     'bower_components/d3/d3.js',
     'bower_components/d3-tip/index.js',
+    'bower_components/jquery-cookie/jquery.cookie.js',
+    'bower_components/unslider/src/unslider.js',
     // jQueryUI components
     jqueryUiDir+'ui/core.js',
     jqueryUiDir+'ui/widget.js',

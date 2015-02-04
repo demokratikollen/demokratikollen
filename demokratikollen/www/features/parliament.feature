@@ -6,8 +6,9 @@ Feature: As a curious user
         Given you browse to the "riksdagen" page
         Then the page title should be "Riksdagen - Demokratikollen"
         But only the header button "Riksdagen" should be activated
-        Then the response should contain an element "div#parliament_svg_div"
-        Then the response should contain an element "div#parliament_date_slider div.date_slider"
+        Then the response should contain an element "div#parliament-figure figure"
+        Then the response should contain an element "div#parliament-date-slider div.date_slider"
+        Then the response should contain an element "div.figure-description p"
     
     Scenario: Surfing to the index should give you a riksdagen plot.
         Given you browse to the "riksdagen" page

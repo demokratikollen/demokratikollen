@@ -2,7 +2,7 @@
 {% block content %}
 
 <div class="row">
-    <div class="col-sm-12 col-md-8">
+    <div class="text-col">
         <h2>Vem röstar med vem i kammaren?</h2>
         <p>Den här figuren visar hur partierna förhåller sig till varandra vid voteringar i kammaren.</p>        <p>
            Vi väljer ut två partier och placerar dem längst till vänster och höger i figuren. De definerar skalan i figuren. Vi placerar de övriga partierna på skalan efter vem de oftast håller med i voteringar. Om ett parti lika ofta håller med de båda hamnar det i mitten av figuren.
@@ -28,7 +28,7 @@
 </div>
 
 <div class="row">
-    <div class="col-sm-12 col-md-8">
+    <div class="text-col">
         <h2>Antal samarbetsförslag i riksdagen</h2>
         <p>Ett samarbetsförslag är en förslagspunkt i en motion signerad av ledamöter från två eller fler partier. Mängden samarbetsförslag kan vara en indikation på möjligheterna för partiöverskridande samarbeten för ledamöterna. Du kan själv filtrera datan per utskott med listan nedan. Enskilda motioner är ej medräknade i statistiken.</p>
     </div>
@@ -37,15 +37,19 @@
     <div class="col-sm-6 col-md-4">
       <div id="cosigning-filter"></div>
       <figure>
-        <div id="cosigning"></div>
-            <figcaption>Staplarna indikerar hur många samarbetsförslag som behandlades under ett riksmöte. Klicka på en stapel för att visa de vanligaste partikombinationerna.</figcaption>
+        <div class="inset">
+          <div id="cosigning"></div>
+              <figcaption>Staplarna indikerar hur många samarbetsförslag som behandlades under ett riksmöte. Klicka på en stapel för att visa de vanligaste partikombinationerna.</figcaption>
+        </div>
     </figure>
 
     </div>
     <div class="col-sm-6 col-md-4">
     <figure>
+      <div class="inset">
         <div id="cosigning-detail"></div>
             <figcaption></figcaption>
+      </div>
     </figure>
 
     </div>
@@ -139,8 +143,8 @@ cosigningFigure = function(data) {
       detailHeight = 500;
   var detailTop = detailParent.append("svg")
       .attr("width",detailWidth)
-      .attr("height",detailHeight)
-      .style("background-color","#eee");
+      .attr("height",detailHeight);
+      // .style("background-color","#eee");
 
   var filterParent = d3.select("#cosigning-filter");
   var select = filterParent.append("select").attr("class", "graph-filter form-control input-sm");
@@ -153,8 +157,8 @@ cosigningFigure = function(data) {
 
   var top = parent.append("svg")
     .attr("width", width)
-    .attr("height", height)
-    .style("background-color", "#eee");
+    .attr("height", height);
+    // .style("background-color", "#eee");
 
   var detailChart = demokratikollen.graphics.horizontalBarChart()
     .width(detailWidth).height(detailHeight);

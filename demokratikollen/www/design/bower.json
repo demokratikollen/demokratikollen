@@ -18,7 +18,9 @@
     "topojson": "~1.6.18",
     "typeahead.js": "~0.10.5",
     "fuse.js": "~1.2.2",
-    "jqueryui-touch-punch": "*"
+    "jqueryui-touch-punch": "*",
+    "jquery-cookie": "1.4.1",
+    "unslider": "*"
   },
   "resolutions": {
     "d3": "~3.5.2"

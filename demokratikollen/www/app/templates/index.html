@@ -1,5 +1,34 @@
 {% extends "base.html" %}
 
 {% block content %}
-Detta är startsidan för Demokratikollen
+<div class="row text-div">
+    <div class="col-xs-12">
+        <h2>Välkommen!</h2>
+        <p>
+            Välkommen till Demokratikollen, ett steg närmre politikens dolda korridorer. Vilket parti röstar med vilket? Vilken ledamot har flest uppdrag? (mera!). Dessa och många fler frågor kan du få svar på genom att utforska denna sida. 
+        </p>
+    </div>
+</div>
+<div id="teaser-slider" class="row">
+    <div class="image-slider col">
+        <ul>
+            <li>
+                <a href="{{ url_for('pages.parliament') }}" alt="Länk till sidan för en översikt över parlamentet">
+                    <img src="img/slider_parliament.jpg">
+                </a>
+            </li>
+            <li><a href="/m"><img src="img/slider_party.jpg"></a></li>
+            <li><a href="/partierna"><img src="img/slider_parties.jpg"></a></li>
+        </ul>
+    </div>
+</div>
+
+
 {% endblock %}
+
+{% block scripts %}
+    {{ super() }}
+    <script>
+      $(function() { $('div.image-slider').unslider({fluid: true, dots: true}); });
+    </script>
+{%- endblock %}

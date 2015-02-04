@@ -1,15 +1,18 @@
 # -*- coding: utf-8 -*-
 
+from datetime import datetime
+
 # Import flask dependencies
 from flask import request, render_template, \
                   flash, g, session, redirect, url_for
 
 # Import the database object from the main app module
-from demokratikollen.www.app.helpers.cache import cache
+from demokratikollen.www.app.helpers.cache import cache, http_expires
 from demokratikollen.www.app.helpers.db import db
 from demokratikollen.core.db_structure import Member, ChamberAppointment, Party
 from demokratikollen.www.app.models.proposals import proposals_main
-from flask import Blueprint, request, jsonify
+from demokratikollen.www.app.models.sitemap import sitemap_pages
+from flask import Blueprint, request, jsonify, Markup
 from sqlalchemy.orm.exc import NoResultFound
 from sqlalchemy import func
 from demokratikollen.core.utils.mongodb import MongoDBDatastore
@@ -17,18 +20,20 @@ from demokratikollen.core.utils.mongodb import MongoDBDatastore
 
 blueprint = Blueprint('pages', __name__)
 
+def render_parliament():
+    return render_template("/parliament/index.html")
+
 # Set the route and accepted methods
 @blueprint.route('/', methods=['GET'])
 def index():
     return render_template("/index.html")
 
-@blueprint.route('/riksdagen/', methods=['GET'])
+@blueprint.route('/riksdagen', methods=['GET'])
 def parliament():
-    return render_template("/parliament/index.html")
+    return render_parliament()
 
 @blueprint.route('/partierna', methods=['GET'])
 def parties():
-
     return render_template("/parties/index.html")
 
 @blueprint.route('/forslagen', methods=['GET'])
@@ -44,13 +49,17 @@ def proposals():
 def about():
     return render_template("/about.html")
 
-    
+@blueprint.route("/sitemap.xml")
+def sitemap():
+    pages = sitemap_pages()
+    return render_template("/sitemap.xml", pages=pages)
 
 @blueprint.route('/search.json', methods=['GET'])
+@cache.cached(3600*24*30)
+@http_expires(3600*24*30)
 def timeseries():
-
     ds = MongoDBDatastore()
-    return jsonify(ds.get_object("search")); 
+    return jsonify(ds.get_object("search"))
 
 def render_party(p):
     return render_template("/parties/party.html",party=p)

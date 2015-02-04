@@ -1,0 +1,17 @@
+cookienotice {
+  background-color: orange;
+  position: absolute;
+  bottom: 0px;
+  left: 0;
+  width: 100%;
+  height: auto;
+  display: none;
+
+  div {
+    margin-top: 5px;
+    margin-bottom: 5px;
+    margin-left: 10px;
+    margin-right: 10px;
+    text-align: center;
+  }
+}

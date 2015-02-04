@@ -6,7 +6,7 @@ import datetime
 from flask.ext.jsontools import DynamicJSONEncoder
 
 #import helpers
-from demokratikollen.www.app.helpers.cache import cache
+from demokratikollen.www.app.helpers.cache import cache, httpdate
 from demokratikollen.www.app.helpers.db import db
 
 import demokratikollen.www.app.views.data.member
@@ -47,6 +47,13 @@ def create_app(testing=False, caching=True):
 
     if not caching:
         cache.config['CACHE_TYPE'] = 'null'
+    else:
+        # Add a 1 day expiry on all responses.
+        @app.after_request
+        def expiration_header(response):
+            if not 'Expires' in response.headers:
+                response.headers['Expires'] = httpdate(datetime.datetime.now() + datetime.timedelta(days=1))
+            return response
 
     #init the cache
     cache.init_app(app)

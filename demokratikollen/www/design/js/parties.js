@@ -330,7 +330,7 @@ parties = {
         var years = d3.extent(data, function(d) { return d.year; });
         xScale.domain(years);
 
-        var votes = d3.extent(data, function(d) { return d.votes; });
+        var votes = [0,d3.max(data, function(d) { return d.votes; })];
         yScale.domain(votes);
 
         years.splice(1,0,d3.median(data,function(d) { return d.year; }));
@@ -373,12 +373,14 @@ parties = {
   },
   setupGenderChart: function(w,h) {
     parties.voterSupportGenderChart = demokratikollen.graphics.horizontalBarChart()
+        .formatter(function(d) { return d.value + "%"})
         .width(w)
         .height(h)
         .topMargin(0);
   },
   setupEducationChart: function(w,h) {
     parties.voterSupportEducationChart = demokratikollen.graphics.horizontalBarChart()
+        .formatter(function(d) { return d.value + "%"})
         .width(w)
         .height(h)
         .topMargin(0);
@@ -390,7 +392,7 @@ parties = {
     parties.pColorMild = d3.interpolateRgb(d3.rgb('#eee'), parties.pColor)(0.5);
 
     var startColor = d3.rgb('#eee'),
-        endColor = d3.rgb(parties.pColor);
+        endColor = d3.rgb(parties.pColor).darker(0.5);
 
     var maxVotes = data.max_municipality;
 

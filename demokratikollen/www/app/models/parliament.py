@@ -8,6 +8,7 @@ from sqlalchemy.orm import joinedload
 from datetime import datetime
 from demokratikollen.www.app.models.parties import party_comparator
 
+@cache.memoize(3600*24)
 def parliament(date):
 
     members = get_parliament_db_statement(date)
