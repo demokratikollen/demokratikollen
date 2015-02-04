@@ -4,7 +4,8 @@ demokratikollen.graphics.PickerCross = function() {
 
   var margin = { top: 0, left: 0, bottom: 0, right: 0 },
     cssClass = 'picker-cross',
-    onMouseMove = function () {};
+    onMouseMove = function () {},
+    onMouseOut = function () {};
 
   function chart(selection) {
     selection.each(function() { // not using data of selection, only the selected object
@@ -49,18 +50,19 @@ demokratikollen.graphics.PickerCross = function() {
             .attr("y2", y);
       }
 
+      function unmark() {
+          cross.selectAll('.vertical')
+            .data([])
+            .exit()
+            .remove()
+            
+          cross.selectAll('.horizontal')
+            .data([])
+            .exit()
+            .remove();
+      }
 
-      function onMouseOut() {
-        mark(0, 0);
-      }
-/*
-      function onClick() {
-        var eventData = d3.mouse(this),
-          x = eventData[0],
-          y = eventData[1];
-          config.click(x, y);
-      }
-*/
+
       container.on("mousemove." + pickerId, function () {
         var eventData = d3.mouse(this),
           x = eventData[0],
@@ -68,63 +70,15 @@ demokratikollen.graphics.PickerCross = function() {
           mark(x, y);
           onMouseMove(x, y);
       });
-      container.on("mouseout." + pickerId, onMouseOut);
-      //container.on("mouseup." + pickerId, onClick);
 
-
-
-/*
-
-      
-
-      })();
-
-
-      var config = {
-        xMin: 0,
-        xMax: width,
-        yMin: 0,
-        yMax: height,
-        hover: mark,
-        leave: function () {
-          mark(xScale(new Date()));
-        },
-        click: mark
-      };
-
-
-      interactiveArea = svg.append("rect")
-        .classed("interactive", true)
-        .attr("width", width)
-        .attr("height", height)
-        .style("fill", "transparent");
-
-      function onMouseMove() {
+      container.on("mouseout." + pickerId, function () {
         var eventData = d3.mouse(this),
           x = eventData[0],
           y = eventData[1];
-          config.hover(x, y);
-      }
+          onMouseOut(x, y);
+          unmark();
+      });
 
-      function onMouseOut() {
-          config.leave();
-      }
-
-      function onClick() {
-        var eventData = d3.mouse(this),
-          x = eventData[0],
-          y = eventData[1];
-          config.click(x, y);
-      }
-
-      interactiveArea.on("mousemove.interactive", onMouseMove);
-      interactiveArea.on("mouseout.interactive", onMouseOut);
-      interactiveArea.on("mouseup.interactive", onClick);
-
-      data.selection = {t: new Date(), texts: ["", "", ""]};
-
-      draw();
-*/
     } );
   }
 
@@ -143,6 +97,12 @@ demokratikollen.graphics.PickerCross = function() {
   chart.onMouseMove = function(value) {
     if (!arguments.length) return onMouseMove;
     onMouseMove = value;
+    return chart;
+  }
+
+  chart.onMouseOut = function(value) {
+    if (!arguments.length) return onMouseOut;
+    onMouseOut = value;
     return chart;
   }
 
