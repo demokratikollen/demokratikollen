@@ -249,7 +249,8 @@ $(function(){
 
   console.log(data);
 
-  partyHistoryChart = demokratikollen.graphics.PartyHistory();
+  partyHistoryChart = demokratikollen.graphics.PartyHistory()
+    .baseColor(demokratikollen.utils.getPartyColor('{{ party.abbr|lower }}'));
 
   d3.select("#party-history-fig")
     .datum(data)

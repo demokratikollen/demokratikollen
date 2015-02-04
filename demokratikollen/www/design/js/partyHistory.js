@@ -8,7 +8,8 @@ demokratikollen.graphics.PartyHistory = function () {
     timeUnit = d3.time.year,
     xTickLabelWidth = 100,
     markerSize = 4,
-    cssClass = "party-history";
+    cssClass = "party-history",
+    baseColor = "#555";
 
   function unique(arr) {
     return arr.reduce(function (collected, current) {
@@ -99,8 +100,8 @@ demokratikollen.graphics.PartyHistory = function () {
           .attr("x", function (d) { return xScale(d.start); })
           .attr("width", function (d) { return xScale(d.end) - xScale(d.start); })
           .attr("height", plotAreaHeight)
-          .classed("even", function (d, i) { return i % 2 === 0; })
-          .classed("odd", function (d, i) { return i % 2 !== 0; });
+          .style("fill-opacity", function (d, i) { return i % 2 !== 0 ? 0.2 : 0.4; })
+          .style("fill", baseColor.darker(1));
         /*jslint unparam: false*/
 
         partyLeaderRects.classed("selected", prop("selected"));
@@ -114,16 +115,20 @@ demokratikollen.graphics.PartyHistory = function () {
           .attr("x1", function (d) { return xScale(d.start); })
           .attr("x2", function (d) { return xScale(d.end); })
           .attr("y1", function (d) { return yScale(d.value); })
-          .attr("y2", function (d) { return yScale(d.value); });
+          .attr("y2", function (d) { return yScale(d.value); })
+          .style("stroke", baseColor.darker(1));
 
         termLines.classed("selected", prop("selected"));
 
+        var pollColor = baseColor.darker(2);
         plotArea.selectAll("path.poll")
           .data([data.polls])
           .enter()
           .append("path")
           .classed("poll", true)
-          .attr("d", pollPath);
+          .attr("d", pollPath)
+          .style("stroke", pollColor)
+          .style("fill", "none");
 
         var pollMarkers = plotArea.selectAll("circle.poll")
           .data(data.polls);
@@ -133,7 +138,9 @@ demokratikollen.graphics.PartyHistory = function () {
           .classed("poll", true)
           .attr("cx", function (d) { return xScale(d.time); })
           .attr("cy", function (d) { return yScale(d.value); })
-          .attr('r', markerSize);
+          .attr('r', markerSize)
+          .style("fill", pollColor)
+          .style("stroke", pollColor);
 
         pollMarkers
           .classed("selected", prop('selected'));
@@ -299,6 +306,12 @@ demokratikollen.graphics.PartyHistory = function () {
   chart.cssClass = function (value) {
     if (!arguments.length) { return cssClass; }
     cssClass = value;
+    return chart;
+  };
+
+  chart.baseColor = function (value) {
+    if (!arguments.length) { return baseColor; }
+    baseColor = value;
     return chart;
   };
 
