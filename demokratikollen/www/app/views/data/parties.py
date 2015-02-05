@@ -1,7 +1,14 @@
 from flask import Blueprint, request, jsonify, render_template
+from flask.ext.jsontools import jsonapi
 # from demokratikollen.www.app.models import parties
-from demokratikollen.www.app.models.parties import party_election, get_municipality_timeseries,\
-                                                    get_best_party_gender,get_best_party_education
+from demokratikollen.www.app.models.parties import (
+    party_election,
+    party_election_history,
+    get_municipality_timeseries,
+    get_best_party_gender,
+    get_best_party_education,
+    get_best_party_time,
+    party_leader_history)
 
 from demokratikollen.www.app.helpers.db import db
 from demokratikollen.www.app.helpers.cache import cache
@@ -21,6 +28,15 @@ def election(year,abbr):
         return render_template('404.html'), 404
     return jsonify(d)
 
+@blueprint.route('/party_history/<string:abbr>.json')
+@jsonapi
+def party_history(abbr):
+    return dict(
+        elections=party_election_history(abbr),
+        partyLeaders=party_leader_history(abbr),
+        polls=get_best_party_time(abbr))
+
+
 @blueprint.route('/elections/timeseries/<string:abbr>/<string:municipality_id>.json')
 def municipality_timeseries(abbr,municipality_id):
     # try:
@@ -38,7 +54,6 @@ def best_party_gender(t,abbr):
 def best_party_education(t,abbr):
     d = get_best_party_education(t,abbr)
     return jsonify(d)
-
 
 @blueprint.route('/cosigning/timeseries.json', methods=['GET'])
 @cache.cached(3600*24)
