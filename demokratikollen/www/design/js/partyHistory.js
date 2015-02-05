@@ -164,7 +164,7 @@ demokratikollen.graphics.PartyHistory = function () {
 
       var yAxis = d3.svg.axis()
         .scale(yScale)
-        .tickFormat(yScale.tickFormat(",.1%"))
+        .tickFormat(d3.format(",.1%"))
         .orient("left");
 
       svg.append("g")
