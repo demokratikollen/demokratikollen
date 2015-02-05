@@ -201,59 +201,11 @@ $(function(){
 <script type="text/javascript">
 
   (function () {
-    var electionData = [
-      {start: '2002-09-20T00:00:00', end: '2006-09-20T00:00:00', value: 108 / 349},
-      {start: '2006-09-20T00:00:00', end: '2010-09-20T00:00:00', value: 100 / 349},
-      {start: '2010-09-20T00:00:00', end: '2014-09-20T00:00:00', value: 70 / 349}];
-
-    var pollData = [
-      {time: '2002-01-01T00:00:00', value: 0.34},
-      {time: '2002-07-01T00:00:00', value: 0.33},
-      {time: '2003-01-01T00:00:00', value: 0.31},
-      {time: '2003-07-01T00:00:00', value: 0.33},
-      {time: '2004-01-01T00:00:00', value: 0.30},
-      {time: '2004-07-01T00:00:00', value: 0.27},
-      {time: '2005-01-01T00:00:00', value: 0.26},
-      {time: '2005-07-01T00:00:00', value: 0.29},
-      {time: '2006-01-01T00:00:00', value: 0.29},
-      {time: '2006-07-01T00:00:00', value: 0.28},
-      {time: '2007-01-01T00:00:00', value: 0.29},
-      {time: '2007-07-01T00:00:00', value: 0.26},
-      {time: '2008-01-01T00:00:00', value: 0.23},
-      {time: '2008-07-01T00:00:00', value: 0.25},
-      {time: '2009-01-01T00:00:00', value: 0.24},
-      {time: '2009-07-01T00:00:00', value: 0.22},
-      {time: '2010-01-01T00:00:00', value: 0.21},
-      {time: '2010-07-01T00:00:00', value: 0.23}
-      ];
-
-    var partyLeaderData = [
-      {start: '2002-01-01T00:00:00', end: '2004-06-01T00:00:00', name: "Åsa Jinder"},
-      {start: '2004-07-01T00:00:00', end: '2006-07-01T00:00:00', name: "Horace Engdahl"},
-      {start: '2006-07-01T00:00:00', end: '2008-07-01T00:00:00', name: "Per Morberg"},
-      {start: '2010-07-01T00:00:00', end: '2018-07-01T00:00:00', name: "Darth Vader"},
-    ];
-    var data = {
-      polls: pollData,
-      partyLeaders: partyLeaderData,
-      terms: electionData
-    }
-
-    data.partyLeaders.concat(data.terms).forEach(function (d) { 
-      d.start = new Date(d.start);
-      d.end = new Date(d.end);
-    });
-
-    data.polls.forEach(function (d) {
-      d.time = new Date(d.time);
-    });
 
     var container = d3.select("#party-history-fig"),
       ar = 5/3,
       partyHistoryChart = demokratikollen.graphics.PartyHistory()
         .baseColor(demokratikollen.utils.getPartyColor('{{ party.abbr|lower }}'));
-
-    container.datum(data);
 
     function draw () {
       partyHistoryChart.width(demokratikollen.utils.getInnerWidth(container));
@@ -261,8 +213,21 @@ $(function(){
         .call(partyHistoryChart);
     }
 
-    draw();
-    d3.select(window).on('resize', draw); 
+    d3.json("/data/party_history/{{party.abbr}}.json", function (data) {
+      data.partyLeaders.concat(data.elections).forEach(function (d) { 
+        d.start = new Date(d.start);
+        d.end = new Date(d.end);
+      });
+
+      data.polls.forEach(function (d) {
+        d.time = new Date(d.time);
+      });
+      
+      container.datum(data);
+      console.log(data)
+      draw();
+      d3.select(window).on('resize', draw); 
+    }) 
   }());
 
 
