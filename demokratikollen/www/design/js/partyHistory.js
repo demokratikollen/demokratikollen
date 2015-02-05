@@ -54,8 +54,8 @@ demokratikollen.graphics.PartyHistory = function () {
       var plotArea = svg.append('g')
         .attr('clip-path', 'url(#' + plotClipId + ')');
 
-      var xDomain = [d3.min(data.terms, prop('start')), d3.max(data.terms, prop('end'))],
-        yDomain = [0, d3.max(data.terms.concat(data.polls), prop('value'))];
+      var xDomain = [d3.min(data.elections, prop('start')), d3.max(data.elections, prop('end'))],
+        yDomain = [0, d3.max(data.elections.concat(data.polls), prop('value'))];
 
       var xScale = d3.time.scale()
         .domain(xDomain)
@@ -68,20 +68,20 @@ demokratikollen.graphics.PartyHistory = function () {
         .nice();
 
 
-      //Clipping path with rectangles representing terms.
-      var termsClipId = demokratikollen.utils.uniqueId("terms");
-      var termsClipPath = plotArea.append("clipPath").attr("id", termsClipId);
+      //Clipping path with rectangles representing elections.
+      var electionsClipId = demokratikollen.utils.uniqueId("elections");
+      var electionsClipPath = plotArea.append("clipPath").attr("id", electionsClipId);
 
       var pollPath = d3.svg.line()
         .x(function (d) { return xScale(d.time); })
         .y(function (d) { return yScale(d.value); });
 
       function draw() {
-        termsClipPath.selectAll("rect.term")
-          .data(data.terms)
+        electionsClipPath.selectAll("rect.election")
+          .data(data.elections)
           .enter()
           .append("rect")
-          .classed("term", true)
+          .classed("election", true)
           .attr("y", function (d) { return yScale(d.value); })
           .attr("x", function (d) { return xScale(d.start); })
           .attr("width", function (d) { return xScale(d.end) - xScale(d.start); })
@@ -95,7 +95,7 @@ demokratikollen.graphics.PartyHistory = function () {
         partyLeaderRects.enter()
           .append("rect")
           .classed("party-leader", true)
-          .attr("clip-path", 'url(#' + termsClipId + ')')
+          .attr("clip-path", 'url(#' + electionsClipId + ')')
           .attr("y", 0)
           .attr("x", function (d) { return xScale(d.start); })
           .attr("width", function (d) { return xScale(d.end) - xScale(d.start); })
@@ -106,19 +106,19 @@ demokratikollen.graphics.PartyHistory = function () {
 
         partyLeaderRects.classed("selected", prop("selected"));
 
-        var termLines = plotArea.selectAll("line.term")
-          .data(data.terms);
+        var electionLines = plotArea.selectAll("line.election")
+          .data(data.elections);
 
-        termLines.enter()
+        electionLines.enter()
           .append("line")
-          .classed("term", true)
+          .classed("election", true)
           .attr("x1", function (d) { return xScale(d.start); })
           .attr("x2", function (d) { return xScale(d.end); })
           .attr("y1", function (d) { return yScale(d.value); })
           .attr("y2", function (d) { return yScale(d.value); })
           .style("stroke", baseColor.darker(1));
 
-        termLines.classed("selected", prop("selected"));
+        electionLines.classed("selected", prop("selected"));
 
         var pollColor = baseColor.darker(2);
         plotArea.selectAll("path.poll")
@@ -177,15 +177,15 @@ demokratikollen.graphics.PartyHistory = function () {
         .call(yAxis);
 
       var select = (function () {
-        var items = ['partyLeader', 'term', 'poll'],
+        var items = ['partyLeader', 'election', 'poll'],
           currentSelection = null;
 
         var itemFinders = {
           partyLeader: function (t) {
             return data.partyLeaders.filter(function (d) { return d.start <= t && t <= d.end; })[0];
           },
-          term: function (t) {
-            return data.terms.filter(function (d) { return d.start <= t && t <= d.end; })[0];
+          election: function (t) {
+            return data.elections.filter(function (d) { return d.start <= t && t <= d.end; })[0];
           },
           poll: function (t) {
             return data.polls.filter(function (d) { return d.time <= t; }).reverse()[0];
@@ -205,7 +205,7 @@ demokratikollen.graphics.PartyHistory = function () {
             return 'Partiledare: okänd';
 
           },
-          term: function (d) {
+          election: function (d) {
             if (d) {
               return ('Mandat ' + yearFormat(d.start) + ' – ' + yearFormat(d.end) +
                   ': ' + percentFormat(d.value));
