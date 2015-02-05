@@ -225,11 +225,26 @@ demokratikollen.graphics.PartyHistory = function () {
           return function (d) { if (d) { d.selected = value; } };
         }
 
+        function drawVerticalPicker(t) {
+          var verticalLine = svg.selectAll('.vertical-picker')
+            .data([xScale(t)]);
+
+          verticalLine.enter()
+            .append("line")
+            .style("pointer-events", "none")
+            .classed('vertical-picker', true);
+
+          verticalLine.attr("x1", function (d) { return d; })
+            .attr("x2", function (d) { return d; })
+            .attr("y1", 0)
+            .attr("y2", plotAreaHeight);
+        }
+
         function updateSelection(t) {
+          drawVerticalPicker(t);
+
           var changed = false,
             oldSelection = currentSelection;
-
-          data.selection = {t: t};
 
           currentSelection = itemFinders.map(function (finder) { return finder(t); });
 
@@ -254,21 +269,23 @@ demokratikollen.graphics.PartyHistory = function () {
         return updateSelection;
       }());
 
+      var interactiveArea = svg.append("rect")
+          .attr("width", plotAreaWidth)
+          .attr("height", plotAreaHeight)
+          .style("fill", 'transparent');
+
+      var pickerId = demokratikollen.utils.uniqueId(cssClass);
+
+      interactiveArea.on("mousemove." + pickerId, function () {
+        var x = d3.mouse(this)[0];
+        select(xScale.invert(x));
+      });
+
+      interactiveArea.on("mouseout." + pickerId, function () {
+        select(new Date());
+      });
+
       select(new Date());
-
-      /*jslint unparam: true*/
-      var picker = demokratikollen.graphics.PickerCross()
-        .onMouseMove(function (x, y) { select(xScale.invert(x)); })
-        .onMouseOut(function (x, y) { select(new Date()); });
-      /*jslint unparam: false*/
-
-      var interactiveArea = plotArea.append("g");
-      interactiveArea.append("rect")
-        .attr("width", width)
-        .attr("height", height)
-        .style("fill", 'transparent');
-
-      picker(interactiveArea);
 
     });
   }

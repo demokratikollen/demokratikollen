@@ -27,13 +27,6 @@ figure {
     }
 }
 
-.picker-cross {
-    line {
-        stroke-width: 3px;
-        stroke: $greyish-2;
-        stroke-opacity: 30%;
-    }
-}
 
 svg.timeline {
     rect.background { fill: $chart-background-color; }
@@ -70,10 +63,11 @@ svg.timeline {
         stroke-width: 0;
     }
 
-    .picker-cross {
-        line.horizontal {
-            stroke-width: 0;
-        }
+
+    line.vertical-picker {
+        stroke-width: 3px;
+        stroke: $greyish-2;
+        stroke-opacity: 50%;
     }
      
     circle.poll.selected {
