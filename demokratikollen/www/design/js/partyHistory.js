@@ -199,18 +199,17 @@ demokratikollen.graphics.PartyHistory = function () {
         var textGenerators = {
           partyLeader: function (d) {
             if (d) {
-              return ('Partiledare ' + yearMonthFormat(d.start) + ' – ' + yearMonthFormat(d.end) +
-                ': ' + d.name);
+              return ('Partiledare: ' + d.name + ' (' + yearMonthFormat(d.start) + ' – ' + yearMonthFormat(d.end) + ')');
             }
             return 'Partiledare: okänd';
 
           },
           election: function (d) {
             if (d) {
-              return ('Mandat ' + yearFormat(d.start) + ' – ' + yearFormat(d.end) +
+              return ('Valresultat ' + yearFormat(d.start) +
                   ': ' + percentFormat(d.value));
             }
-            return 'Mandat: okänt';
+            return 'Valresultat: okänt';
           },
           poll: function (d) {
             if (d) {
