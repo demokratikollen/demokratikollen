@@ -8,6 +8,7 @@ python calculations/cosigning.py
 python calculations/search.py
 python calculations/scb_best_party_education.py
 python calculations/scb_best_party_gender.py
+python calculations/scb_best_party_time.py
 END=$(date +%s.%N)
 echo "Time elapsed:"
 echo "$END - $START" | bc
