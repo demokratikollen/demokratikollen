@@ -100,11 +100,11 @@ demokratikollen.graphics.PartyHistory = function () {
           .attr("x", function (d) { return xScale(d.start); })
           .attr("width", function (d) { return xScale(d.end) - xScale(d.start); })
           .attr("height", plotAreaHeight)
-          .style("fill-opacity", function (d, i) { return i % 2 !== 0 ? 0.2 : 0.4; })
-          .style("fill", baseColor.darker(1));
+          .style("fill-opacity", function (d, i) { return i % 2 !== 0 ? 0.25 : 0.35; });
         /*jslint unparam: false*/
 
-        partyLeaderRects.classed("selected", prop("selected"));
+        partyLeaderRects.classed("selected", prop("selected"))
+          .style("fill", function (d) { return d.selected ? baseColor : baseColor.darker(2); });
 
         var electionLines = plotArea.selectAll("line.election")
           .data(data.elections);
@@ -115,10 +115,10 @@ demokratikollen.graphics.PartyHistory = function () {
           .attr("x1", function (d) { return xScale(d.start); })
           .attr("x2", function (d) { return xScale(d.end); })
           .attr("y1", function (d) { return yScale(d.value); })
-          .attr("y2", function (d) { return yScale(d.value); })
-          .style("stroke", baseColor.darker(1));
+          .attr("y2", function (d) { return yScale(d.value); });
 
-        electionLines.classed("selected", prop("selected"));
+        electionLines.classed("selected", prop("selected"))
+          .style("stroke", function (d) { return d.selected ? baseColor.darker(0.5) : baseColor.darker(1); });
 
         var pollColor = baseColor.darker(2);
         plotArea.selectAll("path.poll")
