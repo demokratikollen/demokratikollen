@@ -200,7 +200,12 @@ $(function(){
 </script>
 <script type="text/javascript">
 
-  (function () {
+  d3.json("/data/party_history/{{party.abbr|lower}}.json", function (data) {
+
+    pollDates = data.polls.map(prop('date'));
+    partyLeaderDates = data.partyLeaders.map(prop('start'));
+    minDate = d3.min(pollDates.concat(partyLeaderDates));
+    data.elections = data.elections.filter(function (d) { return d.end >= minDate; });
 
     var container = d3.select("#party-history-fig"),
       ar = 5/3,
@@ -212,23 +217,20 @@ $(function(){
       container.html("")
         .call(partyHistoryChart);
     }
+    
+    data.partyLeaders.concat(data.elections).forEach(function (d) { 
+      d.start = new Date(d.start);
+      d.end = new Date(d.end);
+    });
 
-    d3.json("/data/party_history/{{party.abbr}}.json", function (data) {
-      data.partyLeaders.concat(data.elections).forEach(function (d) { 
-        d.start = new Date(d.start);
-        d.end = new Date(d.end);
-      });
-
-      data.polls.forEach(function (d) {
-        d.time = new Date(d.time);
-      });
-      
-      container.datum(data);
-      console.log(data)
-      draw();
-      d3.select(window).on('resize', draw); 
-    }) 
-  }());
+    data.polls.forEach(function (d) {
+      d.time = new Date(d.time);
+    });
+    
+    container.datum(data);
+    draw();
+    d3.select(window).on('resize', draw); 
+  });
 
 
 </script>

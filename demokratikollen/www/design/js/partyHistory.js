@@ -54,7 +54,7 @@ demokratikollen.graphics.PartyHistory = function () {
       var plotArea = svg.append('g')
         .attr('clip-path', 'url(#' + plotClipId + ')');
 
-      var xDomain = [d3.min(data.elections, prop('start')), d3.max(data.elections, prop('end'))],
+      var xDomain = [d3.min(data.elections, prop('start')), new Date()], //d3.max(data.elections, prop('end'))],
         yDomain = [0, d3.max(data.elections.concat(data.polls), prop('value'))];
 
       var xScale = d3.time.scale()
