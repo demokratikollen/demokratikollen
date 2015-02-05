@@ -1,4 +1,5 @@
 from demokratikollen.www.app.helpers.db import db
+from sqlalchemy import func
 from demokratikollen.www.app.helpers.cache import cache
 from demokratikollen.core.db_structure import Party, Group, GroupAppointment, Member
 from demokratikollen.core.utils.mongodb import MongoDBDatastore
@@ -105,7 +106,7 @@ def party_leader_history(party_abbr):
         .join(Member)
         .join(Group)
         .filter(GroupAppointment.role == 'Partiledare')
-        .filter(Group.abbr == party_abbr)
+        .filter(func.lower(Group.abbr) == party_abbr.lower())
         .order_by(GroupAppointment.start_date))
 
     results = []
@@ -163,6 +164,8 @@ def get_best_party_time(abbr):
     party_data = data[abbr.lower()]
     out_data = []
     for key in sorted(party_data.keys()):
+        if math.isnan(party_data[key]):
+            continue
         year, month = map(int, key.split('M'))
         out_data.append(dict(time=dt.datetime(year, month, 1), value=party_data[key]))
 
