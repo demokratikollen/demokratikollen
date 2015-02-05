@@ -62,6 +62,12 @@ demokratikollen.graphics.PartyHistory = function () {
         .range([0, plotAreaWidth])
         .nice(timeUnit);
 
+      var xScaleClamped = d3.time.scale()
+        .domain(xDomain)
+        .range([0, plotAreaWidth])
+        .nice(timeUnit)
+        .clamp(true);
+
       var yScale = d3.scale.linear()
         .domain(yDomain)
         .range([plotAreaHeight, 0])
@@ -99,12 +105,30 @@ demokratikollen.graphics.PartyHistory = function () {
           .attr("y", 0)
           .attr("x", function (d) { return xScale(d.start); })
           .attr("width", function (d) { return xScale(d.end) - xScale(d.start); })
-          .attr("height", plotAreaHeight)
-          .style("fill-opacity", function (d, i) { return i % 2 !== 0 ? 0.25 : 0.35; });
+          .attr("height", plotAreaHeight);
         /*jslint unparam: false*/
 
         partyLeaderRects.classed("selected", prop("selected"))
-          .style("fill", function (d) { return d.selected ? baseColor : baseColor.darker(2); });
+          .style("fill", function (d) { return d.selected ? baseColor.darker(1) : baseColor.darker(3); })
+          .style("fill-opacity", function (d, i) { return d.selected ? 0.7 : (i % 2 !== 0 ? 0.4 : 0.5); });
+
+
+        var partyLeaderNames = plotArea.selectAll("text.party-leader")
+          .data(data.partyLeaders);
+
+        partyLeaderNames.enter()
+          .append("g")
+          .attr("transform", function (d) { return 'translate(' + (xScaleClamped(d.end) + xScaleClamped(d.start)) / 2 + ',' + (plotAreaHeight - 65) + ')'; })
+          .append("text")
+          .classed("party-leader", true)
+          .attr("text-anchor", "middle")
+          .selectAll("tspan")
+          .data(function (d) { return d.name.split(" "); })
+          .enter()
+          .append("tspan")
+          .attr("x", 0)
+          .attr("dy", "1.3em")
+          .text(function (d) { return d; });
 
         var electionLines = plotArea.selectAll("line.election")
           .data(data.elections);
