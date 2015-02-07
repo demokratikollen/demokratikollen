@@ -1,10 +1,10 @@
-/*global demokratikollen, d3, prop */
+/*global demokratikollen, d3, prop, window */
 
 demokratikollen.graphics.PartyHistory = function () {
 
   var width = 400,
     height = 350,
-    svgMargin = {top: 20, left: 50, right: 20, bottom: 20},
+    svgMargin = {top: 20, left: 50, right: 20, bottom: 100},
     timeUnit = d3.time.year,
     xTickLabelWidth = 100,
     markerSize = 4,
@@ -38,11 +38,6 @@ demokratikollen.graphics.PartyHistory = function () {
         .style("width", width)
         .style("height", height);
 
-      var info = container.append("div")
-        .classed("info", true)
-        .style("margin-left", (svgMargin.left + 10) + 'px');
-
-
       var plotAreaWidth = width - svgMargin.left - svgMargin.right,
         plotAreaHeight = height - svgMargin.top - svgMargin.bottom;
 
@@ -53,13 +48,13 @@ demokratikollen.graphics.PartyHistory = function () {
         .append("g")
         .attr("transform", "translate(" + svgMargin.left + "," + svgMargin.top + ")");
 
-      var plotClipId = demokratikollen.utils.uniqueId("plot-area");
-      svg.append('clipPath')
-        .attr("id", plotClipId)
-        .append('rect')
-        .attr("width", plotAreaWidth)
-        .attr("height", plotAreaHeight)
-        .style("fill", "transparent");
+      var plotClipId = demokratikollen.utils.uniqueId("plot-area"),
+        plotClipRect = svg.append('clipPath')
+          .attr("id", plotClipId)
+          .append('rect')
+          .attr("width", plotAreaWidth)
+          .attr("height", plotAreaHeight)
+          .style("fill", "transparent");
 
       var plotArea = svg.append('g')
         .attr('clip-path', 'url(#' + plotClipId + ')');
@@ -84,6 +79,44 @@ demokratikollen.graphics.PartyHistory = function () {
       var pollPath = d3.svg.line()
         .x(function (d) { return xScale(d.time); })
         .y(function (d) { return yScale(d.value); });
+
+      var tooltip = d3.select("body").append("div")
+          .classed(cssClass + " tooltip", true)
+          .style("display", "none")
+          .style("position", "absolute")
+          .style("max-width", plotAreaWidth + "px");
+
+      function tooltipVisible(visible) {
+        tooltip.style("display", (visible ? "block" : "none"));
+      }
+
+      function setPosTooltip(x, y) {
+        tooltip.style("left", x + "px")
+          .style("top", y + "px");
+      }
+
+      function positionTooltip(t) {
+        var plotAreaBCR = plotClipRect[0][0].getBoundingClientRect(),
+          edge = {
+            left: window.pageXOffset + plotAreaBCR.left,
+            right: window.pageXOffset + plotAreaBCR.left + plotAreaWidth,
+            top: window.pageYOffset + plotAreaBCR.top + plotAreaHeight + 30
+          },
+          anchorX = edge.left + xScale(t);
+
+        setPosTooltip(edge.left, edge.top);
+
+        var tooltipBCR = tooltip[0][0].getBoundingClientRect(),
+          tooltipWidth = tooltipBCR.right - tooltipBCR.left;
+
+        if (anchorX - tooltipWidth / 2 < edge.left) {
+          setPosTooltip(edge.left, edge.top);
+        } else if (anchorX + tooltipWidth / 2 > edge.right) {
+          setPosTooltip(edge.right - tooltipWidth);
+        } else {
+          setPosTooltip(anchorX - tooltipWidth / 2, edge.top);
+        }
+      }
 
       function draw() {
         electionsClipPath.selectAll("rect.election")
@@ -155,10 +188,12 @@ demokratikollen.graphics.PartyHistory = function () {
           .classed("selected", prop('selected'));
 
         if (data.texts) {
-          var paragraphs = info.selectAll("p").data(data.texts);
+          var paragraphs = tooltip.selectAll("p").data(data.texts);
           paragraphs.enter().append("p");
           paragraphs.html(function (d) { return d; });
         }
+
+        tooltipVisible(!!data.texts);
       }
 
       // These two lines limit the number of time tick values and only keeps those that are
@@ -272,6 +307,7 @@ demokratikollen.graphics.PartyHistory = function () {
               return tg(curr);
             });
             draw();
+            positionTooltip(t);
           }
         }
         return updateSelection;
