@@ -21,6 +21,24 @@ demokratikollen.graphics.PartyHistory = function () {
   function chart(selection) {
     selection.each(function (data) {
 
+      data.partyLeaders.forEach(function (d) {
+        if (d.end === undefined) {
+          var today = new Date();
+          var tomorrow = new Date(today);
+          console.log(today)
+          console.log(tomorrow)
+          tomorrow.setDate(today.getDate() + 1);
+          console.log(today)
+          console.log(tomorrow)
+          d.end = tomorrow;
+          d.ongoing = true;
+        } else {
+          console.log(d.end);
+        }
+      });
+
+      console.log(data)
+
       var container = d3.select(this)
         .html("")
         .append('div')
@@ -59,8 +77,8 @@ demokratikollen.graphics.PartyHistory = function () {
 
       var xScale = d3.time.scale()
         .domain(xDomain)
-        .range([0, plotAreaWidth])
-        .nice(timeUnit);
+        .range([0, plotAreaWidth]);
+        /*.nice(timeUnit);*/
 
       var xScaleClamped = d3.time.scale()
         .domain(xDomain)
@@ -111,24 +129,6 @@ demokratikollen.graphics.PartyHistory = function () {
         partyLeaderRects.classed("selected", prop("selected"))
           .style("fill", function (d) { return d.selected ? baseColor.darker(1) : baseColor.darker(3); })
           .style("fill-opacity", function (d, i) { return d.selected ? 0.7 : (i % 2 !== 0 ? 0.4 : 0.5); });
-
-
-        var partyLeaderNames = plotArea.selectAll("text.party-leader")
-          .data(data.partyLeaders);
-
-        partyLeaderNames.enter()
-          .append("g")
-          .attr("transform", function (d) { return 'translate(' + (xScaleClamped(d.end) + xScaleClamped(d.start)) / 2 + ',' + (plotAreaHeight - 65) + ')'; })
-          .append("text")
-          .classed("party-leader", true)
-          .attr("text-anchor", "middle")
-          .selectAll("tspan")
-          .data(function (d) { return d.name.split(" "); })
-          .enter()
-          .append("tspan")
-          .attr("x", 0)
-          .attr("dy", "1.3em")
-          .text(function (d) { return d; });
 
         var electionLines = plotArea.selectAll("line.election")
           .data(data.elections);
@@ -223,7 +223,7 @@ demokratikollen.graphics.PartyHistory = function () {
         var textGenerators = {
           partyLeader: function (d) {
             if (d) {
-              return ('Partiledare: ' + d.name + ' (' + yearMonthFormat(d.start) + ' – ' + yearMonthFormat(d.end) + ')');
+              return ('Partiledare: ' + d.name + ' (' + yearMonthFormat(d.start) + ' – ' + (d.ongoing ? "" : yearMonthFormat(d.end)) + ')');
             }
             return 'Partiledare: okänd';
 

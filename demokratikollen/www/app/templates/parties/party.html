@@ -202,7 +202,7 @@ $(function(){
 
   d3.json("/data/party_history/{{party.abbr|lower}}.json", function (data) {
 
-    pollDates = data.polls.map(prop('date'));
+    pollDates = data.polls.map(prop('time'));
     partyLeaderDates = data.partyLeaders.map(prop('start'));
     minDate = d3.min(pollDates.concat(partyLeaderDates));
     data.elections = data.elections.filter(function (d) { return d.end >= minDate; });
@@ -220,7 +220,9 @@ $(function(){
     
     data.partyLeaders.concat(data.elections).forEach(function (d) { 
       d.start = new Date(d.start);
-      d.end = new Date(d.end);
+      if (d.end) {
+        d.end = new Date(d.end);
+      }
     });
 
     data.polls.forEach(function (d) {
