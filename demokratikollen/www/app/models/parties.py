@@ -79,14 +79,9 @@ def party_election(party_abbr,year):
 
 @cache.memoize(3600*24*30)
 def party_election_history(party_abbr):
-    party = db_name[party_abbr.lower()]
+    party_abbr = party_abbr.lower()
 
-    el_totals = mdb.get_object("election_totals")
-    el_party_sums = mdb.get_object("election_party_sums")
-
-    timeseries = el_party_sums[party]
-
-    timeseries = {int(y): val/el_totals[y] for y,val in timeseries.items()}
+    data = mdb.get_object("election_results")[party_abbr]
 
     all_years = tuple(sorted(ELECTION_DATES.keys()))
     next_election_year = {this: next_ for (this, next_) in zip(all_years[0:-1], all_years[1:])}
@@ -95,9 +90,9 @@ def party_election_history(party_abbr):
         return dict(
             start=ELECTION_DATES[year],
             end=ELECTION_DATES[next_election_year[year]],
-            value=timeseries[year])
+            value=data[year])
 
-    return [get_election_dict(y) for y in sorted(timeseries.keys())]
+    return [get_election_dict(y) for y in sorted(data.keys())]
 
 
 @cache.memoize(3600*24*30)
