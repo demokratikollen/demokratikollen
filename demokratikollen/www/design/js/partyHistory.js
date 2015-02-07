@@ -25,19 +25,11 @@ demokratikollen.graphics.PartyHistory = function () {
         if (d.end === undefined) {
           var today = new Date();
           var tomorrow = new Date(today);
-          console.log(today)
-          console.log(tomorrow)
           tomorrow.setDate(today.getDate() + 1);
-          console.log(today)
-          console.log(tomorrow)
           d.end = tomorrow;
           d.ongoing = true;
-        } else {
-          console.log(d.end);
         }
       });
-
-      console.log(data)
 
       var container = d3.select(this)
         .html("")
@@ -78,13 +70,6 @@ demokratikollen.graphics.PartyHistory = function () {
       var xScale = d3.time.scale()
         .domain(xDomain)
         .range([0, plotAreaWidth]);
-        /*.nice(timeUnit);*/
-
-      var xScaleClamped = d3.time.scale()
-        .domain(xDomain)
-        .range([0, plotAreaWidth])
-        .nice(timeUnit)
-        .clamp(true);
 
       var yScale = d3.scale.linear()
         .domain(yDomain)
