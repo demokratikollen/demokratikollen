@@ -113,6 +113,13 @@ def party_leader_history(party_abbr):
 
     return results
 
+@cache.memoize(3600*24*30)
+def scb_polls(party_abbr):
+    party_abbr = party_abbr.lower()
+
+    data = mdb.get_object("scb_polls")[party_abbr]
+
+    return [dict(time=key, value=data[key]) for key in sorted(data.keys())]
 
 
 @cache.memoize(3600*24*30)
@@ -152,16 +159,3 @@ def get_best_party_education(t,abbr):
 
     return out_data
 
-@cache.memoize(3600*24*30)
-def get_best_party_time(abbr):
-    data = mdb.get_object("best_party_time")
-
-    party_data = data[abbr.lower()]
-    out_data = []
-    for key in sorted(party_data.keys()):
-        if math.isnan(party_data[key]):
-            continue
-        year, month = map(int, key.split('M'))
-        out_data.append(dict(time=dt.datetime(year, month, 1), value=party_data[key]))
-
-    return out_data

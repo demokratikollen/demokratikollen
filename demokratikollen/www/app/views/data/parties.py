@@ -7,7 +7,7 @@ from demokratikollen.www.app.models.parties import (
     get_municipality_timeseries,
     get_best_party_gender,
     get_best_party_education,
-    get_best_party_time,
+    scb_polls,
     party_leader_history)
 
 from demokratikollen.www.app.helpers.db import db
@@ -34,7 +34,7 @@ def party_history(abbr):
     return dict(
         elections=party_election_history(abbr),
         partyLeaders=party_leader_history(abbr),
-        polls=get_best_party_time(abbr))
+        polls=scb_polls(abbr))
 
 
 @blueprint.route('/elections/timeseries/<string:abbr>/<string:municipality_id>.json')
