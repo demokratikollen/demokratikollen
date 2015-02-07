@@ -1,33 +1,19 @@
+# coding=utf-8
+
 from demokratikollen.www.app.helpers.db import db
 from sqlalchemy import func
 from demokratikollen.www.app.helpers.cache import cache
 from demokratikollen.core.db_structure import Party, Group, GroupAppointment, Member
 from demokratikollen.core.utils.mongodb import MongoDBDatastore
 import math
+from demokratikollen.data.other.election_dates import ELECTION_DATES
+from demokratikollen.data.other.party_leaders import PARTY_LEADERS
 
 import datetime as dt
 import calendar
 import operator
 
 mdb = MongoDBDatastore()
-
-# From se.wikipedia.org...
-ELECTION_DATES = {
-    1973: dt.datetime(1973, 9, 16),
-    1976: dt.datetime(1976, 9, 19),
-    1979: dt.datetime(1979, 9, 16),
-    1982: dt.datetime(1982, 9, 19),
-    1985: dt.datetime(1985, 9, 15),
-    1988: dt.datetime(1988, 9, 18),
-    1991: dt.datetime(1991, 9, 15),
-    1994: dt.datetime(1994, 9, 18),
-    1998: dt.datetime(1998, 9, 20),
-    2002: dt.datetime(2002, 9, 15),
-    2006: dt.datetime(2006, 9, 17),
-    2010: dt.datetime(2010, 9, 19),
-    2014: dt.datetime(2014, 9, 14),
-    2018: dt.datetime(2018, 9, 9)    
-}
 
 def party_comparator(p1):
     party_sort = {
@@ -97,21 +83,8 @@ def party_election_history(party_abbr):
 
 @cache.memoize(3600*24*30)
 def party_leader_history(party_abbr):
-    appointments = (db.session.query(GroupAppointment, Member.first_name, Member.last_name)
-        .join(Member)
-        .join(Group)
-        .filter(GroupAppointment.role == 'Partiledare')
-        .filter(func.lower(Group.abbr) == party_abbr.lower())
-        .order_by(GroupAppointment.start_date))
-
-    results = []
-    for app in appointments:
-        results.append(dict(
-            start=app.GroupAppointment.start_date,
-            end=app.GroupAppointment.end_date,
-            name='{} {}'.format(app.first_name, app.last_name)))
-
-    return results
+    return PARTY_LEADERS.get(party_abbr.lower(), {})
+    
 
 @cache.memoize(3600*24*30)
 def scb_polls(party_abbr):
