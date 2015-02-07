@@ -31,7 +31,7 @@ PARTY_LEADERS["s"] = [
     { "start": "2012-01-27", "name": "Stefan Löfven" }]
 
 PARTY_LEADERS["m"] = [
-    { "start": "1970-09-01", "end": "1986-08-23", "name": "Gösta Bohman" },
+    { "start": "1970-09-01", "end": "1981-09-01", "name": "Gösta Bohman" },
     { "start": "1981-09-01", "end": "1986-08-23", "name": "Ulf Adelsohn" },
     { "start": "1986-08-23", "end": "1999-09-04", "name": "Carl Bildt" },
     { "start": "1999-09-04", "end": "2003-10-25", "name": "Bo Lundgren" },
