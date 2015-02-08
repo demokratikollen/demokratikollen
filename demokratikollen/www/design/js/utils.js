@@ -33,7 +33,7 @@ utils.getPartyColor = function(abbr) {
 
 utils.getInnerWidth = function (selection) {
   var cs = window.getComputedStyle(selection.node());
-  return cs.width.substr(0, cs.width.length-2);
+  return parseInt(cs.width) - parseInt(cs.paddingLeft) - parseInt(cs.paddingRight);
 }
 
 utils.sv_SE = {
