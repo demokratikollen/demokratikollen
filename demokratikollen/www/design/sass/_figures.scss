@@ -63,6 +63,9 @@ svg.timeline {
         stroke-width: 0;
     }
 
+    circle.poll.selected {
+        stroke-width: 5;
+    }
 
     line.vertical-picker {
         stroke-width: 3px;
@@ -70,9 +73,6 @@ svg.timeline {
         stroke-opacity: 50%;
     }
      
-    circle.poll.selected {
-        stroke-width: 8;
-    }
 
     rect.party-leader.even {
         fill-opacity: 25%;
@@ -82,15 +82,21 @@ svg.timeline {
         fill-opacity: 45%;
     }
 
-    ul.legend {
-        list-style-type: none;
+    div.legend {
         text-align: center;
-        margin: 0;
-        li {
+        ul {
             display: inline-block;
-            margin: 2px 20px 2px 0;
-            * {
-                vertical-align: middle;
+            list-style-type: none;
+            text-align: left;
+            margin: 0;
+
+            padding: 0;
+            li {
+                display: inline-block;
+                margin: 2px 20px 2px 0;
+                * {
+                    vertical-align: middle;
+                }
             }
         }
     }

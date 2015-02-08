@@ -7,7 +7,7 @@ demokratikollen.graphics.PartyHistory = function () {
     svgMargin = {top: 20, left: 50, right: 20, bottom: 100},
     timeUnit = d3.time.year,
     xTickLabelWidth = 100,
-    markerSize = 4,
+    markerSize = 3,
     cssClass = "party-history",
     baseColor = "#555";
 
@@ -41,11 +41,11 @@ demokratikollen.graphics.PartyHistory = function () {
       var plotAreaWidth = width - svgMargin.left - svgMargin.right,
         plotAreaHeight = height - svgMargin.top - svgMargin.bottom;
 
-      var legend = container.append("ul")
+      var legend = container.append("div")
         .classed("legend", true)
         .style("margin-left", svgMargin.left + 'px')
         .style("width", plotAreaWidth + "px")
-        .style("text-align", "center");
+        .append("ul");
 
       var svg = container.append("svg")
         .classed(cssClass, true)
@@ -231,7 +231,7 @@ demokratikollen.graphics.PartyHistory = function () {
           .classed("selected", prop('selected'));
 
         legendItems.push({
-          text: "Opinion",
+          text: "Opinionsläge",
           draw: function (selection) {
 
             var points = [[10, 10], [30, 10]];
@@ -324,13 +324,15 @@ demokratikollen.graphics.PartyHistory = function () {
         };
         itemFinders = items.map(function (item) { return itemFinders[item]; });
 
-        var yearFormat = d3.time.format("%Y"),
-          yearMonthFormat = d3.time.format("%Y-%m"),
-          percentFormat = d3.format(",.1%");
+        var loc = demokratikollen.utils.locale,
+          yearFormat = loc.timeFormat("%Y"),
+          yearMonthFormat = loc.timeFormat("%b %Y"),
+          percentFormat = loc.numberFormat(",.1%");
+
         var textGenerators = {
           partyLeader: function (d) {
             if (d) {
-              return ('Partiledare: ' + d.name + ' (' + yearMonthFormat(d.start) + ' – ' + (d.ongoing ? "" : yearMonthFormat(d.end)) + ')');
+              return ('Partiledare: ' + d.name + ' (' + yearFormat(d.start) + ' – ' + (d.ongoing ? "" : yearFormat(d.end)) + ')');
             }
             return 'Partiledare: okänd';
 

@@ -36,6 +36,23 @@ utils.getInnerWidth = function (selection) {
   return cs.width.substr(0, cs.width.length-2);
 }
 
+utils.sv_SE = {
+  "decimal": ",",
+    "thousands": " ",
+    "grouping": [3],
+    "currency": ["", " kr"],
+    "dateTime": "%A %e %B %Y %X",
+    "date": "%Y-%m%-%d",
+    "time": "%H:%M:%S",
+    "periods": ["AM", "PM"],
+    "days": ["söndag", "måndag", "tisdag", "onsdag", "torsdag", "fredag", "lördag"],
+    "shortDays": ["sön", "mån", "tis", "ons", "tor", "fre", "lö"],
+    "months": ["januari", "februari", "mars", "april", "maj", "juni", "juli", "augusti", "september", "oktober", "november", "december"],
+    "shortMonths": ["jan", "feb", "mar", "apr", "maj", "jun", "jul", "aug", "sep", "okt", "nov", "dec"]
+}
+
+utils.locale = d3.locale(utils.sv_SE);
+
 utils.pageState = function(obj) {
 
   var state = {};
