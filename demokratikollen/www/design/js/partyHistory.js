@@ -86,7 +86,7 @@ demokratikollen.graphics.PartyHistory = function () {
         .x(function (d) { return xScale(d.time); })
         .y(function (d) { return yScale(d.value); });
 
-      var tooltip = d3.select("body").append("div")
+      var tooltip = container.append("div")
           .classed(cssClass + " tooltip", true)
           .style("display", "none")
           .style("position", "absolute")
