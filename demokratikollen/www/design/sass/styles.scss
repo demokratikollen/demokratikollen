@@ -24,6 +24,16 @@ h1,h2,h3,h4,h5,h6 {
   text-align: left;
 }
 
+h1 {
+    @include xs-font-size($font-size-h2 * 0.9, $font-size-h1);
+}
+h2 {
+    @include xs-font-size($font-size-h3, $font-size-h2);
+}
+h3 {
+    @include xs-font-size($font-size-h3 * 0.9, $font-size-h3);
+}
+
 .row .text-col {
   @extend .col-md-8;
 }

@@ -57,58 +57,6 @@
 
 
 {% endblock %}
-{% block styles %}
-<style>
-
-.axis path, .axis line {
-  fill: none;
-  stroke: #888;
-  shape-rendering: crispEdges;
-}
-.axis text {
-    font-size: 11px;
-    fill: #888;
-}
-#cosigning .bar-rect {
- shape-rendering: crispEdges;
-}
-#cosigning-detail .bar-title {
- font-size: 11px;
- font-weight: normal;
-}
-.bar-text {
- font-size: 11px;
- font-weight: bold;
-}
-.title-text {
- font-size: 14px;
-}
-.click-rect {
- pointer-events: all;
- stroke:none;
- fill:#111;
- fill-opacity: 0.0;
- cursor:pointer;
-}
-
-figcaption {
- font-size:12px;
- color: #111;
-}
-
-.line-path {
- fill:none;
- stroke-width: 2px;
-}
-.line-marker {
- fill:#ffffff;
- pointer-events: 'none';
- stroke-width: '2px';
-}
-
-</style>
-
-{% endblock %}
 
 {% block scripts %}
 {{ super() }}

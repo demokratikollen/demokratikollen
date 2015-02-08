@@ -25,6 +25,11 @@ figure {
               border-radius: 0;
         }
     }
+
+    figcaption {
+      font-size:12px;
+      color: #111;
+    }
 }
 
 
@@ -43,11 +48,11 @@ svg.timeline {
 }
 
 .party-history {
-	.tooltip p {
-		font-size: 16px;
-		font-weight: 700;
-		margin: 0 0 5px;
-	}
+    .tooltip p {
+        font-size: 16px;
+        font-weight: 700;
+        margin: 0 0 5px;
+    }
 
     line.election {
         stroke-width: 4px;
@@ -112,3 +117,67 @@ svg.timeline {
     pointer-events: none;
     max-width:50%;
 }
+
+
+
+.axis {
+    path, line {
+        fill: none;
+        stroke: #888;
+        shape-rendering: crispEdges;        
+    }
+
+    text {
+        font-size: 11px;
+        fill: #888;
+    }
+}
+
+#cosigning, #cosigning-detail, #voter-support-education, #voter-support-gender
+{
+    .bar-rect {
+        shape-rendering: crispEdges;
+    }
+
+    .bar-title {
+        font-size: 11px;
+        font-weight: normal;
+    }
+
+    .bar-text {
+        font-size: 11px;
+        font-weight: bold;
+    }
+
+    .title-text {
+        font-size: 14px;
+    }
+
+    .click-rect {
+        pointer-events: all;
+        stroke:none;
+        fill:#111;
+        fill-opacity: 0.0;
+        cursor:pointer;
+    }
+
+    .line-path {
+        fill:none;
+        stroke-width: 2px;
+    }
+    .line-marker {
+        fill:#ffffff;
+        pointer-events: none;
+        stroke-width: '2px';
+    }
+}
+
+.election-tooltip {
+    .line {
+      fill: none;
+      stroke-width: 1.5px;
+    }    
+}
+
+
+
