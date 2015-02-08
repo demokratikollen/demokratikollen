@@ -43,7 +43,7 @@ svg.timeline {
 }
 
 .party-history {
-	.info p {
+	.tooltip p {
 		font-size: 16px;
 		font-weight: 700;
 		margin: 0 0 5px;
@@ -82,10 +82,16 @@ svg.timeline {
         fill-opacity: 45%;
     }
 
-    text.party-leader {
-        font-size: 16px;
-        fill: $greyish-9;
-        font-weight: 700;
+    ul.legend {
+        list-style-type: none;
+        text-align: center;
+        li {
+            display: inline-block;
+            margin: 2px 20px 2px 0;
+            * {
+                vertical-align: middle;
+            }
+        }
     }
 }
 
