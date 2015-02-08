@@ -190,7 +190,7 @@ demokratikollen.graphics.PartyHistory = function () {
           .attr("y2", function (d) { return yScale(d.value); });
 
         electionLines.classed("selected", prop("selected"))
-          .style("stroke", function (d) { return d.selected ? baseColor.darker(0.5) : baseColor.darker(1); });
+          .style("stroke", function (d) { return d.selected ? baseColor.darker(0.5) : baseColor.darker(3); });
 
         legendItems.push({
           text: "Valresultat",
@@ -200,7 +200,7 @@ demokratikollen.graphics.PartyHistory = function () {
               .attr("x2", 35)
               .attr("y1", 10)
               .attr("y2", 10)
-              .style("stroke", baseColor.darker(1))
+              .style("stroke", baseColor.darker(3))
               .classed("election", true);
           }
         });
@@ -231,7 +231,7 @@ demokratikollen.graphics.PartyHistory = function () {
           .classed("selected", prop('selected'));
 
         legendItems.push({
-          text: "Opinionsundersökningar",
+          text: "Opinion",
           draw: function (selection) {
 
             var points = [[10, 10], [30, 10]];
