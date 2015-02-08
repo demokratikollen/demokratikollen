@@ -88,7 +88,7 @@ cosigningFigure = function(data) {
 
   var detailParent = d3.select("#cosigning-detail");
   var detailWidth = detailParent[0][0].getBoundingClientRect().width,
-      detailHeight = 500;
+      detailHeight = 620;
   var detailTop = detailParent.append("svg")
       .attr("width",detailWidth)
       .attr("height",detailHeight);
@@ -109,11 +109,11 @@ cosigningFigure = function(data) {
     // .style("background-color", "#eee");
 
   var detailChart = demokratikollen.graphics.horizontalBarChart()
-    .width(detailWidth).height(detailHeight);
+    .width(detailWidth).height(detailHeight).maxAbsoluteBandWidth(50);
   var mainChart = demokratikollen.graphics.stackedBarChart()
     .width(width).height(height)
     .onBarActivated(function(d,i){
-      detailChart.title("Grupperingar riksmötet " + data.t[i]);
+      detailChart.title("Samarbetsförslag " + data.t[i]);
       detailTop.datum(d.slice(0,  15).reverse()).call(detailChart);
       pageState({"cosigningActiveBar": i});
     })

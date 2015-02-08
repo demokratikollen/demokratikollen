@@ -26,12 +26,25 @@ figure {
         }
     }
 
-    figcaption {
-      font-size:12px;
-      color: #111;
-    }
 }
 
+figcaption {
+  font-size: 14px;
+  color: $greyish-2;
+}
+
+.axis {
+    path, line {
+        fill: none;
+        stroke: $greyish-3;
+        shape-rendering: crispEdges;        
+    }
+
+    text {
+        font-size: 12px;
+        fill: $greyish-3;
+    }
+}
 
 svg.timeline {
     rect.background { fill: $chart-background-color; }
@@ -120,32 +133,21 @@ svg.timeline {
 
 
 
-.axis {
-    path, line {
-        fill: none;
-        stroke: #888;
-        shape-rendering: crispEdges;        
-    }
-
-    text {
-        font-size: 11px;
-        fill: #888;
-    }
-}
 
 #cosigning, #cosigning-detail, #voter-support-education, #voter-support-gender
 {
     .bar-rect {
         shape-rendering: crispEdges;
+        fill: $brownish-3;
     }
 
     .bar-title {
-        font-size: 11px;
+        font-size: 14px;
         font-weight: normal;
     }
 
     .bar-text {
-        font-size: 11px;
+        font-size: 14px;
         font-weight: bold;
     }
 
@@ -168,7 +170,7 @@ svg.timeline {
     .line-marker {
         fill:#ffffff;
         pointer-events: none;
-        stroke-width: '2px';
+        stroke-width: 2px;
     }
 }
 
@@ -176,7 +178,16 @@ svg.timeline {
     .line {
       fill: none;
       stroke-width: 1.5px;
-    }    
+    }
+
+    .axis {
+        text {
+            fill: $greyish-9;
+        }
+        path {
+            stroke: $greyish-7;
+        }
+    }
 }
 
 
