@@ -41,6 +41,12 @@ demokratikollen.graphics.PartyHistory = function () {
       var plotAreaWidth = width - svgMargin.left - svgMargin.right,
         plotAreaHeight = height - svgMargin.top - svgMargin.bottom;
 
+      var legend = container.append("ul")
+        .classed("legend", true)
+        .style("margin-left", svgMargin.left + 'px')
+        .style("width", plotAreaWidth + "px")
+        .style("text-align", "center");
+
       var svg = container.append("svg")
         .classed(cssClass, true)
         .attr("width", width)
@@ -119,6 +125,8 @@ demokratikollen.graphics.PartyHistory = function () {
       }
 
       function draw() {
+        var legendItems = [];
+
         electionsClipPath.selectAll("rect.election")
           .data(data.elections)
           .enter()
@@ -144,6 +152,28 @@ demokratikollen.graphics.PartyHistory = function () {
           .attr("height", plotAreaHeight);
         /*jslint unparam: false*/
 
+        legendItems.push({
+          text: "Partiledare",
+          draw: function (selection) {
+            var rects = [
+              { x: 5, y: 3, height: 14, width: 15 },
+              { x: 20, y: 3, height: 14, width: 15 }
+            ];
+            selection
+              .selectAll("rect.party-leader")
+              .data(rects)
+              .enter()
+              .append("rect")
+              .classed("party-leader", true)
+              .attr("y", prop("y"))
+              .attr("x", prop("x"))
+              .attr("width", prop("width"))
+              .attr("height", prop("height"))
+              .style("fill", baseColor.darker(3))
+              .style("fill-opacity", function (d, i) { return d.selected ? 0.7 : (i % 2 !== 0 ? 0.4 : 0.5); });
+          }
+        });
+
         partyLeaderRects.classed("selected", prop("selected"))
           .style("fill", function (d) { return d.selected ? baseColor.darker(1) : baseColor.darker(3); })
           .style("fill-opacity", function (d, i) { return d.selected ? 0.7 : (i % 2 !== 0 ? 0.4 : 0.5); });
@@ -161,6 +191,19 @@ demokratikollen.graphics.PartyHistory = function () {
 
         electionLines.classed("selected", prop("selected"))
           .style("stroke", function (d) { return d.selected ? baseColor.darker(0.5) : baseColor.darker(1); });
+
+        legendItems.push({
+          text: "Valresultat",
+          draw: function (selection) {
+            selection.append("line")
+              .attr("x1", 5)
+              .attr("x2", 35)
+              .attr("y1", 10)
+              .attr("y2", 10)
+              .style("stroke", baseColor.darker(1))
+              .classed("election", true);
+          }
+        });
 
         var pollColor = baseColor.darker(2);
         plotArea.selectAll("path.poll")
@@ -186,6 +229,50 @@ demokratikollen.graphics.PartyHistory = function () {
 
         pollMarkers
           .classed("selected", prop('selected'));
+
+        legendItems.push({
+          text: "Opinionsundersökningar",
+          draw: function (selection) {
+
+            var points = [[10, 10], [30, 10]];
+
+            selection
+              .append("path")
+              .datum(points)
+              .classed("poll", true)
+              .attr("d", d3.svg.line())
+              .style("stroke", pollColor)
+              .style("fill", "none");
+
+
+            selection
+              .selectAll("circle.poll")
+              .data(points)
+              .enter()
+              .append("circle")
+              .classed("poll", true)
+              .attr("cx", function (d) { return d[0]; })
+              .attr("cy", function (d) { return d[1]; })
+              .attr('r', markerSize)
+              .style("fill", pollColor)
+              .style("stroke", pollColor);
+          }
+        });
+
+        legend.selectAll("li")
+          .data(legendItems)
+          .enter()
+          .append("li")
+          .each(function (d) {
+            var li = d3.select(this);
+
+            li.append("svg")
+              .style("width", 40)
+              .style("height", 20)
+              .call(d.draw);
+
+            li.append("span").text(d.text);
+          });
 
         if (data.texts) {
           var paragraphs = tooltip.selectAll("p").data(data.texts);
