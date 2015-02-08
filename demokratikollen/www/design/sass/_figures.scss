@@ -131,19 +131,6 @@ div.timeline.tooltip {
 }
 
 
-.d3-tip {
-    line-height: 1.2;
-    padding: 10px;
-    background: fade-out($greyish-2, 0.07);
-    color: $greyish-9;
-    border-radius: 5px;
-    pointer-events: none;
-    max-width:50%;
-}
-
-
-
-
 #cosigning, #cosigning-detail, #voter-support-education, #voter-support-gender
 {
     .bar-rect {
