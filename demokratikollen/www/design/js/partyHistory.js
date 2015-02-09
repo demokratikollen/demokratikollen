@@ -4,7 +4,7 @@ demokratikollen.graphics.PartyHistory = function () {
 
   var width = 400,
     height = 350,
-    svgMargin = {top: 20, left: 50, right: 20, bottom: 100},
+    svgMargin = {top: 20, left: 50, right: 20, bottom: 110},
     timeUnit = d3.time.year,
     xTickLabelWidth = 100,
     markerSize = 3,
@@ -86,11 +86,14 @@ demokratikollen.graphics.PartyHistory = function () {
         .x(function (d) { return xScale(d.time); })
         .y(function (d) { return yScale(d.value); });
 
-      var tooltip = container.append("div")
-          .classed(cssClass + " tooltip", true)
-          .style("display", "none")
-          .style("position", "absolute")
-          .style("max-width", plotAreaWidth + "px");
+      var tooltip = d3.select("body").selectAll("div.tooltip." + cssClass.split(" ").join("."))
+        .data([0])
+        .enter()
+        .append("div")
+        .classed(cssClass + " tooltip", true)
+        .style("display", "none")
+        .style("position", "absolute")
+        .style("max-width", plotAreaWidth + "px");
 
       function tooltipVisible(visible) {
         tooltip.style("display", (visible ? "block" : "none"));
@@ -106,7 +109,7 @@ demokratikollen.graphics.PartyHistory = function () {
           edge = {
             left: window.pageXOffset + plotAreaBCR.left,
             right: window.pageXOffset + plotAreaBCR.left + plotAreaWidth,
-            top: window.pageYOffset + plotAreaBCR.top + plotAreaHeight + 30
+            top: window.pageYOffset + plotAreaBCR.top + plotAreaHeight + 50
           },
           anchorX = edge.left + xScale(t);
 
@@ -133,8 +136,8 @@ demokratikollen.graphics.PartyHistory = function () {
           .append("rect")
           .classed("election", true)
           .attr("y", function (d) { return yScale(d.value); })
-          .attr("x", function (d) { return xScale(d.start); })
-          .attr("width", function (d) { return xScale(d.end) - xScale(d.start); })
+          .attr("x", function (d) { return Math.floor(xScale(d.start)); })
+          .attr("width", function (d) { return Math.ceil(xScale(d.end)) - Math.floor(xScale(d.start)); })
           .attr("height", function (d) { return yScale(0) - yScale(d.value); });
 
 

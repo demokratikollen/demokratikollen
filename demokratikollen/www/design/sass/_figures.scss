@@ -71,11 +71,6 @@ div.timeline.tooltip {
 }
 
 .party-history {
-    .tooltip p {
-        font-size: 16px;
-        font-weight: 700;
-        margin: 0 0 5px;
-    }
 
     line.election {
         stroke-width: 4px;
@@ -128,6 +123,11 @@ div.timeline.tooltip {
             }
         }
     }
+}
+.party-history.tooltip p {
+    font-size: 16px;
+    font-weight: 700;
+    margin: 0 0 5px;
 }
 
 
