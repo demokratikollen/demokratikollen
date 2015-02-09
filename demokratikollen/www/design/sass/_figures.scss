@@ -159,7 +159,9 @@ div.timeline.tooltip {
         fill-opacity: 0.0;
         cursor:pointer;
     }
+}
 
+#party-bias {
     .line-path {
         fill:none;
         stroke-width: 2px;
@@ -168,7 +170,7 @@ div.timeline.tooltip {
         fill:#ffffff;
         pointer-events: none;
         stroke-width: 2px;
-    }
+    }    
 }
 
 .election-tooltip {
