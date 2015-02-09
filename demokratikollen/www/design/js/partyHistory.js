@@ -417,10 +417,6 @@ demokratikollen.graphics.PartyHistory = function () {
         select(xScale.invert(x));
       });
 
-      interactiveArea.on("mouseout." + pickerId, function () {
-        select(new Date());
-      });
-
       select(new Date());
 
     });
