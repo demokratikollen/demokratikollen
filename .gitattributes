@@ -7,3 +7,6 @@ demokratikollen/data/other/*.gz binary
 
 #images should be binary
 *.jpg binary
+*.png binary
+*.gif binary
+*.xcf binary

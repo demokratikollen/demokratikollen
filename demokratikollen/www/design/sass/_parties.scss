@@ -7,6 +7,30 @@ path.map-region {
     // shape-rendering: crispEdges;
 }
 
+
+a.party-logo {
+    display: inline-block;
+    position: relative;
+    img {
+        margin: 5px;
+        z-index: 1;
+    }    
+    div {
+        position: absolute;
+        top: 0;
+        left: 0;
+        height: 100%;
+        width: 100%;
+        z-index: 2;
+        background: transparentize($body-bg, 0.7);
+    }
+}
+a.party-logo:hover {
+    div {
+        background: none;
+    }
+}
+
 div.election-tooltip {
     position: absolute;
     top: 0;
