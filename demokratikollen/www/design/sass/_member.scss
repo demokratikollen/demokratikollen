@@ -1,8 +1,7 @@
 div.member-image {
-	float: left;
+	display: inline-block;
 	border: 1px solid $greyish-5;
 	img {
-		display: block;
 		border-color: $greyish-6;
 		border-bottom-width: 22px;
 		border-bottom-style: solid;

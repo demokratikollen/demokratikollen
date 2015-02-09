@@ -4,7 +4,7 @@ demokratikollen.graphics.AppointmentsTimeline = function () {
 
   var rowHeight = 40,
     lineOffsetY = 10,
-    margin = { top: 20, right: 0, bottom: 5, left: 0 },
+    margin = { top: 20, right: 20, bottom: 5, left: 10 },
     rowLabelsMarginLeft = 10,
     timeUnit = d3.time.year,
     tickLabelWidth = 100,
@@ -65,11 +65,6 @@ demokratikollen.graphics.AppointmentsTimeline = function () {
         .append("g")
         .attr("transform", "translate(" + margin.left + "," + margin.top + ")");
 
-      svg.append("rect")
-        .attr("width", width)
-        .attr("height", height)
-        .classed("background", true);
-
       var x = d3.time.scale()
         .domain([minDate, maxDate])
         .range([0, width])
@@ -91,8 +86,6 @@ demokratikollen.graphics.AppointmentsTimeline = function () {
       xAxis = svg.append("g")
         .classed("axis x", true)
         .call(xAxis);
-      xAxis.selectAll("text")
-        .style("text-anchor", "start");
 
       svg.append("g")
         .classed("rowLabels", true)
@@ -135,7 +128,7 @@ demokratikollen.graphics.AppointmentsTimeline = function () {
         var tooltip = d3.select("body")
           .append("div")
           .classed(cssClass + " tooltip", true)
-          .style("display", "hidden")
+          .style("display", "none")
           .style("position", "absolute")
           .style("max-width", width + "px");
 
@@ -152,18 +145,16 @@ demokratikollen.graphics.AppointmentsTimeline = function () {
           tooltip.style("display", "block");
           tooltip.html(tipHtml(d));
           setPosTooltip(0, 0);
-          /*console.log(tooltip[0][0].getBoundingClientRect());
-          return;*/
 
           var mouseEvent = d3.mouse(d3.select("body")[0][0]),
             anchorX = mouseEvent[0],
             anchorY = mouseEvent[1],
             tooltipBCR = tooltip[0][0].getBoundingClientRect(),
             tooltipWidth = tooltipBCR.right - tooltipBCR.left,
-            plotAreaBCR = svg[0][0].getBoundingClientRect(),
+            plotAreaBCR = container[0][0].getBoundingClientRect(),
             edge = {
-              left: window.pageXOffset + plotAreaBCR.left,
-              right: window.pageXOffset + plotAreaBCR.left + width
+              left: window.pageXOffset + plotAreaBCR.left + margin.left,
+              right: window.pageXOffset + plotAreaBCR.left + margin.left + width
             };
 
           if (anchorX + tooltipWidth / 2 > edge.right) {
