@@ -267,8 +267,8 @@ demokratikollen.graphics.PartyHistory = function () {
             var li = d3.select(this);
 
             li.append("svg")
-              .style("width", 40)
-              .style("height", 20)
+              .attr("width", 40)
+              .attr("height", 20)
               .call(d.draw);
 
             li.append("span").text(d.text);
