@@ -26,6 +26,7 @@ h1,h2,h3,h4,h5,h6 {
 
 h1 {
     @include xs-font-size($font-size-h2 * 0.9, $font-size-h1);
+    margin-bottom: 15px;
 }
 h2 {
     @include xs-font-size($font-size-h3, $font-size-h2);
