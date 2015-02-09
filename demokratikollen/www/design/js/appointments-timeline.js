@@ -4,7 +4,7 @@ demokratikollen.graphics.AppointmentsTimeline = function () {
 
   var rowHeight = 40,
     lineOffsetY = 10,
-    margin = { top: 20, right: 0, bottom: 5, left: 0 },
+    margin = { top: 20, right: 20, bottom: 5, left: 10 },
     rowLabelsMarginLeft = 10,
     timeUnit = d3.time.year,
     tickLabelWidth = 100,
@@ -86,8 +86,6 @@ demokratikollen.graphics.AppointmentsTimeline = function () {
       xAxis = svg.append("g")
         .classed("axis x", true)
         .call(xAxis);
-      xAxis.selectAll("text")
-        .style("text-anchor", "start");
 
       svg.append("g")
         .classed("rowLabels", true)
