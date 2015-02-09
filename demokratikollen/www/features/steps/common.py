@@ -33,6 +33,10 @@ def step_impl(context):
 def step_impl(context, title):
     eq_(context.driver.title, title)
 
+@then('The page title should contain "{phrase}"')
+def step_impl(context, phrase):
+    ok_(phrase in context.driver.title, "{} not in page title.".format(phrase))
+
 @then('No header button should be activated')
 def step_impl(context):
     elements = context.driver.find_elements_by_css_selector('ul.menu-items li')
