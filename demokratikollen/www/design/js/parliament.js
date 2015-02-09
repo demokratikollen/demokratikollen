@@ -228,6 +228,14 @@ parliamentChairs = {
 
     new_decorations.append("text")
       .attr("class", "party_abbr")
+      .on("click",function(d){ location.href = '/'+d.party; })
+      .on("mouseover",function(d){
+        d3.select(this)
+            .style("fill",demokratikollen.utils.getPartyColor(d.party).toString());
+      })
+      .on("mouseout",function(d){
+        d3.select(this).style("fill","");
+      })
       .text(function(d) {
         return d.party.toUpperCase();
       })

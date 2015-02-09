@@ -1,6 +1,16 @@
 ﻿{% extends "parties/base.html" %}
 {% block content %}
-
+<h1>Partierna</h1>
+<div class="row">
+  <div class="text-col">
+    <p>På den här sidan visar vi statistik om hur partierna förhåller sig till varandra i riksdagen. Mer information om varje enskilt parti finns på partiets egen sida, som kan nås genom länkarna nedan.</p>
+    {% for p in parties -%}
+    <span class="party-link">
+      <a href="/{{ p }}">{{ p|upper }}</a>
+    </span>
+    {%- endfor %}
+  </div>
+</div>
 <div class="row">
     <div class="text-col">
         <h2>Vem röstar med vem i kammaren?</h2>

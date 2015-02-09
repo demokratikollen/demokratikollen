@@ -26,7 +26,7 @@ def render_parliament():
 # Set the route and accepted methods
 @blueprint.route('/', methods=['GET'])
 def index():
-    return render_template("/index.html")
+    return render_parliament()
 
 @blueprint.route('/riksdagen', methods=['GET'])
 def parliament():
@@ -34,7 +34,12 @@ def parliament():
 
 @blueprint.route('/partierna', methods=['GET'])
 def parties():
-    return render_template("/parties/index.html")
+    left_index = {"v": 0, "s": 1, "mp": 2, "sd": 10, "c": 100, "fp": 101, "kd": 102, "m": 103}
+    ps = [p for p, in db.session.query(Party.abbr) \
+                        .all() if p.lower() in left_index]
+    ps = sorted(ps,key=lambda k: left_index[k.lower()])
+
+    return render_template("/parties/index.html", parties=ps)
 
 @blueprint.route('/forslagen', methods=['GET'])
 def proposals():
