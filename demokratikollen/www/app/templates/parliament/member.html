@@ -6,7 +6,11 @@
 {%- endblock %}
 
 {% block content %}
-<h1 class="member-name">{{ member.first_name }} {{ member.last_name }} ({{ member.party.abbr|lower() }})</h1>
+<div class="row">
+  <div class="col-sm-12">
+    <h1 class="member-name">{{ member.first_name }} {{ member.last_name }} ({{ member.party.abbr|lower() }})</h1>
+  </div>
+</div>
 
 <div class="row">
   <div class="col-md-4">

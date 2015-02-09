@@ -135,7 +135,7 @@ demokratikollen.graphics.AppointmentsTimeline = function () {
         var tooltip = d3.select("body")
           .append("div")
           .classed(cssClass + " tooltip", true)
-          .style("display", "hidden")
+          .style("display", "none")
           .style("position", "absolute")
           .style("max-width", width + "px");
 
