@@ -65,11 +65,6 @@ demokratikollen.graphics.AppointmentsTimeline = function () {
         .append("g")
         .attr("transform", "translate(" + margin.left + "," + margin.top + ")");
 
-      svg.append("rect")
-        .attr("width", width)
-        .attr("height", height)
-        .classed("background", true);
-
       var x = d3.time.scale()
         .domain([minDate, maxDate])
         .range([0, width])
@@ -152,18 +147,16 @@ demokratikollen.graphics.AppointmentsTimeline = function () {
           tooltip.style("display", "block");
           tooltip.html(tipHtml(d));
           setPosTooltip(0, 0);
-          /*console.log(tooltip[0][0].getBoundingClientRect());
-          return;*/
 
           var mouseEvent = d3.mouse(d3.select("body")[0][0]),
             anchorX = mouseEvent[0],
             anchorY = mouseEvent[1],
             tooltipBCR = tooltip[0][0].getBoundingClientRect(),
             tooltipWidth = tooltipBCR.right - tooltipBCR.left,
-            plotAreaBCR = svg[0][0].getBoundingClientRect(),
+            plotAreaBCR = container[0][0].getBoundingClientRect(),
             edge = {
-              left: window.pageXOffset + plotAreaBCR.left,
-              right: window.pageXOffset + plotAreaBCR.left + width
+              left: window.pageXOffset + plotAreaBCR.left + margin.left,
+              right: window.pageXOffset + plotAreaBCR.left + margin.left + width
             };
 
           if (anchorX + tooltipWidth / 2 > edge.right) {
