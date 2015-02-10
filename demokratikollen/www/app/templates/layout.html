@@ -1,4 +1,4 @@
-<!DOCTYPE html>
+﻿<!DOCTYPE html>
 <html lang="sv">
   <head>
     {% block head -%}
@@ -82,9 +82,12 @@
     </footer>
 
     <cookienotice>
-      <div class="row">
-        <div class="col-md-8"><p>Demokratikollen använder kakor för att kunna ge dig som besökare en bättre upplevelse.</p></div>
-        <div class="col-md-4 text-right"><input class="flush-right" id="cookie-consent-button" type="button" value="Visa inte detta meddelande igen"></div>
+      <div>
+        <p class="center">
+          Demokratikollen använder kakor för att kunna ge dig som besökare en bättre upplevelse. För mer information, <a href="{{url_for('pages.privacypolicy')}}">se våran sekretesspolicy</a>
+        </p>
+        <input id="cookie-consent-button" type="button" value="Jag förstår och accepterar">
+
       </div>
     </cookienotice>
 

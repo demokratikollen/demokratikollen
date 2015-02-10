@@ -54,6 +54,10 @@ def sitemap():
     pages = sitemap_pages()
     return render_template("/sitemap.xml", pages=pages)
 
+@blueprint.route("/sekretesspolicy.html")
+def privacypolicy():
+    return render_template("/privacypolicy.html")
+
 @blueprint.route('/search.json', methods=['GET'])
 @cache.cached(3600*24*30)
 @http_expires(3600*24*30)
