@@ -299,7 +299,7 @@ demokratikollen.graphics.timeSeriesChart = function() {
 
 parties = {
   tooltipFigure: function() {
-    var margin = {top: 12, right: 12, bottom: 17, left: 25},
+    var margin = {top: 12, right: 15, bottom: 20, left: 25},
         width = 170 - margin.left - margin.right,
         height = 60 - margin.top - margin.bottom
 
