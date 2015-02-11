@@ -10,6 +10,14 @@
     <link href="{{ url_for('static', filename='css/dependencies.min.css') }}" rel="stylesheet">
     <link href="{{ url_for('static', filename='css/styles.min.css') }}" rel="stylesheet">
     <link href='http://fonts.googleapis.com/css?family=Open+Sans:400italic,700italic,700,400,600|Roboto+Slab:400,700' rel='stylesheet' type='text/css'>
+
+    <meta property="og:site_name " content="Demokratikollen" />
+    <meta property="og:title" content="{{ title | replace(" - Demokratikollen", "") }}" />
+    <meta property="og:type" content="{{ open_graph_type }}" />
+    <meta property="og:url" content="http://www.demokratikollen.se{{ request.path | lower }}" />
+    <meta property="og:image" content="http://www.demokratikollen.se/img/opengraph/{{ open_graph_image }}" />
+    <meta property="og:locale" content="sv_SE" />
+
     <!-- HTML5 shim and Respond.js for IE8 support of HTML5 elements and media queries -->
     <!-- WARNING: Respond.js doesn't work if you view the page via file:// -->
     <!--[if lt IE 9]>
