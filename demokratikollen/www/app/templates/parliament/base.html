@@ -1,4 +1,9 @@
 {% extends "base.html" %}
 
 {% set active_button = active_button|default("Riksdagen") %}
+{% if request.path == "/" %}
+{% set title = title|default("Demokratikollen") %}
+{% set open_graph_type = open_graph_type|default("website") %}
+{% else %}
 {% set title = title|default("Riksdagen - Demokratikollen") %}
+{% endif %}
