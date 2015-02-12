@@ -66,3 +66,12 @@ html,body {
   @extend .navbar-toggle;
   @extend .navbar-right;
 }
+
+#fb-root {
+    display: none;
+}
+
+#fb-twitter {
+    text-align: left;
+    .twitter-share-button { vertical-align: top; }
+}

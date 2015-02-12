@@ -39,6 +39,18 @@
     {% block styles %}{% endblock %}
   </head>
   <body>
+  <div id="fb-root"></div>
+  <script>
+  window.fbAsyncInit = function() {FB.init({appId: '1541141682820916', xfbml: true, version: 'v2.2'});};
+  (function(d, s, id){
+     var js, fjs = d.getElementsByTagName(s)[0];
+     if (d.getElementById(id)) {return;}
+     js = d.createElement(s); js.id = id;
+     js.src = "//connect.facebook.net/sv_SE/sdk.js";
+     fjs.parentNode.insertBefore(js, fjs);
+   }(document, 'script', 'facebook-jssdk'));
+</script>
+
     <nav id="navbar" role="navigation">
       <div>
         <div class="container">
@@ -88,8 +100,16 @@
       </div><!-- /.navbar-inner -->
     </nav>
 
+    
     <div id="content-wrapper">
       <div class="container">
+      <div id="fb-twitter">
+        <div class="inner">
+          <a href="https://twitter.com/share" class="twitter-share-button" data-via="demokratikollen" data-lang="sv">Tweeta</a>
+          <script>!function(d,s,id){var js,fjs=d.getElementsByTagName(s)[0],p=/^http:/.test(d.location)?'http':'https';if(!d.getElementById(id)){js=d.createElement(s);js.id=id;js.src=p+'://platform.twitter.com/widgets.js';fjs.parentNode.insertBefore(js,fjs);}}(document, 'script', 'twitter-wjs');</script>
+          <div class="fb-like" data-href="http://www.demokratikollen.se{{ request.path | lower }}" data-layout="button_count" data-action="like" data-show-faces="false" data-share="true"></div>
+        </div>
+      </div>
         {% block content %}{% endblock %}
       </div>
     </div>
