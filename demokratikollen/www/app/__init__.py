@@ -1,5 +1,5 @@
 # Import flask and template operators
-from flask import Flask, request,render_template
+from flask import Flask, request,render_template, redirect
 import os
 from urllib.parse import urlparse, urlunparse
 
@@ -72,6 +72,7 @@ def create_app(testing=False, caching=True):
     def redirect_nonwww():
         """Redirect non-www requests to www."""
         urlparts = urlparse(request.url)
+        print(urlparts)
         if urlparts.netloc == 'demokratikollen.se':
             urlparts_list = list(urlparts)
             urlparts_list[1] = 'www.demokratikollen.se'
