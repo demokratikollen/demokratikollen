@@ -66,6 +66,16 @@ def create_app(testing=False, caching=True):
     def not_found(error):
         return render_template('404.html'), 404
 
+    # Add a redirect for urls no being www
+    @app.before_request
+    def redirect_nonwww():
+        """Redirect non-www requests to www."""
+        urlparts = urlparse(request.url)
+        if urlparts.netloc == 'demokratikollen.se':
+            urlparts_list = list(urlparts)
+            urlparts_list[1] = 'www.demokratikollen.se'
+            return redirect(urlunparse(urlparts_list), code=301)
+
     # Import a module / component using its blueprint handler variable
 
     blueprints = (
