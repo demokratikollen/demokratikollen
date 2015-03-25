@@ -218,9 +218,6 @@ parliamentChairs = {
       .attr('class', 'decoration');
 
     new_decorations.append("text")
-      .text(function(d) {
-        return self.partySupport[d.party]
-      })
       .attr("class", "party_support")
       .attr("text-anchor", "middle")
       .attr("y", 35)
@@ -244,6 +241,11 @@ parliamentChairs = {
 
     //if the decorations are created for the first time position the outside the screen.
     new_decorations.attr("transform", transition_out);
+
+    //Update party support.
+    decorations.select(".party_support").text(function(d) {
+        return self.partySupport[d.party]
+      })
 
     decorations.transition().duration(1000).attr("transform", function(d) {
       var y = y0 - radius * Math.sin(d.angle);
