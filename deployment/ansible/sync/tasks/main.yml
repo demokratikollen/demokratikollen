@@ -1,0 +1,35 @@
+- name: Check if lock-file exists
+  stat: path=/home/deploy/deploy.lock
+  register: lock
+- fail: msg="Lockfile exists. Either a deploy is running or the last deploy failed somehow. Exiting..."
+  when: lock.stat.exists
+
+- name: Remove the old source
+  file: path=/home/deploy/demokratikollen state=absent
+
+- name: Fetch the source.
+  git: repo=https://github.com/joelgoop/demokratikollen.git dest=/home/deploy/demokratikollen
+
+# - name: Copy the docker related files.
+#   synchronize: src=./ dest=/home/wercker/docker/
+
+# - name: Copy the source to the webapp
+#   synchronize: src=../demokratikollen/ dest=/home/wercker/docker/webapp/demokratikollen/ rsync_opts=--exclude=temp
+
+# - name: Copy the newrelic config file to the webapp
+#   shell: cp /etc/newrelic/newrelic.ini /home/wercker/docker/webapp/newrelic.ini
+
+# - name: Copy the source to the bgtask 
+#   synchronize: src=../demokratikollen/ dest=/home/wercker/docker/bgtasks/demokratikollen/ rsync_opts=--exclude=temp
+
+# - name: Remove the www folder from bgtask
+#   shell: rm -rf docker/bgtasks/demokratikollen/www
+
+# - name: Copy the static files to the nginx docker.
+#   synchronize: src=../demokratikollen/www/app/static/ dest=/home/wercker/docker/nginx/static/
+
+- name: Set cookie secret for the webapp container.
+  lineinfile: dest=/home/wercker/docker/webapp/Dockerfile line='ENV SECRET_KEY {{ lookup("env","SECRET_KEY") }}' state=present
+
+- name: Set CSRF secret for the webapp container.
+  lineinfile: dest=/home/wercker/docker/webapp/Dockerfile line='ENV CSRF_SESSION_KEY {{ lookup("env","CSRF_SESSION_KEY") }}' state=present
