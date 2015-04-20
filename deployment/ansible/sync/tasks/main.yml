@@ -4,8 +4,11 @@
 - fail: msg="Lockfile exists. Either a deploy is running or the last deploy failed somehow. Exiting..."
   when: lock.stat.exists
 
-# - name: Remove the old source
-#   file: path=/home/deploy/demokratikollen state=absent
+# - name: Remove the old_old source
+#   file: path=/home/deploy/demokratikollen_old state=absent
+
+# - name: Move the old src
+#	shell: mv /home/deploy/demokratikollen /home/deploy/demokratikollen_old
 
 # - name: Fetch the source.
 #   git: repo=https://github.com/joelgoop/demokratikollen.git dest=/home/deploy/demokratikollen version=new-deploy
