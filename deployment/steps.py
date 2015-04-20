@@ -1,6 +1,7 @@
 import os
 import diff
 from docker import Client
+from dockerutils import container_utils, image_utils
 import params
 import shutil
 import sys
@@ -15,7 +16,7 @@ def verify_changes(base_dir, logger):
 
     diff_rf = diff.remote_files(
         os.path.join(base_dir, 'data/download') ,
-        os.path.join(base_dir, 'docker/bgtasks/demokratikollen/data/urls.txt')
+        os.path.join(base_dir, 'demokratikollen/demokratikollen/data/urls.txt')
         )
     if diff_rf:
         changed.append('riksdagen_remote')
