@@ -8,7 +8,7 @@ import os
 import sys
 import re
 
-base_dir = '/home/wercker/'
+base_dir = '/home/deploy/'
 lock_file = os.path.join(base_dir, 'deploy.lock')
 # Check if the lockfile exists
 if os.path.isfile(lock_file):
@@ -40,10 +40,9 @@ if pid != 0:
 logger.setup_logging(base_dir)
 log = logging.getLogger(__name__)
 
-with open('/home/wercker/docker/deployment/deploy.conf','r') as df:
+with open(os.path.join(base_dir,'demokratikollen/deployment/deploy.conf'),'r') as df:
     deploy_extent = df.readline()
     deploy_extent = deploy_extent[:-1]
-
 
 #The first step is to check if stuff have changed. If something changed all database images has to be replaced.
 files_changed = steps.verify_changes(base_dir, log)
