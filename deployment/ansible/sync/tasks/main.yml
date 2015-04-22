@@ -13,6 +13,12 @@
 # - name: Fetch the source.
 #   git: repo=https://github.com/joelgoop/demokratikollen.git dest=/home/deploy/demokratikollen version=new-deploy
 
+- name: Copy over the new relic config file.
+  shell: cp /etc/newrelic.ini /home/deploy/demokratikollen/deployment/docker/webapp/
+
+- name: Copy the requirment-files to the webapp
+  shell: cp -r /home/deploy/demokratikollen/demokratikollen/requirement* /home/deploy/demokratikollen/deployment/docker/webapp/
+
 - name: Set cookie secret for the webapp container.
   lineinfile: dest=/home/deploy/demokratikollen/deployment/docker/webapp/Dockerfile line='ENV SECRET_KEY {{ lookup("env","SECRET_KEY") }}' state=present
 

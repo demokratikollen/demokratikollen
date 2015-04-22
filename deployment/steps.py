@@ -1,7 +1,7 @@
 import os
 import diff
 from docker import Client
-from dockerutils import container_utils, image_utils
+from dockerutils import container_utils, image_utils, misc_utils
 import params
 import shutil
 import sys
@@ -36,16 +36,11 @@ def verify_changes(base_dir, logger):
 
 def create_images(deploy_settings):
     cli = Client(base_url='unix://var/run/docker.sock')
-    p = params.get_params()
 
-    images_to_create = []
+    # We can always update all images to their new versions. 
+    images_to_create = ['postgres', 'mongo','webapp','nginx']
 
-    # If files changed we need to create everything! the whole thing!
-    if deploy_settings['deploy_extent'] in ['ALL', 'CALCULATIONS'] and deploy_settings['files_changed']:
-        images_to_create += ['postgres', 'mongo', 'bgtasks']
-
-    #Regardless of changes of files we need a new webapp and nginx.
-    images_to_create += ['webapp', 'nginx']
+    # if deploy_settings['deploy_extent'] in ['ALL', 'CALCULATIONS'] and deploy_settings['files_changed']:
 
     for image in images_to_create:
         try:
@@ -230,18 +225,11 @@ def post_deployment(deploy_settings):
 
     deploy_settings['log'].info("Saving parameters and removing lockfile")
 
-    # Save the current parameters.
-    p = params.get_params()
-    p['prev_images'] = dict(p['curr_images'])    # Object referencing fooled me, use dict to create a copy.
-    p['prev_containers'] = dict(p['curr_containers'])
-    params.set_params(p)
+    
 
-    #Copy this version of source files to the old_source files.
-    current_src_path = os.path.join(deploy_settings['base_dir'], 'docker')
-    prev_src_path = os.path.join(deploy_settings['base_dir'], 'docker_old')
-
-    shutil.rmtree(prev_src_path)
-    shutil.copytree(current_src_path, prev_src_path)
+def clean_up_after_error(deploy_settings):
+    deploy_settings['log'].info("Cleaning up untagged Images")
+    image_utils.removeUntaggedImages()
 
 def create_container(name, deploy_settings):
     p = params.get_params()
@@ -296,17 +284,17 @@ def remove_image(name, deploy_settings):
         cli.remove_image(image=p['prev_images'][name])
 
 def create_image(name,deploy_settings):
-    p = params.get_params()
     cli = Client(base_url='unix://var/run/docker.sock')
 
-    docker_path = os.path.join(deploy_settings['base_dir'], 'docker/' + name)
+    docker_path = os.path.join(deploy_settings['base_dir'], 'demokratikollen/deployment/docker/' + name)
     full_name = 'demokratikollen/' + name
-    if p['prev_images'][name] in [full_name + ':two', '']:
-        p['curr_images'][name] = full_name + ':one'
-    else:
-        p['curr_images'][name] = full_name + ':two'
 
-    params.set_params(p)
+    deploy_settings['log'].info("Creating image: {0}".format(name))
+    for line in cli.build(path=docker_path, rm=True, tag=full_name):
+        log_data = misc_utils.decode_docker_log(line)
 
-    deploy_settings['log'].info("Creating image: {0}".format(p['curr_images'][name]))
-    response = [line for line in cli.build(path=docker_path, rm=True, tag=p['curr_images'][name])]
+        if "error" in log_data:
+            deploy_settings['log'].error("Something went wrong with docker: {0}".format(log_data['error']))
+            raise Exception
+        else:
+            deploy_settings['log'].info("Docker: {0}".format(log_data['stream'].strip()))

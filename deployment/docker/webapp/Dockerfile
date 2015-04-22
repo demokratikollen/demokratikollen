@@ -1,9 +1,11 @@
 FROM python:3.4.2
 MAINTAINER joharohl <johan@rohlen.net>
 
-COPY ./newrelic.ini /etc/newrelic/
-WORKDIR /apps/demokratikollen
-RUN pip install -r requirements.txt -q
+COPY . /etc/webapp/
+
+VOLUME /apps
+
+RUN pip install -r /etc/webapp/requirements.txt -q
 
 ENV PYTHONPATH /apps
 ENV DATABASE_URL postgresql://demokratikollen@postgres:5432/demokratikollen
@@ -13,4 +15,4 @@ ENV NEW_RELIC_CONFIG_FILE /etc/newrelic/newrelic.ini
 
 EXPOSE 8000
 
-CMD newrelic-admin run-program gunicorn -c /apps/demokratikollen/gunicorn_config.py demokratikollen.www.gunicorn_production:app
+CMD newrelic-admin run-program gunicorn -c /etc/webapp/gunicorn_config.py demokratikollen.www.gunicorn_production:app
