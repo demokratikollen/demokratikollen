@@ -222,9 +222,23 @@ def pre_deployment(deploy_settings):
     pass
 
 def post_deployment(deploy_settings):
+    cli = Client(base_url='unix://var/run/docker.sock')
 
-    deploy_settings['log'].info("Saving parameters and removing lockfile")
+    deploy_settings['log'].info("Saving source for next deploy.")
 
+    old_src = os.path.join(deploy_settings['base_dir'],'demokratikollen_old')
+    new_src = os.path.join(deploy_settings['base_dir'],'demokratikollen')
+    shutil.rmtree(old_src)
+    shutil.move(new_src,old_src)
+
+    deploy_settings['log'].info("Retagging images.")
+    image_names = ['demokratikollen/nginx', 
+                   'demokratikollen/mongo',
+                   'demokratikollen/postgres',
+                   'demokratikollen/webapp']
+    for image_name in image_names:
+        cli.tag(image=image_name, tag='current', repository=image_name, force=True)
+    
     
 
 def clean_up_after_error(deploy_settings):

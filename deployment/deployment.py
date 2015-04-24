@@ -69,11 +69,11 @@ try:
     # steps.switch_nginx_servers(deploy_settings)
     # steps.remove_containers(deploy_settings)
     # steps.remove_images(deploy_settings)
-    #steps.post_deployment(deploy_settings)
-
+    steps.post_deployment(deploy_settings)
+    log.info("Removing lockfile.")
     os.remove(lock_file)
 except Exception as e:
     #steps.remove_current_images_and_containers(deploy_settings)
     steps.clean_up_after_error(deploy_settings)
     log.error("Something went wrong during deployment. Check logs, fix error, tidy up, remove lock file and try again")
-    #log.error(e)
+    log.error(e)
