@@ -79,84 +79,9 @@ def stop_and_remove_temp_containers(deploy_settings):
     cli.remove_container(container='postgres-temp', force=True, v=True)
     cli.remove_container(container='mongo-temp', force=True, v=True)
 
+def save_database_data(deploy_settings):
+    pass
 
-def remove_images(deploy_settings):
-    cli = Client(base_url='unix://var/run/docker.sock')
-    p = params.get_params()
-
-    images_to_remove = []
-
-    # Remove the extra containers if the files changed.
-    if deploy_settings['deploy_extent'] in ['ALL', 'CALCULATIONS'] and deploy_settings['files_changed']:
-        images_to_remove += ['postgres', 'mongo','bgtasks']
-    #remove webapp and nginx image if it exists
-    images_to_remove += ['webapp', 'nginx']
-
-    for image in images_to_remove:
-        try:
-            remove_image(image,deploy_settings)
-        except Exception as e:
-            deploy_settings['log'].error("Something went wrong with docker, continuing anyway: {0} ".format(e))
-
-def remove_containers(deploy_settings):
-    cli = Client(base_url='unix://var/run/docker.sock')
-    p = params.get_params()
-
-    containers_to_remove = []
-
-    if deploy_settings['deploy_extent'] in ['ALL', 'CALCULATIONS'] and deploy_settings['files_changed']:
-        containers_to_remove += ['postgres', 'mongo', 'bgtasks']
-
-    containers_to_remove += ['webapp', 'nginx']
-
-    for container in containers_to_remove:
-        try:
-            remove_container(container,deploy_settings)
-        except Exception as e:
-            deploy_settings['log'].error("Something went wrong with docker, continuing anyway: {0} ".format(e))
-
-
-def create_containers(deploy_settings):
-    cli = Client(base_url='unix://var/run/docker.sock')
-    p = params.get_params()
-
-    containers_to_create = []
-
-    # If files changed we need to create everything! the whole thing!
-    if deploy_settings['deploy_extent'] in ['ALL', 'CALCULATIONS'] and deploy_settings['files_changed']:
-        containers_to_create += ['postgres', 'mongo', 'bgtasks']
-
-    #Regardless of changes of files we need a new webapp and nginx.
-    containers_to_create += ['webapp', 'nginx']
-
-    for container in containers_to_create:
-        try:
-            create_container(container,deploy_settings)
-        except Exception as e:
-            deploy_settings['log'].error("Something went wrong with docker: {0} ".format(e))
-            raise
-
-def start_containers(deploy_settings):
-    #start containers except nginx
-
-    cli = Client(base_url='unix://var/run/docker.sock')
-    p = params.get_params()
-
-    containers_to_start = []
-
-    # If files changed we need to create everything! the whole thing!
-    if deploy_settings['deploy_extent'] in ['ALL', 'CALCULATIONS'] and deploy_settings['files_changed']:
-        containers_to_start += ['postgres', 'mongo', 'bgtasks']
-
-    #Regardless of changes of files we need a new webapp and nginx.
-    containers_to_start += ['webapp', 'nginx']
-
-    for container in containers_to_start:
-        try:
-            start_container(container,deploy_settings)
-        except Exception as e:
-            deploy_settings['log'].error("Something went wrong with docker: {0} ".format(e))
-            raise
 
 def switch_nginx_servers(deploy_settings):
     cli = Client(base_url='unix://var/run/docker.sock')
