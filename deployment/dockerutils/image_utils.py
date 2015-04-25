@@ -1,5 +1,4 @@
 from docker import Client
-
 cli = Client(base_url='unix://var/run/docker.sock')
 
 def getImages():
@@ -26,7 +25,7 @@ def buildImageFromDockerfile(image_name, path_to_files):
 
 	return ID, output
 
-def removeUntaggedImages():
+def removeUntaggedImages(force=False):
 	images = cli.images()
 
 	images_to_remove = []
@@ -34,6 +33,6 @@ def removeUntaggedImages():
 		if image['RepoTags'][0] == "<none>:<none>":
 			images_to_remove.append(image['Id'])
 	for image in images_to_remove:
-		cli.remove_image(image)
+		cli.remove_image(image=image, force=force)
 	return images_to_remove
 

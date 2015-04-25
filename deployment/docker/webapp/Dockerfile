@@ -3,8 +3,6 @@ MAINTAINER joharohl <johan@rohlen.net>
 
 COPY . /etc/webapp/
 
-VOLUME /apps
-
 RUN pip install -r /etc/webapp/requirements.txt -q
 
 ENV PYTHONPATH /apps
@@ -14,5 +12,8 @@ ENV MONGO_DATABASE_URL mongodb://mongo:27017/demokratikollen
 ENV NEW_RELIC_CONFIG_FILE /etc/newrelic/newrelic.ini
 
 EXPOSE 8000
+
+VOLUME /apps
+VOLUME /data
 
 CMD newrelic-admin run-program gunicorn -c /etc/webapp/gunicorn_config.py demokratikollen.www.gunicorn_production:app

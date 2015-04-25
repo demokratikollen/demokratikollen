@@ -6,6 +6,8 @@ import params
 import shutil
 import sys
 
+cli = Client(base_url='unix://var/run/docker.sock')
+
 def verify_changes(base_dir, logger):
     changed = []
 
@@ -35,8 +37,6 @@ def verify_changes(base_dir, logger):
     return changed
 
 def create_images(deploy_settings):
-    cli = Client(base_url='unix://var/run/docker.sock')
-
     # We can always update all images to their new versions. 
     images_to_create = ['postgres', 'mongo','webapp','nginx']
 
@@ -48,6 +48,37 @@ def create_images(deploy_settings):
         except Exception as e:
             deploy_settings['log'].error("Something went wrong with docker: {0} ".format(e))
             raise
+
+def setup_containers_for_calculations(deploy_settings):
+    deploy_settings['log'].info("Creating and starting temporary mongo and postgres containers.")
+    cont = cli.create_container(image='demokratikollen/postgres:latest',name='postgres-temp')
+    cli.start(cont['Id'])
+
+    cont = cli.create_container(image='demokratikollen/mongo:latest', name='mongo-temp')
+    cli.start(cont['Id'])
+
+    deploy_settings['log'].info("Creating, starting and populating a temporary webapp container")
+    webapp_dir = os.path.join(deploy_settings['base_dir'],'demokratikollen')
+    data_dir = os.path.join(deploy_settings['base_dir'],'data')
+    binds = {}
+    binds[webapp_dir] = {'bind': '/mnt/demokratikollen', 'ro': False}
+    binds[data_dir] = {'bind': '/data', 'ro': False}
+    links  = {}
+    links['postgres-temp'] = 'postgres'
+    links['mongo-temp'] = 'mongo'
+    cont = cli.create_container(image='demokratikollen/webapp:latest', 
+                                name='webapp-temp', 
+                                command='python /etc/webapp/loop.py', 
+                                volumes='/mnt/demokratikollen')
+    cli.start(cont['Id'],binds=binds, links=links)
+    container_utils.run_command_in_container(cont['Id'], 'cp -r /mnt/demokratikollen/demokratikollen /apps')
+
+
+def stop_and_remove_temp_containers(deploy_settings):
+    deploy_settings['log'].info("Stopping and remove temporary mongo and postgres containers.")
+    cli.remove_container(container='postgres-temp', force=True, v=True)
+    cli.remove_container(container='mongo-temp', force=True, v=True)
+
 
 def remove_images(deploy_settings):
     cli = Client(base_url='unix://var/run/docker.sock')
@@ -145,25 +176,13 @@ def switch_nginx_servers(deploy_settings):
         raise
 
 def populate_riksdagen(deploy_settings):
-    cli = Client(base_url='unix://var/run/docker.sock')
-    p = params.get_params()
-
-    deploy_settings['log'].info("Starting import_data on {0}".format(p['curr_containers']['bgtasks']))
-    s = cli.execute(p['curr_containers']['bgtasks'], 'python import_data.py auto data/urls.txt /data --wipe', stream=True)
-
-    for bytes in s:
-        # look for erros?
-        if 'Traceback' in str(bytes) or 'ERROR' in str(bytes):
-            raise Exception
-        deploy_settings['log'].info(bytes)
+    deploy_settings['log'].info("Starting import_data")
+    container_utils.run_command_in_container('webapp-temp', "/bin/bash -c 'cd /apps/demokratikollen && python import_data.py auto data/urls.txt /data --wipe'", log=deploy_settings['log'])
 
 def populate_orm(deploy_settings):
-    cli = Client(base_url='unix://var/run/docker.sock')
-    p = params.get_params()
+    deploy_settings['log'].info("Starting populate_orm")
 
-    deploy_settings['log'].info("Starting populate_orm on {0}".format(p['curr_containers']['bgtasks']))
-
-    s = cli.execute(p['curr_containers']['bgtasks'], 'python populate_orm.py', stream=True)
+    container_utils.run_command_in_container('webapp-temp', "python /apps/demokratikollen/populate_orm.py", log=deploy_settings['log'])
 
     for bytes in s:
         # look for erros?
@@ -172,33 +191,22 @@ def populate_orm(deploy_settings):
         deploy_settings['log'].info(bytes)
 
 def run_calculations(deploy_settings):
-    cli = Client(base_url='unix://var/run/docker.sock')
-    p = params.get_params()
 
-    commands = ['python compute_party_votes.py',
-                'python calculations/party_covoting.py',
-                'python calculations/sankey_data.py',
-                'python calculations/election_data.py',
-                'python calculations/search.py',
-                'python calculations/cosigning.py',
-                'python calculations/scb_best_party_gender.py',
-                'python calculations/scb_best_party_education.py',
-                'python calculations/scb_elections.py',
-                'python calculations/scb_polls.py']
+    base_cmd_path = 'python /apps/demokratikollen/'
+    commands = [base_cmd_path + 'compute_party_votes.py',
+                base_cmd_path + 'calculations/party_covoting.py',
+                base_cmd_path + 'calculations/sankey_data.py',
+                base_cmd_path + 'calculations/election_data.py',
+                base_cmd_path + 'calculations/search.py',
+                base_cmd_path + 'calculations/cosigning.py',
+                base_cmd_path + 'calculations/scb_best_party_gender.py',
+                base_cmd_path + 'calculations/scb_best_party_education.py',
+                base_cmd_path + 'calculations/scb_elections.py',
+                base_cmd_path + 'calculations/scb_polls.py']
+
     for cmd in commands:
-        deploy_settings['log'].info("Starting {0} on {1}".format(cmd, p['curr_containers']['bgtasks']))
-
-        s = cli.execute(p['curr_containers']['bgtasks'], cmd, stream=True)
-
-        for bytes in s:
-            # look for erros?
-            if 'Traceback' in str(bytes) or 'ERROR' in str(bytes):
-                raise Exception
-            deploy_settings['log'].info(bytes)
-
-
-def remove_orphaned_images_and_containers(base_dir, logger):
-    raise NotImplemented
+        deploy_settings['log'].info("Starting calculation {0}".format(cmd))
+        container_utils.run_command_in_container('webapp-temp', cmd, log=deploy_settings['log'])
 
 def remove_current_images_and_containers(deploy_settings):
     cli = Client(base_url='unix://var/run/docker.sock')
@@ -242,8 +250,10 @@ def post_deployment(deploy_settings):
     
 
 def clean_up_after_error(deploy_settings):
+    deploy_settings['log'].info("Removing current src")
+    shutil.rmtree(os.path.join(deploy_settings['base_dir'],'demokratikollen'))
     deploy_settings['log'].info("Cleaning up untagged Images")
-    image_utils.removeUntaggedImages()
+    image_utils.removeUntaggedImages(force=True)
 
 def create_container(name, deploy_settings):
     p = params.get_params()
@@ -312,3 +322,4 @@ def create_image(name,deploy_settings):
             raise Exception
         else:
             deploy_settings['log'].info("Docker: {0}".format(log_data['stream'].strip()))
+

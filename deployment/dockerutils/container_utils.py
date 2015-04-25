@@ -24,3 +24,21 @@ def remove_offline_containers():
 
 	return containers_to_remove
 
+def get_container_volumes(container):
+	info = cli.inspect_container(container)
+
+	return info['Volumes']
+
+def run_command_in_container(container, command, log=None):
+
+	for line in cli.execute(container, command,stream=True):
+		# look for erros?
+		if 'Traceback' in str(bytes) or 'ERROR' in str(bytes):
+			raise Exception
+			
+		if log:
+			try:
+				log.info(line.decode("UTF-8").strip())
+			except Exception:
+				pass
+		

@@ -35,6 +35,7 @@ if pid != 0:
     sys.exit(0)
 
 
+override = True
 
  # Get a logger.
 logger.setup_logging(base_dir)
@@ -54,26 +55,28 @@ steps.pre_deployment(deploy_settings)
 
 try:
     #Depending on what changed. create new containers and start them.
-    steps.create_images(deploy_settings)
-    # steps.create_containers(deploy_settings)
-    # steps.start_containers(deploy_settings)
+    #steps.create_images(deploy_settings)
 
-    # log.info("Waiting 30 seconds for things to boot")
-    # time.sleep(30)
+    if override or (deploy_extent.lower() in ['all', 'calculations'] and files_changed):
+        #steps.setup_containers_for_calculations(deploy_settings)
+        #steps.populate_riksdagen(deploy_settings)
+        #steps.populate_orm(deploy_settings)
+        #steps.run_calculations(deploy_settings)
+        steps.save_database_data(deploy_settings)
+    #    steps.stop_and_remove_temp_containers(deploy_settings)
 
-    # if deploy_extent != 'SRC' and files_changed:
-    # 	steps.populate_riksdagen(deploy_settings)
-    # 	steps.populate_orm(deploy_settings)
-    # 	steps.run_calculations(deploy_settings)
+    #steps.stop_and_remove_current_containers(deploy_settings)
 
-    # steps.switch_nginx_servers(deploy_settings)
-    # steps.remove_containers(deploy_settings)
-    # steps.remove_images(deploy_settings)
-    steps.post_deployment(deploy_settings)
+    # if deploy_extent.lower() in ['all', 'calculations'] and files_changed:
+    #     steps.restore_database_data(deploy_settings)
+
+    # steps.create_and_start_containers(deploy_settings)
+    
+    #steps.post_deployment(deploy_settings)
+    
     log.info("Removing lockfile.")
     os.remove(lock_file)
 except Exception as e:
-    #steps.remove_current_images_and_containers(deploy_settings)
     steps.clean_up_after_error(deploy_settings)
     log.error("Something went wrong during deployment. Check logs, fix error, tidy up, remove lock file and try again")
     log.error(e)
