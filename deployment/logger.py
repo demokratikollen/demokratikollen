@@ -21,7 +21,7 @@ class StreamToLogger(object):
 def setup_logging(base_dir):
     root_logger = logging.getLogger()
     root_logger.setLevel(logging.DEBUG)
-    fh = logging.FileHandler(base_dir + 'deploy.log')
+    fh = logging.FileHandler(base_dir + 'deploy.log', encoding='UTF-8')
     fh.setFormatter(logging.Formatter('[%(levelname)8s] %(message)s'))
     root_logger.addHandler(fh)
 
