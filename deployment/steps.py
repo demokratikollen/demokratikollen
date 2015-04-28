@@ -110,25 +110,6 @@ def save_database_data(deploy_settings):
         "chown -R {0}:{0} /data".format(deploy_settings['userid']))
     cli.remove_container(cont['Id'], v=True, force=True)
 
-
-
-def switch_nginx_servers(deploy_settings):
-    cli = Client(base_url='unix://var/run/docker.sock')
-    p = params.get_params()
-
-    try:
-        if p['prev_containers']['nginx']:
-            deploy_settings['log'].info("Stopping existing ngninx container: {0}".format(p['prev_containers']['nginx']))
-            cli.stop(container=p['prev_containers']['nginx'])
-
-        deploy_settings['log'].info("Starting nginx container: {0}".format(p['curr_containers']['nginx']))
-        link = [(p['curr_containers']['webapp'],'webapp')]
-        port = {80: 80}
-        cli.start(container=p['curr_containers']['nginx'], links=link, port_bindings=port)
-    except Exception as e:
-        deploy_settings['log'].error("Something went wrong with docker: {0} ".format(e))
-        raise
-
 def populate_riksdagen(deploy_settings):
     deploy_settings['log'].info("Starting import_data")
     container_utils.run_command_in_container('webapp-temp', "/bin/bash -c 'cd /apps/demokratikollen && python import_data.py auto data/urls.txt /data --wipe'", log=deploy_settings['log'])
@@ -284,58 +265,6 @@ def clean_up_after_error(deploy_settings):
     shutil.rmtree(os.path.join(deploy_settings['base_dir'],'demokratikollen'))
     deploy_settings['log'].info("Cleaning up untagged Images")
     image_utils.removeUntaggedImages(force=True)
-
-def create_container(name, deploy_settings):
-    p = params.get_params()
-    cli = Client(base_url='unix://var/run/docker.sock')
-
-    if p['prev_containers'][name] in [name + '_two', '']:
-        p['curr_containers'][name] = name + '_one'
-    else:
-        p['curr_containers'][name] = name + '_two'
-
-    params.set_params(p)
-    image_name = p['curr_images'][name]
-
-    deploy_settings['log'].info("Creating container: {0}".format(p['curr_containers'][name]))
-    if name == 'bgtasks':
-        cli.create_container(image=image_name, name=p['curr_containers'][name], detach=True, volumes=['/data'])
-    else:
-        cli.create_container(image=image_name, name=p['curr_containers'][name], detach=True)
-
-def start_container(name, deploy_settings):
-    p = params.get_params()
-    cli = Client(base_url='unix://var/run/docker.sock')
-
-    deploy_settings['log'].info("Starting container: {0}".format(name))
-
-    if name == 'webapp':
-        links = [(p['curr_containers']['postgres'],'postgres'), (p['curr_containers']['mongo'], 'mongo')]
-        cli.start(container=p['curr_containers'][name], links=links)
-    elif name == 'bgtasks':
-        links = [(p['curr_containers']['postgres'],'postgres'), (p['curr_containers']['mongo'], 'mongo')]
-        volumes = {'/home/wercker/data': {'bind': '/data', 'ro': False}}
-        cli.start(container=p['curr_containers'][name], links=links, binds=volumes)
-    else:
-        cli.start(container=p['curr_containers'][name])
-
-
-def remove_container(name, deploy_settings):
-    p = params.get_params()
-    cli = Client(base_url='unix://var/run/docker.sock')
-
-    if p['prev_containers'][name]:
-        deploy_settings['log'].info("Removing container: {0}".format(p['prev_containers'][name]))
-        cli.remove_container(container=p['prev_containers'][name],v=True,force=True)
-
-
-def remove_image(name, deploy_settings):
-    p = params.get_params()
-    cli = Client(base_url='unix://var/run/docker.sock')
-
-    if p['prev_images'][name]:
-        deploy_settings['log'].info("Removing image: {0}".format(p['prev_images'][name]))
-        cli.remove_image(image=p['prev_images'][name])
 
 def create_image(name,deploy_settings):
     cli = Client(base_url='unix://var/run/docker.sock')
