@@ -2,11 +2,20 @@ from docker import Client
 
 cli = Client(base_url='unix://var/run/docker.sock')
 
+def isContainerRunning(name):
+	containers = cli.containers()
+
+	for container in containers:
+		if name == container['Names'][0][1:]:
+			return True
+
+	return False
+
 def isContainerPresent(name):
 	containers = cli.containers(all=True)
 
 	for container in containers:
-		if name in container['Names'][0]:
+		if name == container['Names'][0][1:]:
 			return True
 
 	return False
@@ -31,14 +40,14 @@ def get_container_volumes(container):
 
 def run_command_in_container(container, command, log=None):
 
-	for line in cli.execute(container, command,stream=True):
+	for line in cli.execute(container, command, stream=True):
 		# look for erros?
 		if 'Traceback' in str(bytes) or 'ERROR' in str(bytes):
 			raise Exception
 			
 		if log:
 			try:
-				log.info(line.decode("UTF-8").strip())
+				log.debug(line.decode("UTF-8").strip())
 			except Exception:
 				pass
 		

@@ -75,12 +75,41 @@ def setup_containers_for_calculations(deploy_settings):
 
 
 def stop_and_remove_temp_containers(deploy_settings):
-    deploy_settings['log'].info("Stopping and remove temporary mongo and postgres containers.")
+    deploy_settings['log'].info("Stopping and remove temporary containers.")
     cli.remove_container(container='postgres-temp', force=True, v=True)
     cli.remove_container(container='mongo-temp', force=True, v=True)
+    cli.remove_container(container='webapp-temp', force=True, v=True)
 
 def save_database_data(deploy_settings):
-    pass
+
+    data_dir = os.path.join(deploy_settings['base_dir'],'data/database_dumps')
+    binds = {}
+    binds[data_dir] = {'bind': '/data', 'ro': False}
+
+    links  = {}
+    links['postgres-temp'] = 'postgres'
+    links['mongo-temp'] = 'mongo'
+
+    deploy_settings['log'].info("Saving Postgres database.")
+    cont = cli.create_container(image='demokratikollen/postgres:latest',
+                                command='/bin/sh -c "while true; do sleep 1; done"',
+                                volumes='/data')
+    cli.start(cont['Id'], binds=binds, links=links)
+    container_utils.run_command_in_container(cont['Id'],
+        "/bin/bash -c 'pg_dump -h postgres -U demokratikollen -c demokratikollen | gzip > /data/demokratikollen_postgres_latest.gz'")
+    cli.remove_container(cont['Id'], v=True, force=True)
+
+    deploy_settings['log'].info("Saving mongo database.")
+    cont = cli.create_container(image='demokratikollen/mongo:latest',
+                                command='/bin/sh -c "while true; do sleep 1; done"',
+                                volumes='/data')
+    cli.start(cont['Id'], binds=binds, links=links)
+    container_utils.run_command_in_container(cont['Id'],
+        "mongodump --host mongo --out /data/demokratikollen_mongo_latest")
+    container_utils.run_command_in_container(cont['Id'],
+        "chown -R {0}:{0} /data".format(deploy_settings['userid']))
+    cli.remove_container(cont['Id'], v=True, force=True)
+
 
 
 def switch_nginx_servers(deploy_settings):
@@ -133,30 +162,94 @@ def run_calculations(deploy_settings):
         deploy_settings['log'].info("Starting calculation {0}".format(cmd))
         container_utils.run_command_in_container('webapp-temp', cmd, log=deploy_settings['log'])
 
-def remove_current_images_and_containers(deploy_settings):
-    cli = Client(base_url='unix://var/run/docker.sock')
-    p = params.get_params()
 
-    for container, name in p['curr_containers'].items():
-        if name != p['prev_containers'][container]:
-            try:
-                remove_container(container,deploy_settings)
-            except Exception as e:
-                deploy_settings['log'].error("Something went wrong with docker, continuing anyway: {0}".format(e))
+def stop_and_remove_current_containers(deploy_settings):
+    
+    containers_to_stop = ['nginx', 'webapp', 'mongo', 'postgres']
 
-    for image, name in p['curr_images'].items():
-        if name != p['prev_images'][image]:
-            try:
-                remove_image(image, deploy_settings)
-            except Exception as e:
-                deploy_settings['log'].error("Something went wrong with docker, continuing anyway: {0}".format(e))
+    for container in containers_to_stop:
+        if container_utils.isContainerRunning(container):
+            deploy_settings['log'].info("Stopping " + container)
+            cli.stop(container)
+        if container_utils.isContainerPresent(container):
+            deploy_settings['log'].info("Removing " + container)
+            cli.remove_container(container)
+
+def create_and_start_data_containers(deploy_settings):
+
+    containers_to_start = ['webapp', 'postgres', 'mongo']
+
+    for container in containers_to_start:
+        if container_utils.isContainerRunning(container+'-data') == False:
+            cont = cli.create_container(image='demokratikollen/'+ container + ':latest',
+                                        name=container+'-data',
+                                        command='/bin/sh -c "while true; do sleep 1; done"')
+            cli.start(cont['Id'])
+            deploy_settings['log'].info("Creating and starting data container: {0}".format(container+'-data'))
+
+
+def create_and_start_app_containers(deploy_settings):
+
+    cont = cli.create_container(image='demokratikollen/postgres:latest', name='postgres')
+    cli.start(cont['Id'], volumes_from='postgres-data')
+
+    cont = cli.create_container(image='demokratikollen/mongo:latest', name='mongo')
+    cli.start(cont['Id'], volumes_from='mongo-data')
+
+    cont = cli.create_container(image='demokratikollen/webapp:latest', name='webapp')
+    cli.start(cont['Id'],volumes_from='webapp-data',links={'postgres': 'postgres', 'mongo':'mongo'})
+
+    cont = cli.create_container(image='demokratikollen/nginx:latest', name='nginx')
+    cli.start(cont['Id'],volumes_from='webapp-data', links={'webapp': 'webapp'}, port_bindings={80:80})
+
+def update_database_data(deploy_settings):
+    data_dir = os.path.join(deploy_settings['base_dir'],'data/database_dumps')
+    binds = {}
+    binds[data_dir] = {'bind': '/data', 'ro': False}
+
+    links  = {}
+    links['postgres'] = 'postgres'
+    links['mongo'] = 'mongo'
+
+    deploy_settings['log'].info("Updating the Postgres database.")
+    cont = cli.create_container(image='demokratikollen/postgres:latest',
+                                command='/bin/sh -c "while true; do sleep 1; done"',
+                                volumes='/data')
+    cli.start(cont['Id'], binds=binds, links=links)
+    container_utils.run_command_in_container(cont['Id'],
+        "/bin/bash -c 'gunzip -c /data/demokratikollen_postgres_latest.gz | psql -h postgres -U demokratikollen demokratikollen'",
+        deploy_settings['log'])
+    cli.remove_container(cont['Id'], v=True, force=True)
+
+    deploy_settings['log'].info("Updating the mongo database.")
+    cont = cli.create_container(image='demokratikollen/mongo:latest',
+                                command='/bin/sh -c "while true; do sleep 1; done"',
+                                volumes='/data')
+    cli.start(cont['Id'], binds=binds, links=links)
+    container_utils.run_command_in_container(cont['Id'],
+        "mongorestore --host mongo --drop /data/demokratikollen_mongo_latest",
+        deploy_settings['log'])
+    cli.remove_container(cont['Id'], v=True, force=True)    
+
+def update_webapp_src(deploy_settings):
+
+    web_src_dir = os.path.join(deploy_settings['base_dir'],'demokratikollen')
+    binds = {}
+    binds[web_src_dir] = {'bind': '/mnt/websrc', 'ro': True}
+
+    cont = cli.create_container(image='demokratikollen/webapp:latest',
+                        name='webapp-temp',
+                        command='/bin/sh -c "while true; do sleep 1; done"',
+                        volumes='/mnt/websrc')
+    cli.start(cont['Id'], binds=binds, volumes_from='webapp-data')
+
+    container_utils.run_command_in_container('webapp-temp', "bash -c 'rm -rf /apps/* && cp -r /mnt/websrc/demokratikollen /apps/'")
+    cli.remove_container(cont['Id'], force=True, v=True)
 
 def pre_deployment(deploy_settings):
     pass
 
 def post_deployment(deploy_settings):
-    cli = Client(base_url='unix://var/run/docker.sock')
-
     deploy_settings['log'].info("Saving source for next deploy.")
 
     old_src = os.path.join(deploy_settings['base_dir'],'demokratikollen_old')
@@ -172,7 +265,19 @@ def post_deployment(deploy_settings):
     for image_name in image_names:
         cli.tag(image=image_name, tag='current', repository=image_name, force=True)
     
-    
+    if deploy_settings['redo_calculations']:
+        current_mongo_database_dump =  os.path.join(deploy_settings['base_dir'],'data/database_dumps/demokratikollen_mongo_current')
+        latest_mongo_database_dump  =  os.path.join(deploy_settings['base_dir'],'data/database_dumps/demokratikollen_mongo_latest')
+        current_postgres_database_dump =  os.path.join(deploy_settings['base_dir'],'data/database_dumps/demokratikollen_postgres_current.gz')
+        latest_postgres_database_dump  =  os.path.join(deploy_settings['base_dir'],'data/database_dumps/demokratikollen_postgres_latest.gz')
+
+        deploy_settings['log'].info("Saving latest database dumps")
+        
+        shutil.rmtree(current_mongo_database_dump)
+        shutil.move(latest_mongo_database_dump, current_mongo_database_dump)
+
+        os.remove(current_postgres_database_dump)
+        shutil.move(latest_postgres_database_dump, current_postgres_database_dump)
 
 def clean_up_after_error(deploy_settings):
     deploy_settings['log'].info("Removing current src")

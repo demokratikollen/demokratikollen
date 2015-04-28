@@ -48,31 +48,40 @@ with open(os.path.join(base_dir,'demokratikollen/deployment/deploy.conf'),'r') a
 #The first step is to check if stuff have changed. If something changed all database images has to be replaced.
 files_changed = steps.verify_changes(base_dir, log)
 
-deploy_settings = dict(base_dir=base_dir, log=log, files_changed=files_changed, deploy_extent=deploy_extent)
+redo_calculations = override or (deploy_extent.lower() in ['all', 'calculations'] and files_changed)
+
+deploy_settings = dict(base_dir=base_dir, log=log, userid=os.getuid(), files_changed=files_changed, redo_calculations=redo_calculations)
 log.info(deploy_settings)
 
 steps.pre_deployment(deploy_settings)
 
 try:
     #Depending on what changed. create new containers and start them.
-    #steps.create_images(deploy_settings)
+    steps.create_images(deploy_settings)
 
-    if override or (deploy_extent.lower() in ['all', 'calculations'] and files_changed):
-        #steps.setup_containers_for_calculations(deploy_settings)
-        #steps.populate_riksdagen(deploy_settings)
-        #steps.populate_orm(deploy_settings)
-        #steps.run_calculations(deploy_settings)
+    if redo_calculations:
+        steps.setup_containers_for_calculations(deploy_settings)
+        steps.populate_riksdagen(deploy_settings)
+        steps.populate_orm(deploy_settings)
+        steps.run_calculations(deploy_settings)
         steps.save_database_data(deploy_settings)
-    #    steps.stop_and_remove_temp_containers(deploy_settings)
+        steps.stop_and_remove_temp_containers(deploy_settings)
 
-    #steps.stop_and_remove_current_containers(deploy_settings)
+    steps.stop_and_remove_current_containers(deploy_settings)
 
-    # if deploy_extent.lower() in ['all', 'calculations'] and files_changed:
-    #     steps.restore_database_data(deploy_settings)
+    steps.create_and_start_data_containers(deploy_settings)
 
-    # steps.create_and_start_containers(deploy_settings)
+    steps.update_webapp_src(deploy_settings)
+
+    steps.create_and_start_app_containers(deploy_settings)
+
+    log.info("Waiting 60 seconds for services to boot")
+    time.sleep(60)
+
+    if redo_calculations:
+        steps.update_database_data(deploy_settings)
     
-    #steps.post_deployment(deploy_settings)
+    steps.post_deployment(deploy_settings)
     
     log.info("Removing lockfile.")
     os.remove(lock_file)
