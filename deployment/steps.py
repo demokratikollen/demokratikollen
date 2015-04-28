@@ -75,7 +75,7 @@ def setup_containers_for_calculations(deploy_settings):
 
 
 def stop_and_remove_temp_containers(deploy_settings):
-    deploy_settings['log'].info("Stopping and remove temporary containers.")
+    deploy_settings['log'].info("Stopping and removing temporary containers.")
     cli.remove_container(container='postgres-temp', force=True, v=True)
     cli.remove_container(container='mongo-temp', force=True, v=True)
     cli.remove_container(container='webapp-temp', force=True, v=True)
@@ -111,19 +111,10 @@ def save_database_data(deploy_settings):
     cli.remove_container(cont['Id'], v=True, force=True)
 
 def populate_riksdagen(deploy_settings):
-    deploy_settings['log'].info("Starting import_data")
     container_utils.run_command_in_container('webapp-temp', "/bin/bash -c 'cd /apps/demokratikollen && python import_data.py auto data/urls.txt /data --wipe'", log=deploy_settings['log'])
 
 def populate_orm(deploy_settings):
-    deploy_settings['log'].info("Starting populate_orm")
-
     container_utils.run_command_in_container('webapp-temp', "python /apps/demokratikollen/populate_orm.py", log=deploy_settings['log'])
-
-    for bytes in s:
-        # look for erros?
-        if 'Traceback' in str(bytes) or 'ERROR' in str(bytes):
-            raise Exception
-        deploy_settings['log'].info(bytes)
 
 def run_calculations(deploy_settings):
 
@@ -162,24 +153,27 @@ def create_and_start_data_containers(deploy_settings):
 
     for container in containers_to_start:
         if container_utils.isContainerRunning(container+'-data') == False:
+            deploy_settings['log'].info("Creating and starting data container: {0}".format(container+'-data'))
             cont = cli.create_container(image='demokratikollen/'+ container + ':latest',
                                         name=container+'-data',
                                         command='/bin/sh -c "while true; do sleep 1; done"')
             cli.start(cont['Id'])
-            deploy_settings['log'].info("Creating and starting data container: {0}".format(container+'-data'))
 
 
 def create_and_start_app_containers(deploy_settings):
-
+    deploy_settings['log'].info("Creating and starting postgres container.")
     cont = cli.create_container(image='demokratikollen/postgres:latest', name='postgres')
     cli.start(cont['Id'], volumes_from='postgres-data')
 
+    deploy_settings['log'].info("Creating and starting mongo container.")
     cont = cli.create_container(image='demokratikollen/mongo:latest', name='mongo')
     cli.start(cont['Id'], volumes_from='mongo-data')
 
+    deploy_settings['log'].info("Creating and starting webapp container.")
     cont = cli.create_container(image='demokratikollen/webapp:latest', name='webapp')
     cli.start(cont['Id'],volumes_from='webapp-data',links={'postgres': 'postgres', 'mongo':'mongo'})
 
+    deploy_settings['log'].info("Creating and starting nginx container.")
     cont = cli.create_container(image='demokratikollen/nginx:latest', name='nginx')
     cli.start(cont['Id'],volumes_from='webapp-data', links={'webapp': 'webapp'}, port_bindings={80:80})
 

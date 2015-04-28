@@ -57,30 +57,43 @@ steps.pre_deployment(deploy_settings)
 
 try:
     #Depending on what changed. create new containers and start them.
+    log.info("Building images.")
     steps.create_images(deploy_settings)
 
     if redo_calculations:
+        log.info("Setting up containers for populating databases.")
         steps.setup_containers_for_calculations(deploy_settings)
+        log.info("Populating riksdagen-database.")
         steps.populate_riksdagen(deploy_settings)
+        log.info("Populating demokratikollen-ORM")
         steps.populate_orm(deploy_settings)
+        log.info("Running calculations.")
         steps.run_calculations(deploy_settings)
+        log.info("Saving databases.")
         steps.save_database_data(deploy_settings)
+        log.info("Cleaning up after database population.")
         steps.stop_and_remove_temp_containers(deploy_settings)
 
+    log.info("Stopping and removing current containers.")
     steps.stop_and_remove_current_containers(deploy_settings)
 
+    log.info("Creating and starting data containers (if needed)")
     steps.create_and_start_data_containers(deploy_settings)
 
+    log.info("Updating the webapp to newest source.")
     steps.update_webapp_src(deploy_settings)
 
+    log.info("Creating and starting app containers.")
     steps.create_and_start_app_containers(deploy_settings)
 
     log.info("Waiting 60 seconds for services to boot")
     time.sleep(60)
 
     if redo_calculations:
+        log.info("Updating the databases.")
         steps.update_database_data(deploy_settings)
     
+    log.info("Running post deployment clean up.")
     steps.post_deployment(deploy_settings)
     
     log.info("Removing lockfile.")
