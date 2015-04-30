@@ -268,10 +268,12 @@ def post_deployment(deploy_settings):
         if not os.path.isfile(latest_postgres_database_dump):
             raise Exception
 
-        shutil.rmtree(current_mongo_database_dump)
+        if os.path.isdir(current_mongo_database_dump):
+            shutil.rmtree(current_mongo_database_dump)
         shutil.move(latest_mongo_database_dump, current_mongo_database_dump)
 
-        os.remove(current_postgres_database_dump)
+        if os.path.isfile(current_postgres_database_dump):
+            os.remove(current_postgres_database_dump)
         shutil.move(latest_postgres_database_dump, current_postgres_database_dump)
 
 def start_upgrade_message(deploy_settings):
