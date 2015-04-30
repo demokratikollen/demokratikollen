@@ -25,7 +25,7 @@ def buildImageFromDockerfile(image_name, path_to_files):
 
 	return ID, output
 
-def removeUntaggedImages(force=False):
+def removeUntaggedImages(force=False,ignoreErrors=True):
 	images = cli.images()
 
 	images_to_remove = []
@@ -33,6 +33,9 @@ def removeUntaggedImages(force=False):
 		if image['RepoTags'][0] == "<none>:<none>":
 			images_to_remove.append(image['Id'])
 	for image in images_to_remove:
-		cli.remove_image(image=image, force=force)
+		try:
+			cli.remove_image(image=image, force=force)
+		except Exception:
+			pass
 	return images_to_remove
 

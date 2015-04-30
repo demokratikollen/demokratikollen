@@ -33,6 +33,11 @@ def remove_offline_containers():
 
 	return containers_to_remove
 
+def remove_all_containers():
+	containers = cli.containers(all=True)
+	for container in containers:
+		cli.remove_container(container['Id'], force=True, v=True)
+
 def get_container_volumes(container):
 	info = cli.inspect_container(container)
 
