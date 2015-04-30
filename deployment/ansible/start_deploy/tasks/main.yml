@@ -2,4 +2,4 @@
   shell: echo "{{ lookup("env","DEPLOY") }}" > /home/deploy/demokratikollen/deployment/deploy.conf
 
 - name: Start deployment script
-  shell: python3 /home/deploy/demokratikollen/deployment/deployment.py
+  shell: python3 /home/deploy/demokratikollen/deployment/first_deployment.py

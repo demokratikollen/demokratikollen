@@ -11,6 +11,12 @@ def decode_docker_log(stream):
     return data
 
 def removeUnusedVolumes():
+
+    image = cli.images(name='martin/docker-cleanup-volumes')
+    if not len(image) > 0:
+        cli.pull('martin/docker-cleanup-volumes')
+
+
     sock_file = '/var/run/docker.sock'
     lib_dir = '/var/lib/docker'
     binds = {}
