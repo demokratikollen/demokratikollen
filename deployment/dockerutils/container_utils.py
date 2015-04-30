@@ -45,7 +45,9 @@ def get_container_volumes(container):
 
 def run_command_in_container(container, command, log=None):
 
-	for line in cli.execute(container, command, stream=True):
+	e = cli.exec_create(container=container,
+					cmd=command)
+	for line in cli.exec_start(exec_id=e['Id'], stream=True):
 		# look for erros?
 		if 'Traceback' in str(bytes) or 'ERROR' in str(bytes):
 			raise Exception
