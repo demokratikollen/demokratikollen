@@ -14,7 +14,7 @@ def removeUnusedVolumes():
 
     image = cli.images(name='martin/docker-cleanup-volumes')
     if not len(image) > 0:
-        cli.pull('martin/docker-cleanup-volumes')
+        cli.pull('martin/docker-cleanup-volumes:latest')
 
 
     sock_file = '/var/run/docker.sock'

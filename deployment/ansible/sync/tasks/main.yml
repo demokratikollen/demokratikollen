@@ -5,7 +5,7 @@
   when: lock.stat.exists
 
 - name: Fetch the source.
-  git: repo=https://github.com/joelgoop/demokratikollen.git dest=/home/deploy/demokratikollen version=new-deploy
+  git: repo=https://github.com/joelgoop/demokratikollen.git dest=/home/deploy/demokratikollen version=develop
 
 - name: Copy over the new relic config file.
   shell: cp /etc/newrelic.ini /home/deploy/demokratikollen/deployment/docker/webapp/
