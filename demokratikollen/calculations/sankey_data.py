@@ -82,7 +82,7 @@ def main():
 
 
 
-        for doc in query.limit(1000):
+        for doc in query:
 
             if hasattr(doc, 'ministry_id'):
 

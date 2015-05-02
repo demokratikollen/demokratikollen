@@ -168,10 +168,14 @@ span.numbers {
 
 {% block content %}
 <div class="row">
+    <div class="col-md-12">
+    <h1>Behandlade förslag under regeringen Reinfeldt II (2010-2014)</h1>
+</div></div>
+<div class="row">
     <div class="col-md-6">
     <figure>
     <div class="inset">
-    <svg id="proposals-main" class='canvas'  viewBox='0 0 450 400' preserveAspectRatio="xMinYMin meet"/>
+    <svg id="proposals-main" class='canvas'/>
     </div>        
     <figcaption>Figure caption tag here</figcaption>
     </figure>
@@ -360,7 +364,7 @@ proposals_main = function() {
       compute_flow_areas = function() {
 
         var nodes = data.nodes;
-        var flows = data.flows; // copy so we can destroy it
+        var flows = data.flows;
         
         flows.forEach(function(flow){
           flow.extra_classes = flow.path.map(function(addr){return "passes-"+addr.join("-");}).join(" ");
@@ -423,6 +427,7 @@ proposals_main = function() {
       var total_size = data.nodes[0].size;
 
       var parent = d3.select(this);
+      parent.attr("width", width).attr("height", height);
 
       var node_layers = parent.selectAll(".node-layers")
                             .data(prop("nodes"));
@@ -723,7 +728,7 @@ function show_detail(d) {
 
 $(d3.select("#proposals-main").datum(sankey_data).call(
   proposals_main()
-    .width(450)
+    .width(325)
     .height(400)
     .onNodeSelected(show_detail)
     .onNodeDeselected(hide_detail)
