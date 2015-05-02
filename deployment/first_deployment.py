@@ -8,7 +8,7 @@ import os
 import sys
 import re
 
-base_dir = '/home/wercker/'
+base_dir = '/home/deploy/'
 lock_file = os.path.join(base_dir, 'deploy.lock')
 # Check if the lockfile exists
 if os.path.isfile(lock_file):
@@ -35,45 +35,58 @@ if pid != 0:
     sys.exit(0)
 
 
+override = False
 
  # Get a logger.
 logger.setup_logging(base_dir)
 log = logging.getLogger(__name__)
 
-with open('/home/wercker/docker/deployment/deploy.conf','r') as df:
-    deploy_extent = df.readline()
-    deploy_extent = deploy_extent[:-1]
-
+deploy_extent = 'all'
 
 #The first step is to check if stuff have changed. If something changed all database images has to be replaced.
 files_changed = steps.verify_changes(base_dir, log)
 
-deploy_settings = dict(base_dir=base_dir, log=log, files_changed=files_changed, deploy_extent=deploy_extent)
+redo_calculations = True
+
+deploy_settings = dict(base_dir=base_dir, log=log, userid=os.getuid(), files_changed=files_changed, redo_calculations=redo_calculations)
 log.info(deploy_settings)
 
 steps.pre_deployment(deploy_settings)
 
 try:
     #Depending on what changed. create new containers and start them.
+    log.info("Building images.")
     steps.create_images(deploy_settings)
-    steps.create_containers(deploy_settings)
-    steps.start_containers(deploy_settings)
 
-    log.info("Waiting 30 seconds for things to boot")
+    log.info("Stopping Ngnix and starting upgrading message")
+    steps.start_upgrade_message(deploy_settings)
+
+    log.info("Stopping and removing current containers.")
+    steps.stop_and_remove_current_containers(deploy_settings)
+
+    log.info("Creating and starting data containers")
+    steps.create_and_start_data_containers(deploy_settings)
+
+    log.info("Updating the webapp to newest source.")
+    steps.update_webapp_src(deploy_settings)
+
+    log.info("Creating and starting app containers.")
+    steps.create_and_start_app_containers(deploy_settings)
+
+    log.info("Waiting 30 seconds for services to boot")
     time.sleep(30)
 
-    if deploy_extent != 'SRC' and files_changed:
-    	steps.populate_riksdagen(deploy_settings)
-    	steps.populate_orm(deploy_settings)
-    	steps.run_calculations(deploy_settings)
+    log.info("Restoring databases.")
+    steps.update_database_data(deploy_settings)
+    
+    log.info("Stopping upgrade message and starting nginx")
+    steps.stop_upgrade_message(deploy_settings)
 
-    steps.switch_nginx_servers(deploy_settings)
-    steps.remove_containers(deploy_settings)
-    steps.remove_images(deploy_settings)
+    log.info("Running post deployment clean up.")
     steps.post_deployment(deploy_settings)
-
+    
+    log.info("Removing lockfile.")
     os.remove(lock_file)
 except Exception as e:
-    steps.remove_current_images_and_containers(deploy_settings)
     log.error("Something went wrong during deployment. Check logs, fix error, tidy up, remove lock file and try again")
     log.error(e)

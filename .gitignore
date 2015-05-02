@@ -51,3 +51,6 @@ demokratikollen/www/design/node_modules
 demokratikollen/www/app/static/css/images/
 demokratikollen/www/design/**/*.log
 **/.sass-cache/
+
+# inventory files.
+inventory

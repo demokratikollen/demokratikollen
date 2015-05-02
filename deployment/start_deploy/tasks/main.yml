@@ -1,5 +1,0 @@
-- name: Set deployment status
-  shell: echo "{{ lookup("env","DEPLOY") }}" > /home/wercker/docker/deployment/deploy.conf
-
-- name: Start deployment script
-  shell: python3 /home/wercker/docker/deployment/deployment.py

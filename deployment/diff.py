@@ -5,16 +5,16 @@ import filecmp
 
 def riksdagen(base_dir):
     riksdagen_diff = filecmp.dircmp(
-        os.path.join(base_dir, 'docker/bgtasks/demokratikollen/data') ,
-        os.path.join(base_dir, 'docker_old/bgtasks/demokratikollen/data')
+        os.path.join(base_dir, 'demokratikollen/demokratikollen/data'),
+        os.path.join(base_dir, 'demokratikollen_old/demokratikollen/data')
         )
 
     return riksdagen_diff.left_list != riksdagen_diff.right_list or len(riksdagen_diff.diff_files) > 0
 
 def calculations(base_dir):
     calc_diff = filecmp.dircmp(
-        os.path.join(base_dir, 'docker/bgtasks/demokratikollen/calculations') ,
-        os.path.join(base_dir, 'docker_old/bgtasks/demokratikollen/calculations') )
+        os.path.join(base_dir, 'demokratikollen/demokratikollen/calculations') ,
+        os.path.join(base_dir, 'demokratikollen_old/demokratikollen/calculations') )
 
     return calc_diff.left_list != calc_diff.right_list or len(calc_diff.diff_files) > 0
 
@@ -22,8 +22,8 @@ def dbstructure(base_dir):
 
     try:
         diff = filecmp.cmp(
-            os.path.join(base_dir, 'docker/bgtasks/demokratikollen/core/db_structure.py') ,
-            os.path.join(base_dir, 'docker_old/bgtasks/demokratikollen/core/db_structure.py')
+            os.path.join(base_dir, 'demokratikollen/demokratikollen/core/db_structure.py') ,
+            os.path.join(base_dir, 'demokratikollen_old/demokratikollen/core/db_structure.py')
                 )
 
     except FileNotFoundError as e:
