@@ -182,7 +182,7 @@ span.numbers {
     <div class="col-md-8">
     <figure>
     <div class="inset" id="proposals-main-container">
-    <svg id="proposals-main" class='canvas'/>
+    <svg id="proposals-main" class='canvas'  viewBox='0 0 600 500' preserveAspectRatio="xMinYMin meet"/>
     </div>        
     <figcaption></figcaption>
     </figure>
@@ -267,7 +267,7 @@ demokratikollen.graphics.layeredSankey = function() {
 
   var width, height;
   var onNodeSelected, onNodeDeselected;
-
+  var total_width, total_height;
   var labelspace = {top:50,left:100,right:70,bottom:0};
 
   var node_yspacing = 3,
@@ -283,10 +283,12 @@ demokratikollen.graphics.layeredSankey = function() {
 
   function chart(selection) {
 
-    var total_width=width;
-    var total_height=height;
-    width = total_width - (labelspace.right+labelspace.left);
-    height = total_height - (labelspace.top + labelspace.bottom);
+    var oldWidth = width;
+    var oldHeight = height;
+    total_width=oldWidth;
+    total_height=oldHeight;
+    width = oldWidth - (labelspace.right+labelspace.left);
+    height = oldHeight - (labelspace.top + labelspace.bottom);
 
     selection.each(function(data){
 
@@ -480,7 +482,6 @@ demokratikollen.graphics.layeredSankey = function() {
       compute_flow_areas();
 
       var parent = d3.select(this);
-      parent.attr("width", total_width).attr("height", total_height);
 
       var node_layers = parent.selectAll(".node-layers")
                             .data(prop("nodes"));
@@ -602,6 +603,8 @@ demokratikollen.graphics.layeredSankey = function() {
               
             });          
     }); // selection.each()
+    width = oldWidth;
+    height = oldHeight;
   };
   
   chart.width = function(_) {
@@ -795,19 +798,22 @@ function show_detail(d) {
 
 
 d3.select("#proposals-main").datum(sankey_data);
+var sankey = demokratikollen.graphics.layeredSankey()
+    .onNodeSelected(show_detail)
+    .onNodeDeselected(hide_detail); 
+sankey.width(600)
+      .height(500);
+
 
 function draw() {
   var container = d3.select('#proposals-main-container');
   var width = demokratikollen.utils.getInnerWidth(container);
-
-  var sankey = demokratikollen.graphics.layeredSankey()
-      .onNodeSelected(show_detail)
-      .onNodeDeselected(hide_detail); 
-  sankey.width(width)
-        .height(width*0.8);
-
-
-  d3.select("#proposals-main").html("").call(sankey);    
+  width = width > 600 ? 600 : width;
+  d3.select("#proposals-main")
+    .html("")
+    .attr("width", width)
+    .attr("height", 500/600 * width)
+    .call(sankey);    
 
 }
 
