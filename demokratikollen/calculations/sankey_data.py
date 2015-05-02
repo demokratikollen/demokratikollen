@@ -4,12 +4,12 @@ from sqlalchemy.orm import sessionmaker, aliased, joinedload
 from sqlalchemy.sql.expression import literal
 from itertools import combinations
 from demokratikollen.core.utils.mongodb import MongoDBDatastore
-from demokratikollen.core.utils import postgres as pg_utils
+from demokratikollen.core.utils import postgres as pg_utils, riksdagen
 import datetime as dt
 import json
 from pymongo import ASCENDING
 from collections import defaultdict
-
+import re
 def Tree(): return defaultdict(Tree)
 
 party_ordering = {p: i for (i, p) in enumerate([
@@ -56,11 +56,12 @@ def main():
 
 
     basequery = s.query(Proposal).options( \
-            joinedload(Proposal.points).joinedload(ProposalPoint.committee_report).joinedload(CommitteeReport.committee))
+            joinedload(Proposal.points).joinedload(ProposalPoint.committee_report).joinedload(CommitteeReport.committee)) \
+            .order_by(Proposal.published.desc())
 
     governments = [
-#        ("persson3"   , basequery.filter(MemberProposal.session.in_(['2002/03', '2003/04', '2004/05', '2005/06'])) ),
-#        ("reinfeldt1" , basequery.filter(MemberProposal.session.in_(['2006/07', '2007/08', '2008/09', '2009/10'])) ),
+        #("persson3"   , basequery.filter(MemberProposal.session.in_(['2002/03', '2003/04', '2004/05', '2005/06'])) ),
+        #("reinfeldt1" , basequery.filter(MemberProposal.session.in_(['2006/07', '2007/08', '2008/09', '2009/10'])) ),
         ("reinfeldt2" , basequery.filter(MemberProposal.session.in_(['2010/11', '2011/12', '2012/13', '2013/14'])) )
         ]
 
@@ -81,7 +82,7 @@ def main():
 
 
 
-        for doc in query:
+        for doc in query.limit(1000):
 
             if hasattr(doc, 'ministry_id'):
 
@@ -118,16 +119,16 @@ def main():
                 committee = point.committee_report.committee
                 result = point.decision
 
-                if not result.lower() in ['bifall','delvis bifall','avslag']:
-                    continue
-
                 committee_key = committee.id
-                result_key = result
+                result_key = result.lower()
+
+                if not result_key in ['bifall','delvis bifall','avslag']:
+                    continue
                 
                 if not result_key in origin_tree[origin_key][committee_key]:
-                    origin_tree[origin_key][committee_key][result_key] = 0
+                    origin_tree[origin_key][committee_key][result_key] = list()
                 
-                origin_tree[origin_key][committee_key][result_key] += 1
+                origin_tree[origin_key][committee_key][result_key].append((doc.id, point.number))
 
                 committees_set.add(committee_key)
                 results_set.add(result_key)
@@ -194,52 +195,195 @@ def main():
         flows = list()
         for member_key in members_tree:
             for committee_key in members_tree[member_key]:
-                for (result_key, count) in members_tree[member_key][committee_key].items():
+                for (result_key, point_ids) in members_tree[member_key][committee_key].items():
                     member_addr = (0,0,member_idc[member_key])
                     committee_addr = (1,0,committee_idc[committee_key])
                     result_addr = (2,0,result_idc[result_key])
-                    flows.append(dict(path=[member_addr, committee_addr, result_addr], magnitude=count))
+                    flows.append(dict(path=[member_addr, committee_addr, result_addr], magnitude=len(point_ids)))
 
         for party_key in parties_tree:
             for committee_key in parties_tree[party_key]:
-                for (result_key, count) in parties_tree[party_key][committee_key].items():
+                for (result_key, point_ids) in parties_tree[party_key][committee_key].items():
                     party_addr = (0,1,party_idc[party_key])
                     committee_addr = (1,0,committee_idc[committee_key])
                     result_addr = (2,0,result_idc[result_key])
-                    flows.append(dict(path=[party_addr, committee_addr, result_addr], magnitude=count))
+                    flows.append(dict(path=[party_addr, committee_addr, result_addr], magnitude=len(point_ids)))
 
         for multiparty_key in multiparties_tree:
             for committee_key in multiparties_tree[multiparty_key]:
-                for (result_key, count) in multiparties_tree[multiparty_key][committee_key].items():
+                for (result_key, point_ids) in multiparties_tree[multiparty_key][committee_key].items():
                     multiparty_addr = (0,2,multiparty_idc[multiparty_key])
                     committee_addr = (1,0,committee_idc[committee_key])
                     result_addr = (2,0,result_idc[result_key])
-                    flows.append(dict(path=[multiparty_addr, committee_addr, result_addr], magnitude=count))                    
+                    flows.append(dict(path=[multiparty_addr, committee_addr, result_addr], magnitude=len(point_ids)))                    
 
         for ministry_key in ministries_tree:
             for committee_key in ministries_tree[ministry_key]:
-                for (result_key, count) in ministries_tree[ministry_key][committee_key].items():
+                for (result_key, point_ids) in ministries_tree[ministry_key][committee_key].items():
                     ministry_addr = (0,3,ministry_idc[ministry_key])
                     committee_addr = (1,0,committee_idc[committee_key])
                     result_addr = (2,0,result_idc[result_key])
-                    flows.append(dict(path=[ministry_addr, committee_addr, result_addr], magnitude=count))
+                    flows.append(dict(path=[ministry_addr, committee_addr, result_addr], magnitude=len(point_ids)))
 
 
+        def parse_title(s,dbs):
+            r = re.sub(r'med anledning av', 'm.a.a.', s)
+            r = re.sub(r'([0-9]{4}/[0-9]{2}):(\S{,7})', lambda m: '<a href="{}">{}</a>'.format(riksdagen.url_from_code(m.group(1),m.group(2),dbs),m.group(0)), r)
+            return r
+
+        def author_string(doc):
+            if len(doc.signatories)>2:
+                return '{} och {} till'.format(repr(doc.signatories[0]),len(doc.signatories)-1)
+            else:
+                return ' och '.join(map(repr,doc.signatories))
+
+        def shortest_number_string(l):
+            items = []
+            i = 0
+            on_streak = False
+
+            while i < len(l):
+                if not on_streak:
+                    start = i
+    
+                if len(l) == i+1 or l[i+1] != l[i]+1:
+                    if start == i:
+                        items.append(repr(l[start]))
+                    else:
+                        items.append('{}-{}'.format(repr(l[start]),repr(l[i])))
+                    on_streak = False
+                else:
+                    on_streak = True
+
+                i += 1
+
+
+
+            return ', '.join(items)
+
+        def documents_from_points(decision_sets):
+            result = list()
+            prevdocid = 0
+            row = None
+
+
+            for (decision, ids) in decision_sets:
+                for (docid, number) in ids:
+                    if not (docid == prevdocid):
+                        doc = s.query(Document).get(docid)
+                        parsed_title = parse_title(doc.title,s)
+                        authors = author_string(doc)
+                        title_html = '<span class="authors">{}</span><span class="title">{}</span>'.format(authors, parsed_title)
+                        row = dict(
+                                decision=decision,
+                                title=title_html, 
+                                unique_code=doc.unique_code(),
+                                url=riksdagen.url_from_dokid(doc.dok_id),
+                                numbers='')
+                        numbers = []
+                        result.append(row)
+
+                    numbers.append(number)
+                    numbers.sort()
+                    row['numbers'] = shortest_number_string(numbers)
+                    prevdocid = docid
+
+
+
+            return result
+
+        def documents_from_prop(decision_sets):
+            result = list()
+            prevdocid = 0
+            row = None
+
+
+            for (decision, ids) in decision_sets:
+                for (docid, number) in ids:
+                    if not (docid == prevdocid):
+                        doc = s.query(Document).get(docid)
+                        parsed_title = parse_title(doc.title,s)
+                        authors = "?"
+                        if not doc.ministry is None:
+                            authors = doc.ministry.name
+
+                        title_html = '<span class="authors">{}</span><span class="title">{}</span>'.format(authors, parsed_title)
+                        row = dict(
+                                decision=decision,
+                                title=title_html, 
+                                unique_code=doc.unique_code(),
+                                url=riksdagen.url_from_dokid(doc.dok_id),
+                                numbers='')
+                        numbers = []
+                        result.append(row)
+
+                    numbers.append(number)
+                    numbers.sort()
+                    row['numbers'] = shortest_number_string(numbers)
+                    prevdocid = docid
+
+
+
+            return result
+
+        print('Generating party_detail')
         party_detail = dict();
         for p_id in parties:
+            committee_results = []
+            for c_id in committees:
+                if c_id not in parties_tree[p_id]:
+                    continue
+
+                bifall_ids = parties_tree[p_id][c_id].get('bifall',[])+parties_tree[p_id][c_id].get('delvis bifall',[])
+                avslag_ids = parties_tree[p_id][c_id].get('avslag',[])
+                num_bifall = len(bifall_ids)
+                num_avslag = len(avslag_ids)
+
+                committee_results.append({
+                    'name': committee_metadata[c_id]['name'],
+                    'abbr': committee_metadata[c_id]['abbr'],
+                    'bifall': num_bifall,
+                    'avslag': num_avslag,
+                    'documents': documents_from_points((("Bifall", bifall_ids), ("Avslag", avslag_ids)))
+                })
+                    
+
             party_detail[repr(p_id)] = dict(
-                committees = [dict(id=c_id,name=committee_metadata[c_id]["name"],count=sum(parties_tree[p_id][c_id].values())) for c_id in committees if c_id in parties_tree[p_id]],
-                results = [dict(id=result,name=result,count=sum(parties_tree[p_id][c_id][result] for c_id in committees if c_id in parties_tree[p_id] and result in parties_tree[p_id][c_id]) ) for result in results]
+                party = party_metadata[p_id],
+                committee_results = committee_results
                 )
 
+        print('Generating ministries_detail')
+        committee_results = []
+        m_id = ministries[0]
+        for c_id in committees:
+            if c_id not in ministries_tree[m_id]:
+                continue
 
+            bifall_ids = ministries_tree[m_id][c_id].get('bifall',[])+ministries_tree[m_id][c_id].get('delvis bifall',[])
+            avslag_ids = ministries_tree[m_id][c_id].get('avslag',[])
+            num_bifall = len(bifall_ids)
+            num_avslag = len(avslag_ids)
 
+            committee_results.append({
+                'name': committee_metadata[c_id]['name'],
+                'abbr': committee_metadata[c_id]['abbr'],
+                'bifall': num_bifall,
+                'avslag': num_avslag,
+                'documents': documents_from_prop((("Avslag", avslag_ids),("Bifall", bifall_ids)))
+            })
+                
+
+        ministries_detail = dict(
+            committee_results = committee_results
+            )
 
         output_top = dict(
                             government=name,
                             nodes = nodes,
                             flows = flows,
-                            party_detail=party_detail
+                            party_detail=party_detail,
+                            ministries_detail=ministries_detail
                         )
 
         mongo_collection.update(dict(government=name), output_top, upsert=True)

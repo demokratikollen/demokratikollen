@@ -40,6 +40,67 @@ rect.node-group {
   cursor:default;
 }
 
+.committeeGroup .header {
+  cursor:pointer;
+}
+.committeeGroup .header:hover {
+  background-color: #ddd;
+}
+
+
+
+.committeeGroup > div > span {
+  vertical-align: middle;
+  margin-left: 15px;
+}
+.committeeGroup .name {
+  font-size: 16px;
+  font-weight: 600;
+}
+
+.committeeGroup .solidus {
+  font-size:40px;
+}
+.committeeGroup .avslag {
+  font-size: 34px;
+  font-weight: bold;
+  color: #d62728;
+}
+.committeeGroup .bifall {
+  font-size: 34px;
+  font-weight: bold;
+  color: #2ca02c;
+}
+
+.committeeGroup tr.Bifall {
+  border-left: 20px solid #2ca02c;
+}
+.committeeGroup tr.Avslag {
+  border-left: 20px solid #d62728;
+}
+
+.committeeGroup td > span {
+  display: block;
+}
+
+span.authors, span.decision  {
+  font-size: .9em;
+  font-color: #777;
+  font-weight:600;
+}
+span.numbers {
+  font-size: 1em;
+  font-weight:700;
+}
+.committeeGroup tr a {
+  font-weight:600;
+}
+
+.committeeGroup div.scrollblock {
+  display:block;
+  height:300px;
+  overflow: auto;
+}
     </style>
 
 
@@ -117,9 +178,7 @@ rect.node-group {
     </div>
     <div class="col-md-6">
     <figure>
-    <div class="inset">
-    <svg id="proposals-detail" class='canvas'  viewBox='0 0 450 400' preserveAspectRatio="xMinYMin meet"/>
-    </div>        
+    <div class="inset" id="proposals-detail"></div>        
     <figcaption>Figure caption tag here</figcaption>
     </figure>
     </div>    
@@ -499,54 +558,81 @@ proposals_main = function() {
   return sankey;
 };
 
-function pie() {
+function once(f) {
+  var done = false;
+  return function() {
+    if (done) return;
+    done = true;
+    f.apply(null, arguments);
+  }
+}
 
-  var radius = 200;
+
+function ministry_detail() {
 
   function chart(selection) {
+    selection.each(function(data) {
+      
+      var parent = d3.select(this);
 
-    selection.each(function(data){
+      parent.append("h2").html("Regeringen");
 
-    var parent = d3.select(this);
-    var total = d3.sum(data, prop("count"));
 
-    var color = d3.scale.category20();
+      var committeeGroups = parent.selectAll('.committeeGroup').data(data.committee_results);
+      var entering = committeeGroups.enter()
+        .append("div").attr("class", "committeeGroup");
 
-    var arc = d3.svg.arc()
-        .outerRadius(radius)
-        .innerRadius(radius*0.5);
 
-    var pie = d3.layout.pie()
-        .sort(null)
-        .value(function(d) { return d.count; });
-    var piedata = pie(data);
-    var g = parent.selectAll(".arc")
-        .data(piedata)
-      .enter().append("g")
-        .attr("class", "arc");
+      var loadDocuments = once(function(){
+            
+      })();
 
-    var tip = d3.tip().attr('class', 'd3-tip')
-    .direction('e')
-    .html(function(d) { return d.data.name + " " + (100*d.data.count/total).toFixed(1) + "%"; });
-    parent.call(tip)
+      entering.append("div").attr("class", "header").html(
+        '<span class="glyphicon glyphicon-plus" aria-hidden="true"></span><span class="name"></span> <span class="bifall"></span> <span class="solidus">/</span> <span class="avslag"></span>'
+        )
+      .on("click", function(d){
+        $('div.documents.collapse.in').collapse('hide');
+        $('#docs-'+d.abbr).collapse('toggle');
+      }); 
 
-    g.append("path")
-        .attr("d", arc)
-        .style("fill", function(d) { return color(d.data.name); })
-        .on("mouseover",tip.show)
-        .on("mouseout",tip.hide)
-     
+      entering.append("div").attr("class", "documents collapse")
+        .attr("id", function(d) {return 'docs-'+d.abbr;})
+        .html('<div class="scrollblock"><table class="table table-condensed"><thead><tr><th>Motion</th><th>Titel och författare</th></tr></thead><tbody></tbody></table></div>');
 
-      }); // selection.each
-  }
-  chart.radius = function(_) {
-    if (!arguments.length) return radius;
-    else radius = +_;
-    return chart;
-  }  
+      var documents = committeeGroups.select("tbody").selectAll("tr").data(prop('documents'));
+      var documentTr = documents.enter().append("tr").attr("class", prop("decision"));
+      var firstCell = documentTr.append("td");
+      firstCell.append("a")
+        .attr("href", prop("url"))
+        .attr("target","_blank")
+        .html(function(d){return d.unique_code;});
+      firstCell.append("span").attr("class","decision").html(function(d){
+        return d.decision + ' på punkt' + (d.numbers.indexOf(',')!=-1||d.numbers.indexOf('-')!=-1?'erna ':' ');
+      });
+      firstCell.append("span").attr("class", "numbers").html(function(d){
+        return d.numbers;
+      });
+      documentTr.append("td").html(function(d){return d.title;});
 
+      documents.exit().remove();
+
+      committeeGroups.select("span.name").html(prop('name'));
+      committeeGroups.select("span.bifall").html(function(d){
+        return ''+d.bifall;
+      });
+      committeeGroups.select("span.avslag").html(function(d){
+        return ''+d.avslag;
+      });
+
+      committeeGroups.exit().remove();
+
+
+
+    }); // selection.each
+  };
   return chart;
 }
+
 
 function party_detail() {
 
@@ -555,12 +641,56 @@ function party_detail() {
       
       var parent = d3.select(this);
 
-      parent.append("g")
-        .attr("class","detail_pie")
-        .attr("transform","translate(200,200)")
-        .datum(data.committees).call(
-          pie().radius(120)
-            );
+      parent.append("h2").html(function(d){return d.party.name;});
+
+      var committeeGroups = parent.selectAll('.committeeGroup').data(data.committee_results);
+      var entering = committeeGroups.enter()
+        .append("div").attr("class", "committeeGroup");
+
+
+      var loadDocuments = once(function(){
+            
+      })();
+
+      entering.append("div").attr("class", "header").html(
+        '<span class="glyphicon glyphicon-plus" aria-hidden="true"></span><span class="name"></span> <span class="bifall"></span> <span class="solidus">/</span> <span class="avslag"></span>'
+        )
+      .on("click", function(d){
+        $('div.documents.collapse.in').collapse('hide');
+        $('#docs-'+d.abbr).collapse('toggle');
+      }); 
+
+      entering.append("div").attr("class", "documents collapse")
+        .attr("id", function(d) {return 'docs-'+d.abbr;})
+        .html('<div class="scrollblock"><table class="table table-condensed"><thead><tr><th>Motion</th><th>Titel och författare</th></tr></thead><tbody></tbody></table></div>');
+
+      var documents = committeeGroups.select("tbody").selectAll("tr").data(prop('documents'));
+      var documentTr = documents.enter().append("tr").attr("class", prop("decision"));
+      var firstCell = documentTr.append("td");
+      firstCell.append("a")
+        .attr("href", prop("url"))
+        .attr("target","_blank")
+        .html(function(d){return d.unique_code;});
+      firstCell.append("span").attr("class","decision").html(function(d){
+        return d.decision + ' på punkt' + (d.numbers.indexOf(',')!=-1||d.numbers.indexOf('-')!=-1?'erna ':' ');
+      });
+      firstCell.append("span").attr("class", "numbers").html(function(d){
+        return d.numbers;
+      });
+      documentTr.append("td").html(function(d){return d.title;});
+
+      documents.exit().remove();
+
+      committeeGroups.select("span.name").html(prop('name'));
+      committeeGroups.select("span.bifall").html(function(d){
+        return ''+d.bifall;
+      });
+      committeeGroups.select("span.avslag").html(function(d){
+        return ''+d.avslag;
+      });
+
+      committeeGroups.exit().remove();
+
 
 
     }); // selection.each
@@ -578,8 +708,14 @@ function show_detail(d) {
 
   var detail = d3.select("#proposals-detail"); 
 
+  console.log(d);
+
   if (d.detail == "party") {
     detail.datum(all_data.party_detail[d.party_id]).call(party_detail());
+    return;
+  }
+  if (d.detail == "government") {
+    detail.datum(all_data.ministries_detail).call(ministry_detail());
     return;
   }
 

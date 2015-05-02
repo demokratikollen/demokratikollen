@@ -179,6 +179,9 @@ class Document(Base):
         'polymorphic_on':classtype
     }
 
+    def unique_code(self):
+        return "{}:{}".format(self.session,self.code)
+
     def __repr__(self):
         return '{}-{}: {}'.format(self.session, self.dok_id, self.title)
     
