@@ -45,6 +45,19 @@ def main():
                 abbr=c.abbr,
                 name=c.name
             )
+    result_metadata = dict()
+    result_metadata['bifall'] = dict(
+            name= 'Bifall',
+            ordering = 2
+        )
+    result_metadata['delvis bifall'] = dict(
+            name= 'Delvis bifall',
+            ordering = 1
+        )
+    result_metadata['avslag'] = dict(
+            name= 'Avslag',
+            ordering = 0
+        )
 
 
 
@@ -68,6 +81,7 @@ def main():
     
     num_missing_committee_report = 0
     num_missing_committee_report_committee = 0
+    num_unknown_result = 0
 
     for (name, query) in governments:
         print("Government: {}".format(name))
@@ -122,7 +136,9 @@ def main():
                 committee_key = committee.id
                 result_key = result.lower()
 
-                if not result_key in ['bifall','delvis bifall','avslag']:
+                if not result_key in result_metadata.keys():
+                    num_unknown_result += 1
+                    print("Unknown result: {}".format(result_key))
                     continue
                 
                 if not result_key in origin_tree[origin_key][committee_key]:
@@ -136,6 +152,8 @@ def main():
         def party_sort_key(p):
             return party_metadata[p]['ordering']
 
+        def result_sort_key(r):
+            return result_metadata[r]['ordering']
 
         parties = list(parties_tree.keys())
         parties.sort(key=party_sort_key)
@@ -155,25 +173,26 @@ def main():
         committee_idc = {c:k for (k,c) in enumerate(committees)}
 
         results = list(results_set)
+        results.sort(key=result_sort_key)
         result_idc = {r:k for (k,r) in enumerate(results)}
 
         nodes = list()
         node_group_members = dict(
-            title="Enskilda ledamöters förslag", 
+            title="Enskilda\nledamöters\nmotioner", 
             items=[dict(detail="single", title=p) for p in members],
             label = -1)
 
         node_group_party = dict(
-            title="Partiförslag", 
+            title="Partiernas\nmotioner", 
             items=[dict(detail="party", party_id=p, title=party_metadata[p]['name'],abbr=party_metadata[p]['abbr']) for p in parties],
             label = -1)
 
         node_group_multiparty = dict(
-            title="Flerpartiförslag", 
+            title="Flerparti-\nmotioner", 
             items=[dict(detail="multiparty", title=p) for p in multiparties],
             label = -1)
         node_group_government = dict(
-            title="Regeringspropositioner", 
+            title="Regeringens\npropositioner", 
             items=[dict(detail="government", title=p) for p in ministries],
             label = -1)
 
@@ -182,14 +201,14 @@ def main():
             items=[dict(detail="committee",committee_id=p, title=committee_metadata[p]['name'],abbr=committee_metadata[p]['abbr']) for p in committees],
             label = 0)
         node_group_results = dict(
-            title="Besluten", 
-            items=[dict(detail="result", result_id=p, title=p) for p in results],
+            title="Beslut", 
+            items=[dict(detail="beslut", result_id=r, title=result_metadata[r]['name']) for r in results],
             label = 0)
 
         nodes = [
-            dict(x=0.0, items=[node_group_members, node_group_party, node_group_multiparty, node_group_government]),
-            dict(x=0.5, items=[node_group_committee]),
-            dict(x=1.0, items=[node_group_results])
+            dict(x=0.0, title='1. Förslag kommer från\nriksdagens ledamöter\noch regeringen', items=[node_group_members, node_group_party, node_group_multiparty, node_group_government]),
+            dict(x=0.5, title='2. De bereds i ett\nav utskotten.', items=[node_group_committee]),
+            dict(x=1.0, title='3. Beslut i\nriksdagens kammare.', items=[node_group_results])
         ]
 
         flows = list()
@@ -329,6 +348,8 @@ def main():
         print('Generating party_detail')
         party_detail = dict();
         for p_id in parties:
+            total_bifall = 0
+            total_avslag = 0
             committee_results = []
             for c_id in committees:
                 if c_id not in parties_tree[p_id]:
@@ -338,6 +359,8 @@ def main():
                 avslag_ids = parties_tree[p_id][c_id].get('avslag',[])
                 num_bifall = len(bifall_ids)
                 num_avslag = len(avslag_ids)
+                total_bifall += num_bifall
+                total_avslag += num_avslag
 
                 committee_results.append({
                     'name': committee_metadata[c_id]['name'],
@@ -350,11 +373,15 @@ def main():
 
             party_detail[repr(p_id)] = dict(
                 party = party_metadata[p_id],
-                committee_results = committee_results
+                committee_results = committee_results,
+                total_bifall = total_bifall,
+                total_avslag = total_avslag
                 )
 
         print('Generating ministries_detail')
         committee_results = []
+        total_bifall = 0
+        total_avslag = 0
         m_id = ministries[0]
         for c_id in committees:
             if c_id not in ministries_tree[m_id]:
@@ -364,7 +391,8 @@ def main():
             avslag_ids = ministries_tree[m_id][c_id].get('avslag',[])
             num_bifall = len(bifall_ids)
             num_avslag = len(avslag_ids)
-
+            total_bifall += num_bifall
+            total_avslag += num_avslag
             committee_results.append({
                 'name': committee_metadata[c_id]['name'],
                 'abbr': committee_metadata[c_id]['abbr'],
@@ -375,7 +403,9 @@ def main():
                 
 
         ministries_detail = dict(
-            committee_results = committee_results
+            committee_results = committee_results,
+            total_bifall = total_bifall,
+            total_avslag = total_avslag            
             )
 
         output_top = dict(
@@ -388,7 +418,7 @@ def main():
 
         mongo_collection.update(dict(government=name), output_top, upsert=True)
     
-    print("missing committee_report: {}, committee_reports missing committee's: {}".format(num_missing_committee_report,num_missing_committee_report_committee))
+    print("missing committee_report: {}\ncommittee_reports missing committee's: {}\nunknown result: {}".format(num_missing_committee_report,num_missing_committee_report_committee,num_unknown_result))
 
 
 if __name__ == '__main__':

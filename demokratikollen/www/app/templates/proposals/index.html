@@ -25,7 +25,13 @@ rect.node-group {
 }
 .node-group-label text {
   font-size: 12px;
+  font-weight: 600;
   cursor: default;
+}
+.layer-label {
+  font-size: 14px;
+  font-weight: 600;
+  cursor:default;
 }
 .click-capture {
   pointer-events: all;
@@ -170,6 +176,7 @@ span.numbers {
 <div class="row">
     <div class="col-md-12">
     <h1>Behandlade förslag under regeringen Reinfeldt II (2010-2014)</h1>
+    <h2>Klicka i figuren för att bläddra bland förslagen.</h2>
 </div></div>
 <div class="row">
     <div class="col-md-6">
@@ -254,39 +261,60 @@ sankey_data.nodes = all_data.nodes;
 sankey_data.flows = all_data.flows;
 
 
-proposals_main = function() {
+demokratikollen.graphics.layeredSankey = function() {
 
   var width, height;
   var onNodeSelected, onNodeDeselected;
+
+  var labelspace = {top:50,left:100,right:70,bottom:0};
 
   var node_yspacing = 3,
       node_group_yspacing = 0;
 
   var node_group_ypadding = 10;
 
-  var node_group_width = 30+40;
+  var node_group_width = 30;
   var node_width = 30;
 
   var group_label_distance = 5;
-
   var flow_start_width = 20;
 
-  function sankey(selection){
+  function chart(selection){
+    var total_width = width + labelspace.left + labelspace.right;
+    var total_height = height+labelspace.top + labelspace.bottom;
     selection.each(function(data){
 
       var yscale;
       
       var currently_active = null;
 
+      function linebreak(text) {
+        text.each(function() {
+          var text = d3.select(this),
+              words = text.text().split(/\n/).reverse(),
+              word,
+              lineNumber = 0,
+              lineHeight = 1.1, // ems
+              y = text.attr("y"),
+              x = text.attr("x"),
+              dx = text.attr("dx"),
+              dy = .3 - (words.length-1)*lineHeight*0.5; //ems
+          text.text(null);
+          while (word = words.pop()) {
+            tspan = text.append("tspan").attr("dx",dx).attr("x", x).attr("y", y).attr("dy", lineNumber++ * lineHeight + dy + "em").text(word);
+          }
+        });
+      }
+
       compute_positions = function() {
         node_layers = data.nodes;
 
         node_layers.forEach(function(layer, layer_idx){
-          var y = 0.5*(height-layer.total_height);
+          var y = 0.5*(height-layer.total_height) + labelspace.top;
           layer.y = y;
           layer.items.forEach(function(group, group_idx){
 
-            group.x = (width-node_group_width)*layer.x;
+            group.x = labelspace.left+(width-node_group_width)*layer.x;
             group.y = y;
             y += node_group_ypadding;
 
@@ -424,15 +452,24 @@ proposals_main = function() {
       compute_positions();
       compute_flow_areas();
 
-      var total_size = data.nodes[0].size;
-
       var parent = d3.select(this);
-      parent.attr("width", width).attr("height", height);
+      parent.attr("width", total_width).attr("height", total_height);
 
       var node_layers = parent.selectAll(".node-layers")
                             .data(prop("nodes"));
+      nl_labelx = function(d){return labelspace.left+d.x*(width-node_width)+0.5*node_width;}
+      nl_labely = function(d){return 0.5*labelspace.top;}
+
       node_layers.enter()
-                  .append("g").classed("node-layer",true);
+                  .append("g").classed("node-layer",true)
+                  .append("text")
+                    .attr("class", "layer-label")
+                    .attr("text-anchor","middle")
+                    .attr("dx",0)
+                    .attr("dy",0)
+                    .attr("x", nl_labelx)
+                    .attr("y", nl_labely)
+                    .text(prop("title")).call(linebreak);
 
       var node_groups = node_layers.selectAll(".node-group")
                                     .data(prop("items"));
@@ -446,9 +483,8 @@ proposals_main = function() {
             .attr("width", node_group_width)
             .attr("height", prop("height"));
 
-      ng_labelx = function(d){return d.x+0.5*node_group_width+0.5*d.label*node_width;}
+      ng_labelx = function(d){return d.x+0.5*node_width+0.5*d.label*node_width;}
       ng_labely = function(d){return d.y + 0.5*d.height;}
-
 
       var tip = d3.tip().attr('class', 'd3-tip')
       .direction('e')
@@ -459,12 +495,14 @@ proposals_main = function() {
         .style("display",function(d){return d.label ? "" : "none";})
         .attr("class","node-group-label");
       group_labels.append("text")
-        .text(function(d){return (100*d.size/total_size).toFixed(0)+ "%";})
-        .attr("text-anchor","middle")
-        .attr("dy",function(d){return d.label*.7+"em";})
-        .attr("transform",function(d){return "rotate(-90,"+ng_labelx(d)+","+ng_labely(d)+")";})
+        .attr("text-anchor","end")
+        .attr("dx",function(d){return d.label*(group_label_distance*2);})
+        .attr("dy","0.3em")
         .attr("x", ng_labelx)
-        .attr("y", ng_labely);
+        .attr("y", ng_labely)
+        .text(prop("title")).call(linebreak);
+
+
       group_labels.append("path")
         .attr("d", function(d){
           return d3.svg.line()([
@@ -508,10 +546,10 @@ proposals_main = function() {
               var node_id = d.unique_id;
 
               if (currently_active) {
+                if (onNodeDeselected) onNodeDeselected(currently_active.d);
+
                 var theflows = parent.selectAll(".passes-"+currently_active.id);
                 var thenode = parent.selectAll(".node-"+currently_active.id);
-
-                if (onNodeDeselected) onNodeDeselected(currently_active.d);
 
                 theflows.transition()
                   .style("fill", null)
@@ -527,40 +565,40 @@ proposals_main = function() {
               theflows = parent.selectAll(".passes-"+node_id);
               thenode = parent.selectAll(".node-"+node_id);
 
-              if (onNodeSelected) onNodeSelected(d);
 
               theflows.transition()
                 .style("fill", d.color)
                 .style("fill-opacity", 1.0);
 
               currently_active = {"id": node_id, "d": d};
+              if (onNodeSelected) onNodeSelected(d);
               
             });          
     }); // selection.each()
   };
   
-  sankey.width = function(_) {
+  chart.width = function(_) {
     if (!arguments.length) return width;
     else width = +_;
-    return sankey;
+    return chart;
   }
-  sankey.height = function(_) {
+  chart.height = function(_) {
     if (!arguments.length) return height;
     else height = +_;
-    return sankey;
+    return chart;
   }    
-  sankey.onNodeSelected = function(_) {
+  chart.onNodeSelected = function(_) {
     if (!arguments.length) return onNodeSelected;
     else onNodeSelected = _;
-    return sankey;
+    return chart;
   }   
-  sankey.onNodeDeselected = function(_) {
+  chart.onNodeDeselected = function(_) {
     if (!arguments.length) return onNodeDeselected;
     else onNodeDeselected = _;
-    return sankey;
+    return chart;
   }    
 
-  return sankey;
+  return chart;
 };
 
 function once(f) {
@@ -581,6 +619,9 @@ function ministry_detail() {
       var parent = d3.select(this);
 
       parent.append("h2").html("Regeringen");
+      parent.append("p").html(function(d){
+        return "Regeringen lade "+(d.total_bifall+d.total_avslag)+" förslag varav "+d.total_bifall+" fick bifall i kammaren. Här listar vi dem uppdelade på utskott. <b>Klicka på en rubrik</b> för att se förslagen.";
+      });
 
 
       var committeeGroups = parent.selectAll('.committeeGroup').data(data.committee_results);
@@ -647,6 +688,9 @@ function party_detail() {
       var parent = d3.select(this);
 
       parent.append("h2").html(function(d){return d.party.name;});
+      parent.append("p").html(function(d){
+        return d.party.name + " lade "+(d.total_bifall+d.total_avslag)+" förslag varav "+d.total_bifall+" fick bifall i kammaren. Här listar vi dem uppdelade på utskott. <b>Klicka på en rubrik</b> för att se förslagen.";
+      });
 
       var committeeGroups = parent.selectAll('.committeeGroup').data(data.committee_results);
       var entering = committeeGroups.enter()
@@ -705,15 +749,11 @@ function party_detail() {
 
 function hide_detail(d) {
   var detail = d3.select("#proposals-detail");
-  detail.selectAll("*").transition().style("fill-opacity",0.0).remove(); 
+  detail.html(null); 
 }
 function show_detail(d) {
   
-  hide_detail(d);
-
   var detail = d3.select("#proposals-detail"); 
-
-  console.log(d);
 
   if (d.detail == "party") {
     detail.datum(all_data.party_detail[d.party_id]).call(party_detail());
@@ -726,13 +766,12 @@ function show_detail(d) {
 
 }
 
-$(d3.select("#proposals-main").datum(sankey_data).call(
-  proposals_main()
-    .width(325)
+var sankey = demokratikollen.graphics.layeredSankey()
+    .width(350)
     .height(400)
     .onNodeSelected(show_detail)
-    .onNodeDeselected(hide_detail)
-  ));   
+    .onNodeDeselected(hide_detail); 
+$(d3.select("#proposals-main").datum(sankey_data).call(sankey));   
 
     </script>
 {%- endblock %}
