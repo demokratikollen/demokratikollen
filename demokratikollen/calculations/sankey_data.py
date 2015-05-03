@@ -404,7 +404,7 @@ def main():
                 'abbr': "elm",
                 'bifall': num_bifall,
                 'avslag': num_avslag,
-                'documents': documents_from_points((("Avslag", avslag_ids),("Bifall", bifall_ids)))
+                'documents': documents_from_points((("Bifall", bifall_ids), ("Avslag", avslag_ids)))
             })
 
             # then multiparties
@@ -420,7 +420,7 @@ def main():
                 'abbr': "sf",
                 'bifall': num_bifall,
                 'avslag': num_avslag,
-                'documents': documents_from_points((("Avslag", avslag_ids),("Bifall", bifall_ids)))
+                'documents': documents_from_points((("Bifall", bifall_ids), ("Avslag", avslag_ids)))
             })
 
             # finally parties

@@ -215,6 +215,7 @@ span.numbers {
 
 var COLORS = d3.map([
     { name: "alla enskilda motioner", color: "orange"},
+    { name: "alla flerpartiförslag", color: "brown"},
     { name: "bifall", color: "#2ca02c" },
     { name: "delvis bifall", color: "#ff7f0e" },
     { name: "avslag", color: "#d62728" }
@@ -294,118 +295,44 @@ function proposalDocumentList() {
   return chart;
 }
 
-function party_detail() {
+function detailView() {
+
+  var title = function(d){return "Title"};
+  var subtitle = function(d){return "Subtitle"};
+  var documentField = 'committee_results';
 
   function chart(selection) {
     selection.each(function(data) {
       
       var parent = d3.select(this);
 
-      parent.append("h2").html(function(d){return d.party.name;});
-      parent.append("p").html(function(d){
-        return d.party.name + " lade <b>"+(d.total_bifall+d.total_avslag)+"</b> förslag varav <b>"+d.total_bifall+"</b> fick bifall i kammaren. Här listar vi dem uppdelade på utskott. <b>Klicka på en rubrik</b> för att se förslagen.";
-      });
+      parent.append("h2").html(title);
+      parent.append("p").html(subtitle);
 
-      var dl=parent.selectAll("div.documentList").data([data.committee_results])
+      var dl=parent.selectAll("div.documentList").data([data[documentField]])
         .enter().append("div").attr("class", "documentList");
 
       dl.call(proposalDocumentList());
 
     }); // selection.each
   };
-  return chart;
-}
 
+  chart.title = function(_) {
+    if (!arguments.length) return title;
+    else title = _;
+    return chart;
+  }; 
+  chart.subtitle = function(_) {
+    if (!arguments.length) return subtitle;
+    else subtitle = _;
+    return chart;
+  };  
+  chart.documentField = function(_) {
+    if (!arguments.length) return documentField;
+    else documentField = _;
+    return chart;
+  };  
 
-function committee_detail() {
-
-  function chart(selection) {
-    selection.each(function(data) {
-      
-      var parent = d3.select(this);
-      console.log(data);
-      parent.append("h2").html(function(d){return d.committee.name;});
-      parent.append("p").html(function(d){
-        return "I " + d.committee.name + " behandlades totalt <b>"+(d.total_bifall+d.total_avslag)+"</b> förslag. Här listar vi dem uppdelade på förslagsinstans. <b>Klicka på en rubrik</b> för att se förslagen.";
-      });
-
-      var dl=parent.selectAll("div.documentList").data([data.origin_results])
-        .enter().append("div").attr("class", "documentList");
-
-      dl.call(proposalDocumentList());
-
-    }); // selection.each
-  };
-  return chart;
-}
-
-
-function ministry_detail() {
-
-  function chart(selection) {
-    selection.each(function(data) {
-      
-      var parent = d3.select(this);
-
-      parent.append("h2").html("Regeringen {{data.title}}");
-      parent.append("p").html(function(d){
-        return "Regeringen {{data.title}} lade <b>"+(d.total_bifall+d.total_avslag)+"</b> förslag varav <b>"+d.total_avslag+"</b> fick avslag i kammaren. Här listar vi dem uppdelade på utskott. <b>Klicka på en rubrik</b> för att se förslagen.";
-      });
-
-      var dl=parent.selectAll("div.documentList").data([data.committee_results])
-        .enter().append("div").attr("class", "documentList");
-
-      dl.call(proposalDocumentList());
-
-
-    }); // selection.each
-  };
-  return chart;
-}
-
-function members_detail() {
-
-  function chart(selection) {
-    selection.each(function(data) {
-      
-      var parent = d3.select(this);
-
-      parent.append("h2").html("Enskilda ledamöters motioner");
-      parent.append("p").html(function(d){
-        return "Enskilda ledamöter lade <b>"+(d.total_bifall+d.total_avslag)+"</b> förslag varav <b>"+d.total_bifall+"</b> fick bifall i kammaren. Här listar vi dem uppdelade på utskott. <b>Klicka på en rubrik</b> för att se förslagen.";
-      });
-
-      var dl=parent.selectAll("div.documentList").data([data.committee_results])
-        .enter().append("div").attr("class", "documentList");
-
-      dl.call(proposalDocumentList());
-
-
-    }); // selection.each
-  };
-  return chart;
-}
-
-function multiparties_detail() {
-
-  function chart(selection) {
-    selection.each(function(data) {
-      
-      var parent = d3.select(this);
-
-      parent.append("h2").html("Samarbetsförslag");
-      parent.append("p").html(function(d){
-        return "Koalitioner av två eller fler partier lade <b>"+(d.total_bifall+d.total_avslag)+"</b> förslag varav <b>"+d.total_bifall+"</b> fick bifall i kammaren. Här listar vi dem uppdelade på utskott. <b>Klicka på en rubrik</b> för att se förslagen.";
-      });
-
-      var dl=parent.selectAll("div.documentList").data([data.committee_results])
-        .enter().append("div").attr("class", "documentList");
-
-      dl.call(proposalDocumentList());
-
-
-    }); // selection.each
-  };
   return chart;
 }
 
@@ -421,24 +348,49 @@ function show_detail(d) {
   var url,chart=null;
   if (d.detail == "party") {
     url = "/data/proposals/{{data.government}}/party_detail_"+d.party_id+".json";
-    chart = party_detail();
+    chart = detailView()
+              .title(function(d) {return d.party.name;})
+              .subtitle(function(d) {
+                return d.party.name + " lade <b>"+(d.total_bifall+d.total_avslag)+"</b> förslag varav <b>"+d.total_bifall+"</b> fick bifall i kammaren. Här listar vi dem uppdelade på utskott. <b>Klicka på en rubrik</b> för att se förslagen.";
+              })
+              .documentField('committee_results');
   }
 
   if (d.detail == "committee") {
     url = "/data/proposals/{{data.government}}/committee_detail_"+d.committee_id+".json";
-    chart = committee_detail();
+    chart = detailView()
+              .title(function(d) {return d.committee.name;})
+              .subtitle(function(d){
+                return "I " + d.committee.name + " behandlades totalt <b>"+(d.total_bifall+d.total_avslag)+"</b> förslag. Här listar vi dem uppdelade på förslagsinstans. <b>Klicka på en rubrik</b> för att se förslagen.";
+              })
+              .documentField("origin_results");
   }  
   if (d.detail == "government") {
     url = "/data/proposals/{{data.government}}/ministries_detail.json";
-    chart = ministry_detail();
+    chart = detailView()
+              .title("Regeringen {{data.title}}")
+              .subtitle(function(d){
+                return "Regeringen {{data.title}} lade <b>"+(d.total_bifall+d.total_avslag)+"</b> förslag varav <b>"+d.total_avslag+"</b> fick avslag i kammaren. Här listar vi dem uppdelade på utskott. <b>Klicka på en rubrik</b> för att se förslagen.";
+              })
+              .documentField('committee_results');
   }
   if (d.detail == "members") {
     url = "/data/proposals/{{data.government}}/members_detail.json";
-    chart = members_detail();
+    chart = detailView()
+              .title("Enskilda ledamöters förslag")
+              .subtitle(function(d){
+                return "Enskilda ledamöter lade <b>"+(d.total_bifall+d.total_avslag)+"</b> förslag varav <b>"+d.total_bifall+"</b> fick bifall i kammaren. Här listar vi dem uppdelade på utskott. <b>Klicka på en rubrik</b> för att se förslagen.";
+              })
+              .documentField('committee_results');
   }
   if (d.detail == "multiparties") {
     url = "/data/proposals/{{data.government}}/multiparties_detail.json";
-    chart = multiparties_detail();
+    chart = detailView()
+              .title("Samarbetsförslag")
+              .subtitle(function(d){
+                return "Koalitioner av två eller fler partier lade <b>"+(d.total_bifall+d.total_avslag)+"</b> förslag varav <b>"+d.total_bifall+"</b> fick bifall i kammaren. Här listar vi dem uppdelade på utskott. <b>Klicka på en rubrik</b> för att se förslagen.";
+              })
+              .documentField('committee_results');
   }
 
 
