@@ -62,8 +62,8 @@ def privacypolicy():
     return render_template("/privacypolicy.html")
 
 @blueprint.route('/search.json', methods=['GET'])
-@cache.cached(3600*24*30)
-@http_expires(3600*24*30)
+@http_expires(3600*24)
+@cache.cached(3600*24)
 def timeseries():
     ds = MongoDBDatastore()
     return jsonify(ds.get_object("search"))

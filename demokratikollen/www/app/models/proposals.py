@@ -69,3 +69,15 @@ def multiparties_detail(government):
         raise KeyError
     del record['_id']
     return record
+
+def committee_detail(government, id):
+    mdb = MongoDBDatastore()
+    mongodb = mdb.get_mongodb_database() 
+    mongo_collection = mongodb.proposals_committee_detail
+
+    record= mongo_collection.find_one({"government": government,'committee_id': repr(id)})
+    
+    if record is None:
+        raise KeyError
+    del record['_id']
+    return record

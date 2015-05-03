@@ -2,16 +2,15 @@
 
 {% block styles -%}{{ super() }}
     <style>
-.canvas {
-}
 
-.node rect {
+rect.node {
     stroke: none;
     cursor: pointer;
 }
 rect.node-group {
   display:none;
 }
+
 .flow {
   fill: #000;
   fill-opacity: .2;
@@ -34,18 +33,6 @@ rect.node-group {
   font-weight: 600;
   cursor:default;
 }
-.click-capture {
-  pointer-events: all;
-}
-.detail_pie .arc path {
-  stroke: #fff;
-}
-.detail_pie text {
-  font-size:12px;
-  font-weight: bold;
-  fill: #111;
-  cursor:default;
-}
 
 .documentGroup .header {
   cursor:pointer;
@@ -54,10 +41,6 @@ rect.node-group {
   padding-left:24px;
   font-size: 20px;
 }
-.documentGroup .header > span {
-
-}
-
 .documentGroup .header:hover {
   background-color: #ddd;
 }
@@ -97,7 +80,6 @@ rect.node-group {
 .documentGroup tr.Avslag {
   border-left: 20px solid #d62728;
 }
-
 .documentGroup td > span {
   display: block;
 }
@@ -149,10 +131,7 @@ span.numbers {
   margin-bottom:50px;
   font-size:48px;
 }
-    </style>
-
-
-
+</style>
 <style>
 .d3-tip {
   line-height: 1;
@@ -209,11 +188,8 @@ span.numbers {
   top: 50%;
   left: 100%;
 }
-
 </style>
-
 {%- endblock %}
-
 
 {% block content %}
 <div class="row">
@@ -238,7 +214,7 @@ span.numbers {
 <script type="text/javascript">
 
 var COLORS = d3.map([
-    { name: "alla enskilda motioner", color: "#7f7f7f"},
+    { name: "alla enskilda motioner", color: "orange"},
     { name: "bifall", color: "#2ca02c" },
     { name: "delvis bifall", color: "#ff7f0e" },
     { name: "avslag", color: "#d62728" }
@@ -254,7 +230,7 @@ sankey_data.nodes.forEach(function(layer) {
           if (node.title.toLowerCase()=='alla departement') {
             colorobj = demokratikollen.utils.parties.get('{{data.party}}'.toLowerCase());
           }
-          node.color = d3.hsl(colorobj ? colorobj.color : '#7f7f7f');            
+          node.color = d3.hsl(colorobj ? colorobj.color : 'purple');            
         });
     });
 });
@@ -339,6 +315,31 @@ function party_detail() {
   };
   return chart;
 }
+
+
+function committee_detail() {
+
+  function chart(selection) {
+    selection.each(function(data) {
+      
+      var parent = d3.select(this);
+      console.log(data);
+      parent.append("h2").html(function(d){return d.committee.name;});
+      parent.append("p").html(function(d){
+        return "I " + d.committee.name + " behandlades totalt <b>"+(d.total_bifall+d.total_avslag)+"</b> förslag. Här listar vi dem uppdelade på förslagsinstans. <b>Klicka på en rubrik</b> för att se förslagen.";
+      });
+
+      var dl=parent.selectAll("div.documentList").data([data.origin_results])
+        .enter().append("div").attr("class", "documentList");
+
+      dl.call(proposalDocumentList());
+
+    }); // selection.each
+  };
+  return chart;
+}
+
+
 function ministry_detail() {
 
   function chart(selection) {
@@ -417,11 +418,16 @@ function show_detail(d) {
     return;
   }
   currentDetail = d;
-  var url,chart;
+  var url,chart=null;
   if (d.detail == "party") {
     url = "/data/proposals/{{data.government}}/party_detail_"+d.party_id+".json";
     chart = party_detail();
   }
+
+  if (d.detail == "committee") {
+    url = "/data/proposals/{{data.government}}/committee_detail_"+d.committee_id+".json";
+    chart = committee_detail();
+  }  
   if (d.detail == "government") {
     url = "/data/proposals/{{data.government}}/ministries_detail.json";
     chart = ministry_detail();
@@ -436,7 +442,15 @@ function show_detail(d) {
   }
 
 
+
   var detail = d3.select("#proposals-detail").insert("div", ":first-child");
+
+  if (!chart) {
+    detail.html('<h2>Välj en förslagsinstans eller ett utskott för att se deras förslag!</h2>')
+    d3.select("#proposals-detail > div:not(:first-child)").remove();
+    return;
+  }
+
   detail.html('<span class="glyphicon glyphicon-refresh glyphicon-spin glyphicon-loading"></span>');
   d3.json(url, function(detail_data){
     detail.html("").datum(detail_data).call(chart);
