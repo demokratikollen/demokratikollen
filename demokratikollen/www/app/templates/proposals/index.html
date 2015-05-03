@@ -2,15 +2,15 @@
 
 {% block styles -%}{{ super() }}
     <style>
-.canvas {
-}
 
-.node rect {
+rect.node {
     stroke: none;
+    cursor: pointer;
 }
 rect.node-group {
   display:none;
 }
+
 .flow {
   fill: #000;
   fill-opacity: .2;
@@ -25,25 +25,113 @@ rect.node-group {
 }
 .node-group-label text {
   font-size: 12px;
+  font-weight: 600;
   cursor: default;
 }
-.click-capture {
-  pointer-events: all;
-}
-.detail_pie .arc path {
-  stroke: #fff;
-}
-.detail_pie text {
-  font-size:12px;
-  font-weight: bold;
-  fill: #111;
+.layer-label {
+  font-size: 14px;
+  font-weight: 600;
   cursor:default;
 }
 
-    </style>
+.documentGroup .header {
+  cursor:pointer;
+  padding-top:10px;
+  padding-bottom:10px;
+  padding-left:24px;
+  font-size: 20px;
+}
+.documentGroup .header:hover {
+  background-color: #ddd;
+}
 
+.documentGroup .header .name {
+  margin-left:10px;
+  margin-right:10px;
+  font-size: 20px;
+  font-weight: 600;
+}
+.documentGroup .header .total {
+  font-size: 28px;
+  font-weight: bold;
+  color: #222222;
+  margin-right:10px;
+}
+.documentGroup .header .avslag {
+  font-size: 28px;
+  font-weight: bold;
+  color: #d62728;
+}
+.documentGroup .header .parenthesis {
+  font-size: 32px;
+}
+.documentGroup .header .bifall {
+  font-size: 28px;
+  font-weight: bold;
+  color: #2ca02c;
+}
 
+.documentGroup td:first-child {
+  width: 130px;
+}
+.documentGroup tr.Bifall {
+  border-left: 20px solid #2ca02c;
+}
+.documentGroup tr.Avslag {
+  border-left: 20px solid #d62728;
+}
+.documentGroup td > span {
+  display: block;
+}
 
+span.authors, span.decision  {
+  font-size: .9em;
+  font-color: #777;
+  font-weight:600;
+}
+span.numbers {
+  font-size: 1em;
+  font-weight:700;
+}
+.documentGroup tr a {
+  font-weight:600;
+}
+
+.documentGroup div.scrollblock {
+  display:block;
+  height:300px;
+  overflow: auto;
+}
+.glyphicon-spin {
+    -webkit-animation: spin 1000ms infinite linear;
+    animation: spin 1000ms infinite linear;
+}
+@-webkit-keyframes spin {
+    0% {
+        -webkit-transform: rotate(0deg);
+        transform: rotate(0deg);
+    }
+    100% {
+        -webkit-transform: rotate(359deg);
+        transform: rotate(359deg);
+    }
+}
+@keyframes spin {
+    0% {
+        -webkit-transform: rotate(0deg);
+        transform: rotate(0deg);
+    }
+    100% {
+        -webkit-transform: rotate(359deg);
+        transform: rotate(359deg);
+    }
+}
+.glyphicon-loading {
+  margin-left:40%;
+  margin-bottom:50px;
+  font-size:48px;
+}
+</style>
 <style>
 .d3-tip {
   line-height: 1;
@@ -100,467 +188,106 @@ rect.node-group {
   top: 50%;
   left: 100%;
 }
-
 </style>
 {%- endblock %}
 
-
 {% block content %}
 <div class="row">
-    <div class="col-md-6">
+    <div class="col-md-12">
+    <h1>Behandlade förslag under regeringen {{data.title}} ({{data.years}})</h1>
+    <h2>Klicka i figuren för att bläddra bland förslagen.</h2>
+</div></div>
+<div class="row">
+    <div class="col-md-8">
     <figure>
-    <div class="inset">
-    <svg id="proposals-main" class='canvas'  viewBox='0 0 450 400' preserveAspectRatio="xMinYMin meet"/>
-    </div>        
-    <figcaption>Figure caption tag here</figcaption>
-    </figure>
-    </div>
-    <div class="col-md-6">
-    <figure>
-    <div class="inset">
-    <svg id="proposals-detail" class='canvas'  viewBox='0 0 450 400' preserveAspectRatio="xMinYMin meet"/>
-    </div>        
-    <figcaption>Figure caption tag here</figcaption>
+    <div class="inset" id="proposals-main-container">
+    <svg id="proposals-main" class='canvas'  viewBox='0 0 600 500' preserveAspectRatio="xMinYMin meet"/>
+    <div id="proposals-detail"></div>        
     </figure>
     </div>    
 </div> 
 {% endblock %}
 
 {% block scripts %}{{ super() }}
+<script src="{{ url_for('static', filename='js/layeredSankey.js') }}"></script>
 
-    <script type="text/javascript">
-function prop(p) {
-  return function(d) {
-    return d[p];
-  };
-}
+<script type="text/javascript">
 
-PARTIES = [
-    {
-        name: "m",
-        color: "#1b49dd"
-    },
-    {
-        name: "fp",
-        color: "#6bb7ec"
-    },
-    {
-        name: "kd",
-        color: "#231977"
-    },
-    {
-        name: "c",
-        color: "#009933"
-    },
-    {
-        name: "sd",
-        color: "#dddd00"
-    },
-    {
-        name: "mp",
-        color: "#83cf39"
-    },
-    {
-        name: "s",
-        color: "#ee2020"
-    },
-    {
-        name: "v",
-        color: "#af0000"
-    },
-    {
-        name: "fi",
-        color: "#d9308e"
-    },
-    {
-        name: "nyd",
-        color: "#dddd00"
-    }
-    ];
-var COLORS = PARTIES.concat([
-    { name: "alla enskilda motioner", color: "#7f7f7f"},
+var COLORS = d3.map([
+    { name: "alla enskilda motioner", color: "orange"},
+    { name: "alla flerpartiförslag", color: "brown"},
     { name: "bifall", color: "#2ca02c" },
     { name: "delvis bifall", color: "#ff7f0e" },
     { name: "avslag", color: "#d62728" }
-  ]);
-COLORS = d3.map(COLORS, function(d){return d.name;});
+  ], function(d){return d.name;});
 
-all_data = {{data | tojson | safe}};
-sankey_data = {};
-sankey_data.nodes = all_data.nodes;
-sankey_data.flows = all_data.flows;
+sankey_data = {{data | tojson | safe}};
 
-
-proposals_main = function() {
-
-  var width, height;
-  var onNodeSelected, onNodeDeselected;
-
-  var node_yspacing = 3,
-      node_group_yspacing = 0;
-
-  var node_group_ypadding = 10;
-
-  var node_group_width = 30+40;
-  var node_width = 30;
-
-  var group_label_distance = 5;
-
-  var flow_start_width = 20;
-
-  function sankey(selection){
-    selection.each(function(data){
-
-      var yscale;
-      
-      var currently_active = null;
-
-      compute_positions = function() {
-        node_layers = data.nodes;
-
-        node_layers.forEach(function(layer, layer_idx){
-          var y = 0.5*(height-layer.total_height);
-          layer.y = y;
-          layer.items.forEach(function(group, group_idx){
-
-            group.x = (width-node_group_width)*layer.x;
-            group.y = y;
-            y += node_group_ypadding;
-
-            group.items.forEach(function(node, node_idx){
-              node.x = group.x + 0.5*(node_group_width-node_width);
-              node.y = y;
-              y += node.size * yscale;
-              node.height = y - node.y;
-              y += node_yspacing;
-
-              node.layer_idx = layer_idx;
-              node.group_idx = group_idx;
-              node.node_idx = node_idx;
-              node.unique_id = [layer_idx, group_idx, node_idx].join("-");
-
-              var colorobj = COLORS.get( (""+node.abbr).toLowerCase() );
-              if (!colorobj) colorobj = COLORS.get( (""+node.title).toLowerCase() );
-              node.color = d3.hsl(colorobj ? colorobj.color : '#7f7f7f'); 
-            });
-
-            y -= node_yspacing;
-            y += node_group_ypadding;
-            group.height = y - group.y;
-            
-            y += node_group_yspacing;
-
-          });
-          y -= node_group_yspacing;
+sankey_data.nodes.forEach(function(layer) {
+    layer.items.forEach(function(group) {
+        group.items.forEach(function(node) {
+          var colorobj = demokratikollen.utils.parties.get( (""+node.abbr).toLowerCase() );
+          if (!colorobj) colorobj = COLORS.get( (""+node.title).toLowerCase() );
+          if (node.title.toLowerCase()=='alla departement') {
+            colorobj = demokratikollen.utils.parties.get('{{data.party}}'.toLowerCase());
+          }
+          node.color = d3.hsl(colorobj ? colorobj.color : 'purple');            
         });
-      };
+    });
+});
 
-      compute_sizes = function() {
-
-        var nodes = data.nodes;
-        var flows = data.flows;
-
-        // compute and store sizes of all layers, groups and nodes by counting flows through them
-        flows.forEach(function(flow){
-          flow.path.forEach(function(p) {
-            layer = nodes[p[0]];
-            node_group = layer.items[p[1]];
-            node = node_group.items[p[2]];
-            layer.size = layer.size + flow.magnitude || flow.magnitude;
-            node_group.size = node_group.size + flow.magnitude || flow.magnitude;
-            node.size = node.size + flow.magnitude || flow.magnitude;
-          });
-        });
-
-        
-        nodes.forEach(function(layer){
-          layer.num_node_spacings = d3.sum(layer.items, function(g){return g.items.length-1;});
-          layer.num_group_spacings = layer.items.length-1;
-        });
-
-        // yscale calibrated to fill height after equation:
-        // height == size*yscale + group_spacing + group_padding + node_spacing
-        // (take worst case: smallest value)
-        yscale = d3.min(nodes, function(d){
-          return (height 
-                  - d.num_group_spacings*node_group_yspacing
-                  - d.items.length*node_group_ypadding*2
-                  - d.num_node_spacings*node_yspacing)/d.size;
-        });
-
-        nodes.forEach(function(layer){
-          layer.total_height = layer.size * yscale
-                              + layer.num_group_spacings*node_group_yspacing
-                              + layer.items.length*node_group_ypadding*2
-                              + layer.num_node_spacings*node_yspacing;
-        });
-
-
-      };
-
-      compute_flow_areas = function() {
-
-        var nodes = data.nodes;
-        var flows = data.flows; // copy so we can destroy it
-        
-        flows.forEach(function(flow){
-          flow.extra_classes = flow.path.map(function(addr){return "passes-"+addr.join("-");}).join(" ");
-        });
-
-        while(true) {
-
-          flows = flows.filter(function(d){return d.path.length > 1});
-          if (flows.length == 0) return;
-
-          flows.sort(function(a,b){
-            return   a.path[0][0]-b.path[0][0] 
-                  || a.path[0][1]-b.path[0][1] 
-                  || a.path[0][2]-b.path[0][2]
-                  || a.path[1][0]-b.path[1][0] 
-                  || a.path[1][1]-b.path[1][1] 
-                  || a.path[1][2]-b.path[1][2];
-          });
-
-          var layer_idx = flows[0].path[0][0];
-          flows.forEach(function(flow){
-
-            if (flow.path[0][0] != layer_idx) return;
-            var from = flow.path[0];
-            var to = flow.path[1];
-            var h = flow.magnitude*yscale;
-
-            var source = nodes[from[0]].items[from[1]].items[from[2]];
-            var target = nodes[to[0]].items[to[1]].items[to[2]];
-
-            var source_y0 = source.filled_out_y || source.y;
-            var source_y1 = source_y0 + h;
-            source.filled_out_y = source_y1;
-            var target_y0 = target.filled_in_y || target.y;
-            var target_y1 = target_y0 + h;
-            target.filled_in_y = target_y1;
-
-            flow_area_data.push({
-              area: [
-                      {x: source.x+node_width, y0: source_y0, y1: source_y1},
-                      {x: source.x+node_width+flow_start_width, y0: source_y0, y1: source_y1},
-                      {x: target.x-flow_start_width, y0: target_y0, y1: target_y1},
-                      {x: target.x, y0: target_y0, y1: target_y1},
-                    ],
-              class: ["flow", flow.extra_classes].join(" ")
-              });
-
-            flow.path.shift();
-          });
-        }        
-
-      };
-
-      var flow_area_data = [];
-
-      compute_sizes();
-      compute_positions();
-      compute_flow_areas();
-
-      var total_size = data.nodes[0].size;
-
-      var parent = d3.select(this);
-
-      var node_layers = parent.selectAll(".node-layers")
-                            .data(prop("nodes"));
-      node_layers.enter()
-                  .append("g").classed("node-layer",true);
-
-      var node_groups = node_layers.selectAll(".node-group")
-                                    .data(prop("items"));
-      node_groups.enter()
-                  .append("g").classed("node-group", true);
-
-      node_groups.append("rect")
-            .classed("node-group", true)
-            .attr("x", prop("x"))
-            .attr("y", prop("y"))
-            .attr("width", node_group_width)
-            .attr("height", prop("height"));
-
-      ng_labelx = function(d){return d.x+0.5*node_group_width+0.5*d.label*node_width;}
-      ng_labely = function(d){return d.y + 0.5*d.height;}
-
-
-      var tip = d3.tip().attr('class', 'd3-tip')
-      .direction('e')
-      .html(function(d) { return d.title; });
-      parent.call(tip)
-      
-      var group_labels = node_groups.append("g")
-        .style("display",function(d){return d.label ? "" : "none";})
-        .attr("class","node-group-label");
-      group_labels.append("text")
-        .text(function(d){return (100*d.size/total_size).toFixed(0)+ "%";})
-        .attr("text-anchor","middle")
-        .attr("dy",function(d){return d.label*.7+"em";})
-        .attr("transform",function(d){return "rotate(-90,"+ng_labelx(d)+","+ng_labely(d)+")";})
-        .attr("x", ng_labelx)
-        .attr("y", ng_labely);
-      group_labels.append("path")
-        .attr("d", function(d){
-          return d3.svg.line()([
-            [ng_labelx(d)+group_label_distance*d.label ,d.y+node_group_ypadding],
-            [ng_labelx(d)+group_label_distance*d.label ,d.y+d.height-node_group_ypadding]
-            ]);});
-
-      var flows_elements = parent.selectAll(".flow").data(flow_area_data)
-        .enter()
-          .append("path")
-          .attr("class", prop("class"))
-          .datum(prop("area"))
-          .attr("d", 
-            d3.svg.area()
-              .x(prop("x"))
-              .y0(prop("y0"))
-              .y1(prop("y1"))
-              .interpolate("basis"));
-
-      var nodes_elements = node_groups.selectAll(".node")
-                          .data(prop("items"));
-      nodes_elements.enter()
-            .append("g").attr("class", "node");
-      nodes_elements.append("rect")
-            .attr("class", function(d){return "node-"+d.unique_id;})
-            .attr("x", prop("x"))
-            .attr("y", prop("y"))
-            .attr("width", node_width)
-            .attr("height",prop("height"))
-            .style("fill", function(d){return d.color;})
-            .on("mouseover", function(d){
-              d3.select(this).transition().style("fill", d.color.brighter());
-              tip.show(d);
-            })
-            .on("mouseout", function(d){
-              d3.select(this).transition().style("fill", d.color);
-              tip.hide(d);
-            })
-            .on("click", function(d,i){
-              
-              var node_id = d.unique_id;
-
-              if (currently_active) {
-                var theflows = parent.selectAll(".passes-"+currently_active.id);
-                var thenode = parent.selectAll(".node-"+currently_active.id);
-
-                if (onNodeDeselected) onNodeDeselected(currently_active.d);
-
-                theflows.transition()
-                  .style("fill", null)
-                  .style("fill-opacity", null);
-
-
-                 if (currently_active.id == node_id) {
-                   currently_active = null;
-                   return;
-                 }
-              }
-
-              theflows = parent.selectAll(".passes-"+node_id);
-              thenode = parent.selectAll(".node-"+node_id);
-
-              if (onNodeSelected) onNodeSelected(d);
-
-              theflows.transition()
-                .style("fill", d.color)
-                .style("fill-opacity", 1.0);
-
-              currently_active = {"id": node_id, "d": d};
-              
-            });          
-    }); // selection.each()
-  };
-  
-  sankey.width = function(_) {
-    if (!arguments.length) return width;
-    else width = +_;
-    return sankey;
-  }
-  sankey.height = function(_) {
-    if (!arguments.length) return height;
-    else height = +_;
-    return sankey;
-  }    
-  sankey.onNodeSelected = function(_) {
-    if (!arguments.length) return onNodeSelected;
-    else onNodeSelected = _;
-    return sankey;
-  }   
-  sankey.onNodeDeselected = function(_) {
-    if (!arguments.length) return onNodeDeselected;
-    else onNodeDeselected = _;
-    return sankey;
-  }    
-
-  return sankey;
-};
-
-function pie() {
-
-  var radius = 200;
-
-  function chart(selection) {
-
-    selection.each(function(data){
-
-    var parent = d3.select(this);
-    var total = d3.sum(data, prop("count"));
-
-    var color = d3.scale.category20();
-
-    var arc = d3.svg.arc()
-        .outerRadius(radius)
-        .innerRadius(radius*0.5);
-
-    var pie = d3.layout.pie()
-        .sort(null)
-        .value(function(d) { return d.count; });
-    var piedata = pie(data);
-    var g = parent.selectAll(".arc")
-        .data(piedata)
-      .enter().append("g")
-        .attr("class", "arc");
-
-    var tip = d3.tip().attr('class', 'd3-tip')
-    .direction('e')
-    .html(function(d) { return d.data.name + " " + (100*d.data.count/total).toFixed(1) + "%"; });
-    parent.call(tip)
-
-    g.append("path")
-        .attr("d", arc)
-        .style("fill", function(d) { return color(d.data.name); })
-        .on("mouseover",tip.show)
-        .on("mouseout",tip.hide)
-     
-
-      }); // selection.each
-  }
-  chart.radius = function(_) {
-    if (!arguments.length) return radius;
-    else radius = +_;
-    return chart;
-  }  
-
-  return chart;
-}
-
-function party_detail() {
+function proposalDocumentList() {
 
   function chart(selection) {
     selection.each(function(data) {
-      
       var parent = d3.select(this);
 
-      parent.append("g")
-        .attr("class","detail_pie")
-        .attr("transform","translate(200,200)")
-        .datum(data.committees).call(
-          pie().radius(120)
-            );
+      var groups = parent.selectAll('.documentGroup').data(data);
+      var entering = groups.enter()
+        .append("div").attr("class", "documentGroup");
+
+      entering.append("div").attr("class", "header").html(
+        '<span class="glyphicon glyphicon-plus" aria-hidden="true"></span><span class="name"></span><span class="total"></span><span class="parenthesis">(</span><span class="bifall"></span><span> bifall & </span><span class="avslag"></span><span> avslag</span><span class="parenthesis">)</span>'
+        )
+      .on("click", function(d,i){
+        $('div.documents.collapse.in').collapse('hide');
+        $('#docs-'+i).collapse('toggle');
+      }); 
+
+      entering.append("div").attr("class", "documents collapse")
+        .attr("id", function(d,i) {return 'docs-'+i;})
+        .html('<div class="scrollblock"><table class="table"><thead><tr><th>Motion</th><th>Titel och författare</th></tr></thead><tbody></tbody></table></div>');
+
+      var documents = groups.select("tbody").selectAll("tr").data(prop('documents'));
+      var documentTr = documents.enter().append("tr").attr("class", prop("decision"));
+      var firstCell = documentTr.append("td");
+      firstCell.append("a")
+        .attr("href", prop("url"))
+        .attr("target","_blank")
+        .html(function(d){return d.unique_code;});
+      firstCell.append("span").attr("class","decision").html(function(d){
+        return d.decision + ' på punkt' + (d.numbers.indexOf(',')!=-1||d.numbers.indexOf('-')!=-1?'erna ':' ');
+      });
+      firstCell.append("span").attr("class", "numbers").html(function(d){
+        return d.numbers;
+      });
+      documentTr.append("td").html(function(d){return d.title;});
+
+      documents.exit().remove();
+
+      groups.select("span.name").html(prop('name'));
+      groups.select("span.bifall").html(function(d){
+        return ''+d.bifall;
+      });
+      groups.select("span.total").html(function(d){
+        return ''+(d.bifall+d.avslag);
+      });      
+      groups.select("span.avslag").html(function(d){
+        return ''+d.avslag;
+      });
+
+      groups.exit().remove();
+
 
 
     }); // selection.each
@@ -568,30 +295,144 @@ function party_detail() {
   return chart;
 }
 
-function hide_detail(d) {
-  var detail = d3.select("#proposals-detail");
-  detail.selectAll("*").transition().style("fill-opacity",0.0).remove(); 
+function detailView() {
+
+  var title = function(d){return "Title"};
+  var subtitle = function(d){return "Subtitle"};
+  var documentField = 'committee_results';
+
+  function chart(selection) {
+    selection.each(function(data) {
+      
+      var parent = d3.select(this);
+
+      parent.append("h2").html(title);
+      parent.append("p").html(subtitle);
+
+      var dl=parent.selectAll("div.documentList").data([data[documentField]])
+        .enter().append("div").attr("class", "documentList");
+
+      dl.call(proposalDocumentList());
+
+    }); // selection.each
+  };
+
+  chart.title = function(_) {
+    if (!arguments.length) return title;
+    else title = _;
+    return chart;
+  }; 
+  chart.subtitle = function(_) {
+    if (!arguments.length) return subtitle;
+    else subtitle = _;
+    return chart;
+  };  
+  chart.documentField = function(_) {
+    if (!arguments.length) return documentField;
+    else documentField = _;
+    return chart;
+  };  
+
+  return chart;
 }
+
+
+
+var currentDetail = null;
 function show_detail(d) {
   
-  hide_detail(d);
-
-  var detail = d3.select("#proposals-detail"); 
-
+  if (currentDetail == d) {
+    return;
+  }
+  currentDetail = d;
+  var url,chart=null;
   if (d.detail == "party") {
-    detail.datum(all_data.party_detail[d.party_id]).call(party_detail());
+    url = "/data/proposals/{{data.government}}/party_detail_"+d.party_id+".json";
+    chart = detailView()
+              .title(function(d) {return d.party.name;})
+              .subtitle(function(d) {
+                return d.party.name + " lade <b>"+(d.total_bifall+d.total_avslag)+"</b> förslag varav <b>"+d.total_bifall+"</b> fick bifall i kammaren. Här listar vi dem uppdelade på utskott. <b>Klicka på en rubrik</b> för att se förslagen.";
+              })
+              .documentField('committee_results');
+  }
+
+  if (d.detail == "committee") {
+    url = "/data/proposals/{{data.government}}/committee_detail_"+d.committee_id+".json";
+    chart = detailView()
+              .title(function(d) {return d.committee.name;})
+              .subtitle(function(d){
+                return "I " + d.committee.name + " behandlades totalt <b>"+(d.total_bifall+d.total_avslag)+"</b> förslag. Här listar vi dem uppdelade på förslagsinstans. <b>Klicka på en rubrik</b> för att se förslagen.";
+              })
+              .documentField("origin_results");
+  }  
+  if (d.detail == "government") {
+    url = "/data/proposals/{{data.government}}/ministries_detail.json";
+    chart = detailView()
+              .title("Regeringen {{data.title}}")
+              .subtitle(function(d){
+                return "Regeringen {{data.title}} lade <b>"+(d.total_bifall+d.total_avslag)+"</b> förslag varav <b>"+d.total_avslag+"</b> fick avslag i kammaren. Här listar vi dem uppdelade på utskott. <b>Klicka på en rubrik</b> för att se förslagen.";
+              })
+              .documentField('committee_results');
+  }
+  if (d.detail == "members") {
+    url = "/data/proposals/{{data.government}}/members_detail.json";
+    chart = detailView()
+              .title("Enskilda ledamöters förslag")
+              .subtitle(function(d){
+                return "Enskilda ledamöter lade <b>"+(d.total_bifall+d.total_avslag)+"</b> förslag varav <b>"+d.total_bifall+"</b> fick bifall i kammaren. Här listar vi dem uppdelade på utskott. <b>Klicka på en rubrik</b> för att se förslagen.";
+              })
+              .documentField('committee_results');
+  }
+  if (d.detail == "multiparties") {
+    url = "/data/proposals/{{data.government}}/multiparties_detail.json";
+    chart = detailView()
+              .title("Samarbetsförslag")
+              .subtitle(function(d){
+                return "Koalitioner av två eller fler partier lade <b>"+(d.total_bifall+d.total_avslag)+"</b> förslag varav <b>"+d.total_bifall+"</b> fick bifall i kammaren. Här listar vi dem uppdelade på utskott. <b>Klicka på en rubrik</b> för att se förslagen.";
+              })
+              .documentField('committee_results');
+  }
+
+
+
+  var detail = d3.select("#proposals-detail").insert("div", ":first-child");
+
+  if (!chart) {
+    detail.html('<h2>Välj en förslagsinstans eller ett utskott för att se deras förslag!</h2>')
+    d3.select("#proposals-detail > div:not(:first-child)").remove();
     return;
   }
 
+  detail.html('<span class="glyphicon glyphicon-refresh glyphicon-spin glyphicon-loading"></span>');
+  d3.json(url, function(detail_data){
+    detail.html("").datum(detail_data).call(chart);
+    
+    d3.select("#proposals-detail > div:not(:first-child)").remove();
+  });
+
 }
 
-$(d3.select("#proposals-main").datum(sankey_data).call(
-  proposals_main()
-    .width(450)
-    .height(400)
-    .onNodeSelected(show_detail)
-    .onNodeDeselected(hide_detail)
-  ));   
 
-    </script>
+d3.select("#proposals-main").datum(sankey_data);
+var sankey = demokratikollen.graphics.layeredSankey()
+    .onNodeSelected(show_detail);
+sankey.width(600)
+      .height(500)
+      .selectedNodeAddress([0,3,0]); // set initial node to the government (do this last so detail-view callback triggers.)
+
+
+function draw() {
+  var container = d3.select('#proposals-main-container');
+  var width = demokratikollen.utils.getInnerWidth(container);
+  width = width > 600 ? 600 : width;
+  d3.select("#proposals-main")
+    .html("")
+    .attr("width", width)
+    .attr("height", 500/600 * width)
+    .call(sankey);
+}
+
+draw();
+d3.select(window).on("resize",draw);
+</script>
 {%- endblock %}
