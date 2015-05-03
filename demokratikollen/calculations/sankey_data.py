@@ -72,20 +72,25 @@ def main():
     mongo_collection_ministries_detail = mongodb.proposals_ministries_detail
     mongo_collection_ministries_detail.ensure_index([("government", ASCENDING)], unique=True)
 
+    mongo_collection_multiparties_detail = mongodb.proposals_multiparties_detail
+    mongo_collection_multiparties_detail.ensure_index([("government", ASCENDING)], unique=True)
+
+    mongo_collection_members_detail = mongodb.proposals_members_detail
+    mongo_collection_members_detail.ensure_index([("government", ASCENDING)], unique=True)
 
     basequery = s.query(Proposal).options( \
             joinedload(Proposal.points).joinedload(ProposalPoint.committee_report).joinedload(CommitteeReport.committee)) \
             .order_by(Proposal.published.desc())
 
     governments = [
-        ("persson3",
-        dict(title="Person III", years="2002-2006", party="S"), 
-            basequery.filter(MemberProposal.session.in_(['2002/03', '2003/04', '2004/05', '2005/06'])) 
-        ),
-        ("reinfeldt1",
-        dict(title="Reinfeldt I", years="2006-2010", party="M"), 
-            basequery.filter(MemberProposal.session.in_(['2006/07', '2007/08', '2008/09', '2009/10'])) 
-        ),
+        # ("persson3",
+        # dict(title="Person III", years="2002-2006", party="S"), 
+        #     basequery.filter(MemberProposal.session.in_(['2002/03', '2003/04', '2004/05', '2005/06'])) 
+        # ),
+        # ("reinfeldt1",
+        # dict(title="Reinfeldt I", years="2006-2010", party="M"), 
+        #     basequery.filter(MemberProposal.session.in_(['2006/07', '2007/08', '2008/09', '2009/10'])) 
+        # ),
         ("reinfeldt2",
         dict(title="Reinfeldt II", years="2010-2014", party="M"),
             basequery.filter(MemberProposal.session.in_(['2010/11', '2011/12', '2012/13', '2013/14']))
@@ -193,7 +198,7 @@ def main():
         nodes = list()
         node_group_members = dict(
             title="Enskilda\nledamöters\nmotioner", 
-            items=[dict(detail="single", title=p) for p in members],
+            items=[dict(detail="members", title=p) for p in members],
             label = -1)
 
         node_group_party = dict(
@@ -203,7 +208,7 @@ def main():
 
         node_group_multiparty = dict(
             title="Flerparti-\nmotioner", 
-            items=[dict(detail="multiparty", title=p) for p in multiparties],
+            items=[dict(detail="multiparties", title=p) for p in multiparties],
             label = -1)
         node_group_government = dict(
             title="Regeringens\npropositioner", 
@@ -359,6 +364,41 @@ def main():
 
             return result
 
+
+        print('Generating committee_detail')
+        committee_detail = dict();
+        for c_id in committees:
+            total_bifall = 0
+            total_avslag = 0
+            origin_results = []
+
+            for p_id in parties:
+                if c_id not in parties_tree[p_id]:
+                    continue
+
+                bifall_ids = parties_tree[p_id][c_id].get('bifall',[])+parties_tree[p_id][c_id].get('delvis bifall',[])
+                avslag_ids = parties_tree[p_id][c_id].get('avslag',[])
+                num_bifall = len(bifall_ids)
+                num_avslag = len(avslag_ids)
+                total_bifall += num_bifall
+                total_avslag += num_avslag
+
+                origin_results.append({
+                    'name': party_metadata[p_id]['name'],
+                    'abbr': party_metadata[p_id]['abbr'],
+                    'bifall': num_bifall,
+                    'avslag': num_avslag,
+                    'documents': documents_from_points((("Bifall", bifall_ids), ("Avslag", avslag_ids)))
+                })
+                    
+
+            committee_detail[repr(c_id)] = dict(
+                party = party_metadata[p_id],
+                committee_results = origin_results,
+                total_bifall = total_bifall,
+                total_avslag = total_avslag
+                )
+
         print('Generating party_detail')
         party_detail = dict();
         for p_id in parties:
@@ -422,19 +462,90 @@ def main():
             total_avslag = total_avslag            
             )
 
+
+
+
+        print('Generating members_detail')
+        committee_results = []
+        total_bifall = 0
+        total_avslag = 0
+        m_id = members[0]
+        for c_id in committees:
+            if c_id not in members_tree[m_id]:
+                continue
+
+            bifall_ids = members_tree[m_id][c_id].get('bifall',[])+members_tree[m_id][c_id].get('delvis bifall',[])
+            avslag_ids = members_tree[m_id][c_id].get('avslag',[])
+            num_bifall = len(bifall_ids)
+            num_avslag = len(avslag_ids)
+            total_bifall += num_bifall
+            total_avslag += num_avslag
+            committee_results.append({
+                'name': committee_metadata[c_id]['name'],
+                'abbr': committee_metadata[c_id]['abbr'],
+                'bifall': num_bifall,
+                'avslag': num_avslag,
+                'documents': documents_from_points((("Avslag", avslag_ids),("Bifall", bifall_ids)))
+            })
+                
+
+        members_detail = dict(
+            committee_results = committee_results,
+            total_bifall = total_bifall,
+            total_avslag = total_avslag            
+            )
+
+
+        print('Generating multiparties_detail')
+        committee_results = []
+        total_bifall = 0
+        total_avslag = 0
+        m_id = multiparties[0]
+        for c_id in committees:
+            if c_id not in multiparties_tree[m_id]:
+                continue
+
+            bifall_ids = multiparties_tree[m_id][c_id].get('bifall',[])+multiparties_tree[m_id][c_id].get('delvis bifall',[])
+            avslag_ids = multiparties_tree[m_id][c_id].get('avslag',[])
+            num_bifall = len(bifall_ids)
+            num_avslag = len(avslag_ids)
+            total_bifall += num_bifall
+            total_avslag += num_avslag
+            committee_results.append({
+                'name': committee_metadata[c_id]['name'],
+                'abbr': committee_metadata[c_id]['abbr'],
+                'bifall': num_bifall,
+                'avslag': num_avslag,
+                'documents': documents_from_points((("Avslag", avslag_ids),("Bifall", bifall_ids)))
+            })
+                
+
+        multiparties_detail = dict(
+            committee_results = committee_results,
+            total_bifall = total_bifall,
+            total_avslag = total_avslag            
+            )
+
+
+
+
         output_top = dict(
                             government=name,
                             nodes = nodes,
                             flows = flows
                         )
         output_top.update(government_metadata)
-
-
-        
         mongo_collection.update(dict(government=name), output_top, upsert=True)
 
         ministries_detail.update(dict(government=name))
         mongo_collection_ministries_detail.update(dict(government=name), ministries_detail, upsert=True)
+
+        members_detail.update(dict(government=name))
+        mongo_collection_members_detail.update(dict(government=name), members_detail, upsert=True)
+
+        multiparties_detail.update(dict(government=name))
+        mongo_collection_multiparties_detail.update(dict(government=name), multiparties_detail, upsert=True)
+
     
         for (p_id, d) in party_detail.items():
             d.update(dict(

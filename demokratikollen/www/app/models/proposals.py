@@ -43,3 +43,29 @@ def ministries_detail(government):
         raise KeyError
     del record['_id']
     return record
+
+def members_detail(government):
+    mdb = MongoDBDatastore()
+    mongodb = mdb.get_mongodb_database() 
+    mongo_collection = mongodb.proposals_members_detail
+
+    print(mongo_collection)
+    record= mongo_collection.find_one({"government": government})
+    
+    if record is None:
+        raise KeyError
+    del record['_id']
+    return record
+
+def multiparties_detail(government):
+    mdb = MongoDBDatastore()
+    mongodb = mdb.get_mongodb_database() 
+    mongo_collection = mongodb.proposals_multiparties_detail
+
+    print(mongo_collection)
+    record= mongo_collection.find_one({"government": government})
+    
+    if record is None:
+        raise KeyError
+    del record['_id']
+    return record

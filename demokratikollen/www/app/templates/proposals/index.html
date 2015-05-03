@@ -362,6 +362,51 @@ function ministry_detail() {
   return chart;
 }
 
+function members_detail() {
+
+  function chart(selection) {
+    selection.each(function(data) {
+      
+      var parent = d3.select(this);
+
+      parent.append("h2").html("Enskilda ledamöters motioner");
+      parent.append("p").html(function(d){
+        return "Enskilda ledamöter lade <b>"+(d.total_bifall+d.total_avslag)+"</b> förslag varav <b>"+d.total_bifall+"</b> fick bifall i kammaren. Här listar vi dem uppdelade på utskott. <b>Klicka på en rubrik</b> för att se förslagen.";
+      });
+
+      var dl=parent.selectAll("div.documentList").data([data.committee_results])
+        .enter().append("div").attr("class", "documentList");
+
+      dl.call(proposalDocumentList());
+
+
+    }); // selection.each
+  };
+  return chart;
+}
+
+function multiparties_detail() {
+
+  function chart(selection) {
+    selection.each(function(data) {
+      
+      var parent = d3.select(this);
+
+      parent.append("h2").html("Samarbetsförslag");
+      parent.append("p").html(function(d){
+        return "Koalitioner av två eller fler partier lade <b>"+(d.total_bifall+d.total_avslag)+"</b> förslag varav <b>"+d.total_bifall+"</b> fick bifall i kammaren. Här listar vi dem uppdelade på utskott. <b>Klicka på en rubrik</b> för att se förslagen.";
+      });
+
+      var dl=parent.selectAll("div.documentList").data([data.committee_results])
+        .enter().append("div").attr("class", "documentList");
+
+      dl.call(proposalDocumentList());
+
+
+    }); // selection.each
+  };
+  return chart;
+}
 
 
 
@@ -372,7 +417,6 @@ function show_detail(d) {
     return;
   }
   currentDetail = d;
-  
   var url,chart;
   if (d.detail == "party") {
     url = "/data/proposals/{{data.government}}/party_detail_"+d.party_id+".json";
@@ -381,6 +425,14 @@ function show_detail(d) {
   if (d.detail == "government") {
     url = "/data/proposals/{{data.government}}/ministries_detail.json";
     chart = ministry_detail();
+  }
+  if (d.detail == "members") {
+    url = "/data/proposals/{{data.government}}/members_detail.json";
+    chart = members_detail();
+  }
+  if (d.detail == "multiparties") {
+    url = "/data/proposals/{{data.government}}/multiparties_detail.json";
+    chart = multiparties_detail();
   }
 
 
