@@ -53,7 +53,7 @@ demokratikollen.graphics.stackedBarChart = function() {
         bar.rectData = [];
         bar.forEach(function(p,i,a){
           var rect = {};
-          if (i == 0) {
+          if (i === 0) {
             rect.y0 = 0;
           } else {
             rect.y0 = bar.rectData[i-1].y1;
@@ -143,7 +143,7 @@ demokratikollen.graphics.stackedBarChart = function() {
         .text(prop("total"))
         .style("text-anchor","middle")
         .attr("x", function(d,i){return xScale(i)+0.5*(xScale(1));})
-        .attr("y", function(d){return yScale(d.total)})
+        .attr("y", function(d){return yScale(d.total);})
         .attr("dy","-0.1em");
 
 
@@ -151,20 +151,20 @@ demokratikollen.graphics.stackedBarChart = function() {
 
       function activateBar(i) {
         var d = data.bars[i];
-        if (currentlyActive != null) {
+        if (currentlyActive !== null) {
           d3.select(clickRects[0][currentlyActive]).style("fill-opacity","");
         }
         d3.select(clickRects[0][i]).style("fill-opacity",0.3);
         if (onBarActivated) onBarActivated(d,i);
         currentlyActive = i;
-      };
+      }
       function deActivateBar(i) {
         var d = data.bars[i];
-        if (currentlyActive != null) {
+        if (currentlyActive !== null) {
           d3.select(clickRects[0][currentlyActive]).style("fill-opacity","");
         }
         currentlyActive = null;
-      };
+      }
 
       clickRects.enter().append("rect").attr("class", "click-rect");
 
@@ -188,45 +188,45 @@ demokratikollen.graphics.stackedBarChart = function() {
         });
 
       // reactivate selection when updating data
-      if (currentlyActive != null) activateBar(currentlyActive);
+      if (currentlyActive !== null) activateBar(currentlyActive);
     });
-  };
+  }
 
  chart.onBarActivated = function(_) {
     if (!arguments.length) return onBarActivated;
     else onBarActivated = _;
     return chart;
- }
+ };
  chart.width = function(_) {
     if (!arguments.length) return width;
     else width = +_;
     return chart;
- }
+ };
  chart.height = function(_) {
     if (!arguments.length) return height;
     else height = +_;
     return chart;
- }
+ };
  chart.bottomMargin = function(_) {
     if (!arguments.length) return margin.bottom;
     else margin.bottom = +_;
     return chart;
- }
+ };
  chart.maxAbsoluteBandWidth = function(_) {
     if (!arguments.length) return maxAbsoluteBandWidth;
     else maxAbsoluteBandWidth = +_;
     return chart;
- }
+ };
  chart.currentlyActive = function(_) {
     if (!arguments.length) return currentlyActive;
     else currentlyActive = _;
     return chart;
- }
+ };
  chart.title = function(_) {
     if (!arguments.length) return title;
     else title = _;
     return chart;
- }
+ };
 
  return chart;
 };

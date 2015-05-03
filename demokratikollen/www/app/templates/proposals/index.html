@@ -7,6 +7,7 @@
 
 .node rect {
     stroke: none;
+    cursor: pointer;
 }
 rect.node-group {
   display:none;
@@ -87,6 +88,9 @@ rect.node-group {
   color: #2ca02c;
 }
 
+.documentGroup td:first-child {
+  width: 130px;
+}
 .documentGroup tr.Bifall {
   border-left: 20px solid #2ca02c;
 }
@@ -115,6 +119,35 @@ span.numbers {
   display:block;
   height:300px;
   overflow: auto;
+}
+.glyphicon-spin {
+    -webkit-animation: spin 1000ms infinite linear;
+    animation: spin 1000ms infinite linear;
+}
+@-webkit-keyframes spin {
+    0% {
+        -webkit-transform: rotate(0deg);
+        transform: rotate(0deg);
+    }
+    100% {
+        -webkit-transform: rotate(359deg);
+        transform: rotate(359deg);
+    }
+}
+@keyframes spin {
+    0% {
+        -webkit-transform: rotate(0deg);
+        transform: rotate(0deg);
+    }
+    100% {
+        -webkit-transform: rotate(359deg);
+        transform: rotate(359deg);
+    }
+}
+.glyphicon-loading {
+  margin-left:40%;
+  margin-bottom:50px;
+  font-size:48px;
 }
     </style>
 
@@ -193,16 +226,7 @@ span.numbers {
     <figure>
     <div class="inset" id="proposals-main-container">
     <svg id="proposals-main" class='canvas'  viewBox='0 0 600 500' preserveAspectRatio="xMinYMin meet"/>
-    </div>        
-    <figcaption></figcaption>
-    </figure>
-    </div>
-    </div>
-  <div class="row">
-    <div class="col-md-8">
-    <figure>
-    <div class="inset" id="proposals-detail"></div>        
-    <figcaption></figcaption>
+    <div id="proposals-detail"></div>        
     </figure>
     </div>    
 </div> 
@@ -227,7 +251,7 @@ sankey_data.nodes.forEach(function(layer) {
         group.items.forEach(function(node) {
           var colorobj = demokratikollen.utils.parties.get( (""+node.abbr).toLowerCase() );
           if (!colorobj) colorobj = COLORS.get( (""+node.title).toLowerCase() );
-          if (node.title=='alla departement') {
+          if (node.title.toLowerCase()=='alla departement') {
             colorobj = demokratikollen.utils.parties.get('{{data.party}}'.toLowerCase());
           }
           node.color = d3.hsl(colorobj ? colorobj.color : '#7f7f7f');            
@@ -303,7 +327,7 @@ function party_detail() {
 
       parent.append("h2").html(function(d){return d.party.name;});
       parent.append("p").html(function(d){
-        return d.party.name + " lade "+(d.total_bifall+d.total_avslag)+" förslag varav "+d.total_bifall+" fick bifall i kammaren. Här listar vi dem uppdelade på utskott. <b>Klicka på en rubrik</b> för att se förslagen.";
+        return d.party.name + " lade <b>"+(d.total_bifall+d.total_avslag)+"</b> förslag varav <b>"+d.total_bifall+"</b> fick bifall i kammaren. Här listar vi dem uppdelade på utskott. <b>Klicka på en rubrik</b> för att se förslagen.";
       });
 
       var dl=parent.selectAll("div.documentList").data([data.committee_results])
@@ -322,9 +346,9 @@ function ministry_detail() {
       
       var parent = d3.select(this);
 
-      parent.append("h2").html("Regeringen");
+      parent.append("h2").html("Regeringen {{data.title}}");
       parent.append("p").html(function(d){
-        return "Regeringen lade "+(d.total_bifall+d.total_avslag)+" förslag varav "+d.total_bifall+" fick bifall i kammaren. Här listar vi dem uppdelade på utskott. <b>Klicka på en rubrik</b> för att se förslagen.";
+        return "Regeringen {{data.title}} lade <b>"+(d.total_bifall+d.total_avslag)+"</b> förslag varav <b>"+d.total_avslag+"</b> fick avslag i kammaren. Här listar vi dem uppdelade på utskott. <b>Klicka på en rubrik</b> för att se förslagen.";
       });
 
       var dl=parent.selectAll("div.documentList").data([data.committee_results])
@@ -341,36 +365,42 @@ function ministry_detail() {
 
 
 
-function hide_detail(d) {
-  var detail = d3.select("#proposals-detail");
-  detail.html(""); 
-}
+var currentDetail = null;
 function show_detail(d) {
   
-  var detail = d3.select("#proposals-detail"); 
-
-  if (d.detail == "party") {
-    d3.json("/data/proposals/reinfeldt2/party_detail_"+d.party_id+".json", function(detail_data){
-      detail.datum(detail_data).call(party_detail());
-    });
+  if (currentDetail == d) {
     return;
+  }
+  currentDetail = d;
+  
+  var url,chart;
+  if (d.detail == "party") {
+    url = "/data/proposals/{{data.government}}/party_detail_"+d.party_id+".json";
+    chart = party_detail();
   }
   if (d.detail == "government") {
-    d3.json("/data/proposals/reinfeldt2/ministries_detail.json", function(detail_data){
-      detail.datum(detail_data).call(ministry_detail());
-    });    
-    return;
+    url = "/data/proposals/{{data.government}}/ministries_detail.json";
+    chart = ministry_detail();
   }
+
+
+  var detail = d3.select("#proposals-detail").insert("div", ":first-child");
+  detail.html('<span class="glyphicon glyphicon-refresh glyphicon-spin glyphicon-loading"></span>');
+  d3.json(url, function(detail_data){
+    detail.html("").datum(detail_data).call(chart);
+    
+    d3.select("#proposals-detail > div:not(:first-child)").remove();
+  });
 
 }
 
 
 d3.select("#proposals-main").datum(sankey_data);
 var sankey = demokratikollen.graphics.layeredSankey()
-    .onNodeSelected(show_detail)
-    .onNodeDeselected(hide_detail); 
+    .onNodeSelected(show_detail);
 sankey.width(600)
-      .height(500);
+      .height(500)
+      .selectedNodeAddress([0,3,0]); // set initial node to the government (do this last so detail-view callback triggers.)
 
 
 function draw() {
@@ -381,11 +411,10 @@ function draw() {
     .html("")
     .attr("width", width)
     .attr("height", 500/600 * width)
-    .call(sankey);    
-
+    .call(sankey);
 }
 
 draw();
-window.onresize=draw;
+d3.select(window).on("resize",draw);
 </script>
 {%- endblock %}

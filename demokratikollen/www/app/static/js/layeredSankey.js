@@ -1,93 +1,63 @@
 demokratikollen.graphics.layeredSankey = function() {
 
+  function linebreak(text) {
+    text.each(function() {
+      var text = d3.select(this),
+          words = text.text().split(/\n/).reverse(),
+          word,
+          lineNumber = 0,
+          lineHeight = 1.1, // ems
+          y = text.attr("y"),
+          x = text.attr("x"),
+          dx = text.attr("dx"),
+          dy = 0.3 - (words.length-1)*lineHeight*0.5; //ems
+      text.text(null);
+      while (word = words.pop()) {
+        tspan = text.append("tspan").attr("dx",dx).attr("x", x).attr("y", y).attr("dy", lineNumber++ * lineHeight + dy + "em").text(word);
+      }
+    });
+  }
+
   var width, height;
   var onNodeSelected, onNodeDeselected;
-  var total_width, total_height;
   var labelspace = {top:50,left:100,right:70,bottom:0};
+  var selectedNodeAddress = null;
 
-  var node_yspacing = 3,
-      node_group_yspacing = 0;
+  var nodeYSpacing = 3,
+      nodeGroupYSpacing = 0;
 
-  var node_group_ypadding = 10;
+  var nodeGroupYPadding = 10;
 
-  var node_group_width = 30;
-  var node_width = 30;
+  var nodeWidth = 30;
 
-  var group_label_distance = 5;
-  var flow_start_width = 20;
+  var groupLabelDistance = 5;
+  var flowStartWidth = 20;
 
   function chart(selection) {
 
-    var oldWidth = width;
-    var oldHeight = height;
-    total_width=oldWidth;
-    total_height=oldHeight;
-    width = oldWidth - (labelspace.right+labelspace.left);
-    height = oldHeight - (labelspace.top + labelspace.bottom);
-
     selection.each(function(data){
 
+      var parent = d3.select(this);
       var yscale;
-      
-      var currently_active = null;
+      var currentlyActive = null;
 
-      function linebreak(text) {
-        text.each(function() {
-          var text = d3.select(this),
-              words = text.text().split(/\n/).reverse(),
-              word,
-              lineNumber = 0,
-              lineHeight = 1.1, // ems
-              y = text.attr("y"),
-              x = text.attr("x"),
-              dx = text.attr("dx"),
-              dy = .3 - (words.length-1)*lineHeight*0.5; //ems
-          text.text(null);
-          while (word = words.pop()) {
-            tspan = text.append("tspan").attr("dx",dx).attr("x", x).attr("y", y).attr("dy", lineNumber++ * lineHeight + dy + "em").text(word);
-          }
-        });
-      }
+      var availableWidth = width - (labelspace.right+labelspace.left);
+      var availableHeight = height - (labelspace.top + labelspace.bottom);
 
-      compute_positions = function() {
-        node_layers = data.nodes;
+      var flow_area_data = [];
 
-        node_layers.forEach(function(layer, layer_idx){
-          var y = 0.5*(height-layer.total_height) + labelspace.top;
-          layer.y = y;
-          layer.items.forEach(function(group, group_idx){
 
-            group.x = labelspace.left+(width-node_group_width)*layer.x;
-            group.y = y;
-            y += node_group_ypadding;
+      /* 
+      The anonymous function is used to scope the algorithm for
+      preparing the data.
 
-            group.items.forEach(function(node, node_idx){
-              node.x = group.x + 0.5*(node_group_width-node_width);
-              node.y = y;
-              y += node.size * yscale;
-              node.height = y - node.y;
-              y += node_yspacing;
+      It computes sizes and positions for all nodes 
+      and flows and saves them on original data structure.
 
-              node.layer_idx = layer_idx;
-              node.group_idx = group_idx;
-              node.node_idx = node_idx;
-              node.unique_id = [layer_idx, group_idx, node_idx].join("-");
- 
-              if (!node.color) node.color = "#aaa";
-            });
-
-            y -= node_yspacing;
-            y += node_group_ypadding;
-            group.height = y - group.y;
-            
-            y += node_group_yspacing;
-
-          });
-          y -= node_group_yspacing;
-        });
-      };
-
-      compute_sizes = function() {
+      It does not mutate original data (because then multiple call() would
+      then destroy the chart.) 
+      */ 
+      (function() {
 
         var nodes = data.nodes;
         var flows = data.flows;
@@ -124,46 +94,76 @@ demokratikollen.graphics.layeredSankey = function() {
         });
 
         // yscale calibrated to fill height after equation:
-        // height == size*yscale + group_spacing + group_padding + node_spacing
+        // availableHeight == size*yscale + group_spacing + group_padding + node_spacing
         // (take worst case: smallest value)
         yscale = d3.min(nodes, function(d){
-          return (height 
-                  - d.num_group_spacings*node_group_yspacing
-                  - d.items.length*node_group_ypadding*2
-                  - d.num_node_spacings*node_yspacing)/d.size;
+          return (availableHeight 
+                  - d.num_group_spacings*nodeGroupYSpacing
+                  - d.items.length*nodeGroupYPadding*2
+                  - d.num_node_spacings*nodeYSpacing)/d.size;
         });
 
         nodes.forEach(function(layer){
-          layer.total_height = layer.size * yscale
-                              + layer.num_group_spacings*node_group_yspacing
-                              + layer.items.length*node_group_ypadding*2
-                              + layer.num_node_spacings*node_yspacing;
+          layer.totalHeight = layer.size * yscale
+                              + layer.num_group_spacings*nodeGroupYSpacing
+                              + layer.items.length*nodeGroupYPadding*2
+                              + layer.num_node_spacings*nodeYSpacing;
         });
 
 
-      };
+        // use sizes to compute positions of all layers, groups and nodes
+        nodes.forEach(function(layer, layer_idx){
+          var y = 0.5*(availableHeight-layer.totalHeight) + labelspace.top;
+          layer.y = y;
+          layer.items.forEach(function(group, group_idx){
 
-      compute_flow_areas = function() {
+            group.x = labelspace.left+(availableWidth-nodeWidth)*layer.x;
+            group.y = y;
+            y += nodeGroupYPadding;
 
-        var nodes = data.nodes;
-        var flows = data.flows;
+            group.items.forEach(function(node, node_idx){
+              node.x = group.x;
+              node.y = y;
+              y += node.size * yscale;
+              node.height = y - node.y;
+              y += nodeYSpacing;
+
+              node.layer_idx = layer_idx;
+              node.group_idx = group_idx;
+              node.node_idx = node_idx;
+              node.unique_id = [layer_idx, group_idx, node_idx].join("-");
+ 
+              if (!node.color) node.color = d3.hsl("#aaa");
+            });
+
+            y -= nodeYSpacing;
+            y += nodeGroupYPadding;
+            group.height = y - group.y;
+            
+            y += nodeGroupYSpacing;
+
+          });
+          y -= nodeGroupYSpacing;
+        });
+
+
+        
+        // Compute all the path data for the flows.
+        // First make a deep copy of the flows data because
+        // algorithm is destructive
         var flows_copy = data.flows.map(function(f){
           var f2 = {magnitude: f.magnitude};
+          f2.extra_classes = f.path.map(function(addr){return "passes-"+addr.join("-");}).join(" ");
           f2.path = f.path.map(function(addr){
             return addr.slice(0);
           });
           return f2;
         });
-        
-        flows.forEach(function(flow){
-          flow.extra_classes = flow.path.map(function(addr){return "passes-"+addr.join("-");}).join(" ");
-        });
-
 
         while(true) {
 
-          flows_copy = flows_copy.filter(function(d){return d.path.length > 1});
-          if (flows_copy.length == 0) return;
+          flows_copy = flows_copy.filter(function(d){return d.path.length > 1;});
+          if (flows_copy.length === 0) return;
 
           flows_copy.sort(function(a,b){
             return   a.path[0][0]-b.path[0][0] 
@@ -194,9 +194,9 @@ demokratikollen.graphics.layeredSankey = function() {
 
             flow_area_data.push({
               area: [
-                      {x: source.x+node_width, y0: source_y0, y1: source_y1},
-                      {x: source.x+node_width+flow_start_width, y0: source_y0, y1: source_y1},
-                      {x: target.x-flow_start_width, y0: target_y0, y1: target_y1},
+                      {x: source.x+nodeWidth, y0: source_y0, y1: source_y1},
+                      {x: source.x+nodeWidth+flowStartWidth, y0: source_y0, y1: source_y1},
+                      {x: target.x-flowStartWidth, y0: target_y0, y1: target_y1},
                       {x: target.x, y0: target_y0, y1: target_y1},
                     ],
               class: ["flow", flow.extra_classes].join(" ")
@@ -206,160 +206,183 @@ demokratikollen.graphics.layeredSankey = function() {
           });
         }        
 
-      };
+      })(); // end of data preparation
 
-      var flow_area_data = [];
 
-      compute_sizes();
-      compute_positions();
-      compute_flow_areas();
+      // Create all svg elements: layers, groups, nodes and flows.
 
-      var parent = d3.select(this);
-
-      var node_layers = parent.selectAll(".node-layers")
+      var nodeLayers = parent.selectAll(".node-layers")
                             .data(prop("nodes"));
-      nl_labelx = function(d){return labelspace.left+d.x*(width-node_width)+0.5*node_width;}
-      nl_labely = function(d){return 0.5*labelspace.top;}
 
-      node_layers.enter()
+      nl_labelx = function(d){return labelspace.left+d.x*(availableWidth-nodeWidth)+0.5*nodeWidth;};
+      nl_labely = function(d){return 0.5*labelspace.top;};
+      nodeLayers.enter()
                   .append("g").classed("node-layer",true)
                   .append("text")
                     .attr("class", "layer-label")
                     .attr("text-anchor","middle")
                     .attr("dx",0)
-                    .attr("dy",0)
+                    .attr("dy",0);
+
+      nodeLayers.selectAll("text")
                     .attr("x", nl_labelx)
                     .attr("y", nl_labely)
                     .text(prop("title")).call(linebreak);
 
-      var node_groups = node_layers.selectAll(".node-group")
-                                    .data(prop("items"));
-      node_groups.enter()
-                  .append("g").classed("node-group", true);
+      nodeLayers.exit().remove();
 
-      node_groups.append("rect")
-            .classed("node-group", true)
+      var nodeGroups = nodeLayers.selectAll("g.node-group").data(prop("items"));
+      var enteringNodeGroups = nodeGroups.enter().append("g").classed("node-group", true);
+
+      enteringNodeGroups.append("rect").classed("node-group", true);
+      var enteringNodeGroupsG = enteringNodeGroups.append("g").attr("class","node-group-label");
+
+      enteringNodeGroupsG.append("path");
+      enteringNodeGroupsG.append("text");
+
+      nodeGroups.selectAll("g.node-group > rect")
             .attr("x", prop("x"))
             .attr("y", prop("y"))
-            .attr("width", node_group_width)
+            .attr("width", nodeWidth)
             .attr("height", prop("height"));
 
-      ng_labelx = function(d){return d.x+0.5*node_width+0.5*d.label*node_width;}
-      ng_labely = function(d){return d.y + 0.5*d.height;}
+      nodeGroups.selectAll("g.node-group > g")
+        .style("display",function(d){return d.label ? "" : "none";});
 
-      var tip = d3.tip().attr('class', 'd3-tip')
-      .direction('e')
-      .html(function(d) { return d.title; });
-      parent.call(tip)
-      
-      var group_labels = node_groups.append("g")
-        .style("display",function(d){return d.label ? "" : "none";})
-        .attr("class","node-group-label");
-      group_labels.append("text")
+      ng_labelx = function(d){return d.x+0.5*nodeWidth+0.5*d.label*nodeWidth;};
+      ng_labely = function(d){return d.y + 0.5*d.height;};
+      nodeGroups.selectAll("g.node-group > g > path")
+        .attr("d", function(d){
+          return d3.svg.line()([
+            [ng_labelx(d)+groupLabelDistance*d.label ,d.y+nodeGroupYPadding],
+            [ng_labelx(d)+groupLabelDistance*d.label ,d.y+d.height-nodeGroupYPadding]
+            ]);});
+
+      nodeGroups.selectAll("g.node-group > g > text")
         .attr("text-anchor","end")
-        .attr("dx",function(d){return d.label*(group_label_distance*2);})
+        .attr("dx",function(d){return d.label*(groupLabelDistance*2);})
         .attr("dy","0.3em")
         .attr("x", ng_labelx)
         .attr("y", ng_labely)
         .text(prop("title")).call(linebreak);
 
 
-      group_labels.append("path")
-        .attr("d", function(d){
-          return d3.svg.line()([
-            [ng_labelx(d)+group_label_distance*d.label ,d.y+node_group_ypadding],
-            [ng_labelx(d)+group_label_distance*d.label ,d.y+d.height-node_group_ypadding]
-            ]);});
+      nodeGroups.exit().remove();
 
-      var flows_elements = parent.selectAll(".flow").data(flow_area_data)
-        .enter()
-          .append("path")
-          .attr("class", prop("class"))
-          .datum(prop("area"))
-          .attr("d", 
-            d3.svg.area()
-              .x(prop("x"))
-              .y0(prop("y0"))
-              .y1(prop("y1"))
-              .interpolate("basis"));
+      // TODO get rid of dependency
+      var tip = d3.tip().attr('class', 'd3-tip')
+        .direction('e')
+        .html(function(d) { return d.title; });
+      parent.call(tip);
 
-      var nodes_elements = node_groups.selectAll(".node")
-                          .data(prop("items"));
-      nodes_elements.enter()
-            .append("g").attr("class", "node");
-      nodes_elements.append("rect")
-            .attr("class", function(d){return "node-"+d.unique_id;})
-            .attr("x", prop("x"))
-            .attr("y", prop("y"))
-            .attr("width", node_width)
-            .attr("height",prop("height"))
-            .style("fill", function(d){return d.color;})
-            .on("mouseover", function(d){
-              d3.select(this).transition().style("fill", d.color.brighter());
-              tip.show(d);
-            })
-            .on("mouseout", function(d){
-              d3.select(this).transition().style("fill", d.color);
-              tip.hide(d);
-            })
-            .on("click", function(d,i){
-              
-              var node_id = d.unique_id;
+      var flowElements = parent.selectAll("path.flow").data(flow_area_data);
+      flowElements.enter().append("path").attr("class", prop("class"));
 
-              if (currently_active) {
-                if (onNodeDeselected) onNodeDeselected(currently_active.d);
+      flowElements  
+        .datum(prop("area"))
+        .attr("d", 
+          d3.svg.area()
+            .x(prop("x"))
+            .y0(prop("y0"))
+            .y1(prop("y1"))
+            .interpolate("basis"));
+      flowElements.exit().remove();
 
-                var theflows = parent.selectAll(".passes-"+currently_active.id);
-                var thenode = parent.selectAll(".node-"+currently_active.id);
+      
+      function activateNode(d){
+        var node_id = d.unique_id;
+        var theflows, thenode;
 
-                theflows.transition()
-                  .style("fill", null)
-                  .style("fill-opacity", null);
+        if (currentlyActive) {
+          if (currentlyActive.id == node_id) {
+            return;
+          }
 
+          if (onNodeDeselected) onNodeDeselected(currentlyActive.d);
 
-                 if (currently_active.id == node_id) {
-                   currently_active = null;
-                   return;
-                 }
-              }
+          theflows = parent.selectAll(".passes-"+currentlyActive.id);
+          thenode = parent.selectAll(".node-"+currentlyActive.id);
 
-              theflows = parent.selectAll(".passes-"+node_id);
-              thenode = parent.selectAll(".node-"+node_id);
+          theflows
+            .style("fill", null)
+            .style("fill-opacity", null);
+        }
 
+        theflows = parent.selectAll(".passes-"+node_id);
+        thenode = parent.selectAll(".node-"+node_id);
 
-              theflows.transition()
-                .style("fill", d.color)
-                .style("fill-opacity", 1.0);
+        theflows.transition()
+          .style("fill", d.color)
+          .style("fill-opacity", 1.0);
 
-              currently_active = {"id": node_id, "d": d};
-              if (onNodeSelected) onNodeSelected(d);
-              
-            });          
+        thenode.style("fill", d.color);
+        currentlyActive = {"id": node_id, "d": d};
+        selectedNodeAddress = node_id.split("-").map(function(d){return parseInt(d);});
+        if (onNodeSelected) onNodeSelected(d);        
+      }
+
+      function mouseoverNode(d) {
+        tip.show(d);
+        if (currentlyActive && currentlyActive.id == d.unique_id) {
+          return;
+        }
+        d3.select(this).transition().style("fill", d.color.brighter());
+      }
+
+      function mouseoutNode(d) {
+        tip.hide(d);
+        if (currentlyActive && currentlyActive.id == d.unique_id) {
+          return;
+        }
+        d3.select(this).transition().style("fill", d.color);
+      }
+
+      var nodeElements = nodeGroups.selectAll("rect.node").data(prop("items"));
+      nodeElements.enter().append("rect").attr("class", function(d){return "node node-"+d.unique_id;});
+      nodeElements
+        .attr("x", prop("x"))
+        .attr("y", prop("y"))
+        .attr("width", nodeWidth)
+        .attr("height",prop("height"))
+        .style("fill", function(d){return d.color;})
+        .on("mouseover", mouseoverNode)
+        .on("mouseout", mouseoutNode)
+        .on("click", activateNode);
+      nodeElements.exit().remove();
+      
+      if (selectedNodeAddress) {
+        var node = data.nodes[selectedNodeAddress[0]]
+                          .items[selectedNodeAddress[1]]
+                          .items[selectedNodeAddress[2]];
+        activateNode(node);
+      }        
     }); // selection.each()
-    width = oldWidth;
-    height = oldHeight;
-  };
+  }
   
   chart.width = function(_) {
     if (!arguments.length) return width;
     else width = +_;
     return chart;
-  }
+  };
   chart.height = function(_) {
     if (!arguments.length) return height;
     else height = +_;
     return chart;
-  }    
+  };    
   chart.onNodeSelected = function(_) {
     if (!arguments.length) return onNodeSelected;
     else onNodeSelected = _;
     return chart;
-  }   
+  };   
   chart.onNodeDeselected = function(_) {
     if (!arguments.length) return onNodeDeselected;
     else onNodeDeselected = _;
     return chart;
-  }    
-
+  };
+  chart.selectedNodeAddress = function(_) {
+    if (!arguments.length) return selectedNodeAddress;
+    else selectedNodeAddress = _;
+    return chart;
+  }; 
   return chart;
 };
