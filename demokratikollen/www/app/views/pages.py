@@ -36,10 +36,13 @@ def parliament():
 def parties():
     return render_template("/parties/index.html")
 
-@blueprint.route('/forslagen', methods=['GET'])
-def proposals():
+@blueprint.route('/forslagen/<string:gov>', methods=['GET'])
+def proposals(gov):
 
-    proposals_main_data = proposals_main("reinfeldt2")
+    try:
+        proposals_main_data = proposals_main(gov)
+    except KeyError:
+        return render_template('404.html'), 404
 
     return render_template("/proposals/index.html",
                                 data = proposals_main_data

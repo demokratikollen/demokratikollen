@@ -64,8 +64,13 @@ def main():
     mdb = MongoDBDatastore()
     mongodb = mdb.get_mongodb_database() 
     mongo_collection = mongodb.proposals_main
-
     mongo_collection.ensure_index([("government", ASCENDING)], unique=True)
+
+    mongo_collection_party_detail = mongodb.proposals_party_detail
+    mongo_collection_party_detail.ensure_index([("government", ASCENDING),("party_id", ASCENDING)], unique=True)
+
+    mongo_collection_ministries_detail = mongodb.proposals_ministries_detail
+    mongo_collection_ministries_detail.ensure_index([("government", ASCENDING)], unique=True)
 
 
     basequery = s.query(Proposal).options( \
@@ -73,9 +78,18 @@ def main():
             .order_by(Proposal.published.desc())
 
     governments = [
-        #("persson3"   , basequery.filter(MemberProposal.session.in_(['2002/03', '2003/04', '2004/05', '2005/06'])) ),
-        #("reinfeldt1" , basequery.filter(MemberProposal.session.in_(['2006/07', '2007/08', '2008/09', '2009/10'])) ),
-        ("reinfeldt2" , basequery.filter(MemberProposal.session.in_(['2010/11', '2011/12', '2012/13', '2013/14'])) )
+        ("persson3",
+        dict(title="Person III", years="2002-2006", party="S"), 
+            basequery.filter(MemberProposal.session.in_(['2002/03', '2003/04', '2004/05', '2005/06'])) 
+        ),
+        ("reinfeldt1",
+        dict(title="Reinfeldt I", years="2006-2010", party="M"), 
+            basequery.filter(MemberProposal.session.in_(['2006/07', '2007/08', '2008/09', '2009/10'])) 
+        ),
+        ("reinfeldt2",
+        dict(title="Reinfeldt II", years="2010-2014", party="M"),
+            basequery.filter(MemberProposal.session.in_(['2010/11', '2011/12', '2012/13', '2013/14']))
+        )
         ]
 
     
@@ -83,7 +97,7 @@ def main():
     num_missing_committee_report_committee = 0
     num_unknown_result = 0
 
-    for (name, query) in governments:
+    for (name, government_metadata, query) in governments:
         print("Government: {}".format(name))
 
         parties_tree = Tree()
@@ -411,13 +425,23 @@ def main():
         output_top = dict(
                             government=name,
                             nodes = nodes,
-                            flows = flows,
-                            party_detail=party_detail,
-                            ministries_detail=ministries_detail
+                            flows = flows
                         )
+        output_top.update(government_metadata)
 
+
+        
         mongo_collection.update(dict(government=name), output_top, upsert=True)
+
+        ministries_detail.update(dict(government=name))
+        mongo_collection_ministries_detail.update(dict(government=name), ministries_detail, upsert=True)
     
+        for (p_id, d) in party_detail.items():
+            d.update(dict(
+                 government=name,party_id = p_id,   
+                ))
+            mongo_collection_party_detail.update(dict(government=name,party_id = p_id), d, upsert=True)
+
     print("missing committee_report: {}\ncommittee_reports missing committee's: {}\nunknown result: {}".format(num_missing_committee_report,num_missing_committee_report_committee,num_unknown_result))
 
 
