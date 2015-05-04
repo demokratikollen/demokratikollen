@@ -39,7 +39,7 @@ rect.node-group {
   padding-top:10px;
   padding-bottom:10px;
   padding-left:24px;
-  font-size: 20px;
+  font-size: 16px;
 }
 .documentGroup .header:hover {
   background-color: #ddd;
@@ -52,23 +52,26 @@ rect.node-group {
   font-weight: 600;
 }
 .documentGroup .header .total {
-  font-size: 28px;
+  font-size: 22px;
   font-weight: bold;
   color: #222222;
-  margin-right:10px;
+  margin-left:5px;
 }
 .documentGroup .header .avslag {
-  font-size: 28px;
+  font-size: 18px;
   font-weight: bold;
   color: #d62728;
 }
-.documentGroup .header .parenthesis {
-  font-size: 32px;
+.documentGroup .header .delvis-bifall {
+  font-size: 18px;
+  font-weight: bold;
+  color: orange;
 }
 .documentGroup .header .bifall {
-  font-size: 28px;
+  font-size: 18px;
   font-weight: bold;
   color: #2ca02c;
+  margin-left:25px;
 }
 
 .documentGroup td:first-child {
@@ -76,6 +79,9 @@ rect.node-group {
 }
 .documentGroup tr.Bifall {
   border-left: 20px solid #2ca02c;
+}
+.documentGroup tr.Delvis-bifall {
+  border-left: 20px solid orange;
 }
 .documentGroup tr.Avslag {
   border-left: 20px solid #d62728;
@@ -247,7 +253,7 @@ function proposalDocumentList() {
         .append("div").attr("class", "documentGroup");
 
       entering.append("div").attr("class", "header").html(
-        '<span class="glyphicon glyphicon-plus" aria-hidden="true"></span><span class="name"></span><span class="total"></span><span class="parenthesis">(</span><span class="bifall"></span><span> bifall & </span><span class="avslag"></span><span> avslag</span><span class="parenthesis">)</span>'
+        '<span class="glyphicon glyphicon-plus" aria-hidden="true"></span><span class="name"></span><span class="total"></span><br/><span class="bifall"></span><span> bifall, </span><span class="delvis-bifall"></span><span> delvis bifall & </span><span class="avslag"></span><span> avslag</span>'
         )
       .on("click", function(d,i){
         $('div.documents.collapse.in').collapse('hide');
@@ -259,7 +265,7 @@ function proposalDocumentList() {
         .html('<div class="scrollblock"><table class="table"><thead><tr><th>Motion</th><th>Titel och författare</th></tr></thead><tbody></tbody></table></div>');
 
       var documents = groups.select("tbody").selectAll("tr").data(prop('documents'));
-      var documentTr = documents.enter().append("tr").attr("class", prop("decision"));
+      var documentTr = documents.enter().append("tr").attr("class", function(d) {return d.decision.replace(" ","-");});
       var firstCell = documentTr.append("td");
       firstCell.append("a")
         .attr("href", prop("url"))
@@ -279,8 +285,11 @@ function proposalDocumentList() {
       groups.select("span.bifall").html(function(d){
         return ''+d.bifall;
       });
+      groups.select("span.delvis-bifall").html(function(d){
+        return ''+d.delvis_bifall;
+      });
       groups.select("span.total").html(function(d){
-        return ''+(d.bifall+d.avslag);
+        return ''+(d.bifall+d.avslag+d.delvis_bifall);
       });      
       groups.select("span.avslag").html(function(d){
         return ''+d.avslag;
@@ -351,7 +360,7 @@ function show_detail(d) {
     chart = detailView()
               .title(function(d) {return d.party.name;})
               .subtitle(function(d) {
-                return d.party.name + " lade <b>"+(d.total_bifall+d.total_avslag)+"</b> förslag varav <b>"+d.total_bifall+"</b> fick bifall i kammaren. Här listar vi dem uppdelade på utskott. <b>Klicka på en rubrik</b> för att se förslagen.";
+                return d.party.name + " lade <b>"+(d.total_bifall+d.total_delvis_bifall+d.total_avslag)+"</b> förslag varav <b>"+(d.total_bifall+d.total_delvis_bifall)+"</b> fick helt eller delvis bifall i kammaren. Här listar vi dem uppdelade på utskott. <b>Klicka på en rubrik</b> för att se förslagen.";
               })
               .documentField('committee_results');
   }
@@ -361,7 +370,7 @@ function show_detail(d) {
     chart = detailView()
               .title(function(d) {return d.committee.name;})
               .subtitle(function(d){
-                return "I " + d.committee.name + " behandlades totalt <b>"+(d.total_bifall+d.total_avslag)+"</b> förslag. Här listar vi dem uppdelade på förslagsinstans. <b>Klicka på en rubrik</b> för att se förslagen.";
+                return "I " + d.committee.name + " behandlades totalt <b>"+(d.total_bifall+d.total_delvis_bifall+d.total_avslag)+"</b> förslag. Här listar vi dem uppdelade på förslagsinstans. <b>Klicka på en rubrik</b> för att se förslagen.";
               })
               .documentField("origin_results");
   }  
@@ -370,7 +379,7 @@ function show_detail(d) {
     chart = detailView()
               .title("Regeringen {{data.title}}")
               .subtitle(function(d){
-                return "Regeringen {{data.title}} lade <b>"+(d.total_bifall+d.total_avslag)+"</b> förslag varav <b>"+d.total_avslag+"</b> fick avslag i kammaren. Här listar vi dem uppdelade på utskott. <b>Klicka på en rubrik</b> för att se förslagen.";
+                return "Regeringen {{data.title}} lade <b>"+(d.total_bifall+d.total_delvis_bifall+d.total_avslag)+"</b> förslag varav <b>"+d.total_avslag+"</b> fick avslag i kammaren. Här listar vi dem uppdelade på utskott. <b>Klicka på en rubrik</b> för att se förslagen.";
               })
               .documentField('committee_results');
   }
@@ -379,7 +388,7 @@ function show_detail(d) {
     chart = detailView()
               .title("Enskilda ledamöters förslag")
               .subtitle(function(d){
-                return "Enskilda ledamöter lade <b>"+(d.total_bifall+d.total_avslag)+"</b> förslag varav <b>"+d.total_bifall+"</b> fick bifall i kammaren. Här listar vi dem uppdelade på utskott. <b>Klicka på en rubrik</b> för att se förslagen.";
+                return "Enskilda ledamöter lade <b>"+(d.total_bifall+d.total_delvis_bifall+d.total_avslag)+"</b> förslag varav <b>"+(d.total_bifall+d.total_delvis_bifall)+"</b> fick helt eller delvis bifall i kammaren. Här listar vi dem uppdelade på utskott. <b>Klicka på en rubrik</b> för att se förslagen.";
               })
               .documentField('committee_results');
   }
@@ -388,7 +397,7 @@ function show_detail(d) {
     chart = detailView()
               .title("Samarbetsförslag")
               .subtitle(function(d){
-                return "Koalitioner av två eller fler partier lade <b>"+(d.total_bifall+d.total_avslag)+"</b> förslag varav <b>"+d.total_bifall+"</b> fick bifall i kammaren. Här listar vi dem uppdelade på utskott. <b>Klicka på en rubrik</b> för att se förslagen.";
+                return "Koalitioner av två eller fler partier lade <b>"+(d.total_bifall+d.total_delvis_bifall+d.total_avslag)+"</b> förslag varav <b>"+(d.total_bifall+d.total_delvis_bifall)+"</b> fick helt eller delvis bifall i kammaren. Här listar vi dem uppdelade på utskott. <b>Klicka på en rubrik</b> för att se förslagen.";
               })
               .documentField('committee_results');
   }
