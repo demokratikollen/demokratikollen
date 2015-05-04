@@ -48,7 +48,9 @@ with open(os.path.join(base_dir,'demokratikollen/deployment/deploy.conf'),'r') a
 #The first step is to check if stuff have changed. If something changed all database images has to be replaced.
 files_changed = steps.verify_changes(base_dir, log)
 
-redo_calculations = override or (deploy_extent.lower() in ['all', 'calculations'] and files_changed)
+redo_calculations = override or files_changed
+if deploy_extent.lower() in ['all', 'calculations']:
+    redo_calculations = True
 
 deploy_settings = dict(base_dir=base_dir, log=log, userid=os.getuid(), files_changed=files_changed, redo_calculations=redo_calculations)
 log.info(deploy_settings)
