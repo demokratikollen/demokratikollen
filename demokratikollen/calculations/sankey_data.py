@@ -520,6 +520,7 @@ def main():
                 committee = committee_metadata[c_id],
                 origin_results = origin_results,
                 total_bifall = total_bifall,
+                total_delvis_bifall = total_delvis_bifall,
                 total_avslag = total_avslag
                 )
 
