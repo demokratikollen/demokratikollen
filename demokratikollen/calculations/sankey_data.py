@@ -86,14 +86,14 @@ def main():
             .order_by(Proposal.published.desc())
 
     governments = [
-        # ("persson3",
-        # dict(title="Person III", years="2002-2006", party="S"), 
-        #     basequery.filter(MemberProposal.session.in_(['2002/03', '2003/04', '2004/05', '2005/06'])) 
-        # ),
-        # ("reinfeldt1",
-        # dict(title="Reinfeldt I", years="2006-2010", party="M"), 
-        #     basequery.filter(MemberProposal.session.in_(['2006/07', '2007/08', '2008/09', '2009/10'])) 
-        # ),
+        ("persson3",
+        dict(title="Person III", years="2002-2006", party="S"), 
+            basequery.filter(MemberProposal.session.in_(['2002/03', '2003/04', '2004/05', '2005/06'])) 
+        ),
+        ("reinfeldt1",
+        dict(title="Reinfeldt I", years="2006-2010", party="M"), 
+            basequery.filter(MemberProposal.session.in_(['2006/07', '2007/08', '2008/09', '2009/10'])) 
+        ),
         ("reinfeldt2",
         dict(title="Reinfeldt II", years="2010-2014", party="M"),
             basequery.filter(MemberProposal.session.in_(['2010/11', '2011/12', '2012/13', '2013/14']))
