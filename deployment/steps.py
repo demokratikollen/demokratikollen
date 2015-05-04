@@ -281,7 +281,11 @@ def start_upgrade_message(deploy_settings):
         cli.stop('nginx')
 
     if container_utils.isContainerPresent('upgradenginx'):
+        cli.create_container('upgradenginx',v=True,force=True)
+
+    if container_utils.isContainerPresent('upgradenginx'):
         cli.remove_container('upgradenginx', force=True, v=True)
+
     cont = cli.create_container(image='demokratikollen/upgradenginx', name='upgradenginx')
     cli.start(cont['Id'], port_bindings={80:80})
 
