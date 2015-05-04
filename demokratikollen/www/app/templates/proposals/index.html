@@ -137,6 +137,16 @@ span.numbers {
   margin-bottom:50px;
   font-size:48px;
 }
+
+span.toplinks {
+  font-size:16px;
+  padding-top:10px;
+  display:block;
+}
+span.toplinks a {
+  font-size:16px;
+  font-weight:700;
+}
 </style>
 <style>
 .d3-tip {
@@ -200,6 +210,7 @@ span.numbers {
 {% block content %}
 <div class="row">
     <div class="col-md-12">
+    <span class="toplinks">Välj regering: <a href="/forslagen/persson3">Persson III (2002-2006)</a> | <a href="/forslagen/reinfeldt1">Reinfeldt I (2006-2010)</a> | <a href="/forslagen/reinfeldt2">Reinfeldt II (2010-2014)</a></span>
     <h1>Behandlade förslag under regeringen {{data.title}} ({{data.years}})</h1>
     <h2>Klicka i figuren för att bläddra bland förslagen.</h2>
 </div></div>
