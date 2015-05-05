@@ -65,6 +65,7 @@ try:
     if redo_calculations:
         log.info("Setting up containers for populating databases.")
         steps.setup_containers_for_calculations(deploy_settings)
+        time.sleep(15)
         log.info("Populating riksdagen-database.")
         steps.populate_riksdagen(deploy_settings)
         log.info("Populating demokratikollen-ORM")
