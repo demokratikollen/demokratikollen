@@ -181,6 +181,9 @@ def update_database_data(deploy_settings, tag='latest'):
     links['postgres'] = 'postgres'
     links['mongo'] = 'mongo'
 
+    if deploy_settings['deploy_extent'] == 'src':
+        tag = 'current'
+
     if tag == 'latest' and os.path.isfile(os.path.join(data_dir, 'demokratikollen_postgres_latest.gz')):
         postgres_path = '/data/demokratikollen_postgres_latest.gz'
     else:
