@@ -211,6 +211,25 @@ def update_database_data(deploy_settings, tag='latest'):
         deploy_settings['log'])
     cli.remove_container(cont['Id'], v=True, force=True)    
 
+def use_current_database_for_calculations(deploy_settings):
+    data_dir = os.path.join(deploy_settings['base_dir'],'data/database_dumps')
+    binds = {}
+    binds[data_dir] = {'bind': '/data', 'ro': False}
+
+    links  = {}
+    links['postgres-temp'] = 'postgres'
+
+    postgres_path = '/data/demokratikollen_postgres_current.gz'
+   
+    cont = cli.create_container(image='demokratikollen/postgres:current',
+                                command='/bin/sh -c "while true; do sleep 1; done"',
+                                volumes='/data')
+    cli.start(cont['Id'], binds=binds, links=links)
+    container_utils.run_command_in_container(cont['Id'],
+        "/bin/bash -c 'gunzip -c " + postgres_path + " | psql -h postgres -U demokratikollen demokratikollen'",
+        deploy_settings['log'])
+    cli.remove_container(cont['Id'], v=True, force=True)
+
 def update_webapp_src(deploy_settings, tag='latest'):
 
     if tag == 'latest':

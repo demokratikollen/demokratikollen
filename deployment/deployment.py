@@ -48,17 +48,26 @@ with open(os.path.join(base_dir,'demokratikollen/deployment/deploy.conf'),'r') a
 #The first step is to check if stuff have changed. If something changed all database images has to be replaced.
 files_changed = steps.verify_changes(base_dir, log)
 
-redo_calculations = override or files_changed
+redo_riksdagen_import = override or 'riksdagen' in files_changed or 'riksdagen_remote' in files_changed or 'db_structure' in files_changed
+if deploy_extent.lower() in ['calculations', 'src']:
+    redo_riksdagen_import = False 
+
+redo_calculations = override or 'calculations' in files_changed or redo_riksdagen_import
 if deploy_extent.lower() in ['all', 'calculations']:
     redo_calculations = True
+else:
+    redo_calculations = False
 
-deploy_settings = dict(base_dir=base_dir, log=log, userid=os.getuid(), files_changed=files_changed, redo_calculations=redo_calculations)
+deploy_settings = dict(base_dir=base_dir, 
+    log=log, userid=os.getuid(), 
+    files_changed=files_changed, 
+    redo_calculations=redo_calculations, 
+    redo_riksdagen_import=redo_riksdagen_import)
 log.info(deploy_settings)
 
 steps.pre_deployment(deploy_settings)
 
 try:
-    #Depending on what changed. create new containers and start them.
     log.info("Building images.")
     steps.create_images(deploy_settings)
 
@@ -66,10 +75,14 @@ try:
         log.info("Setting up containers for populating databases.")
         steps.setup_containers_for_calculations(deploy_settings)
         time.sleep(15)
-        log.info("Populating riksdagen-database.")
-        steps.populate_riksdagen(deploy_settings)
-        log.info("Populating demokratikollen-ORM")
-        steps.populate_orm(deploy_settings)
+        if redo_riksdagen_import:
+            log.info("Populating riksdagen-database.")
+            steps.populate_riksdagen(deploy_settings)
+            log.info("Populating demokratikollen-ORM")
+            steps.populate_orm(deploy_settings)
+        else:
+            log.info("Restoring ORM from previous deploy.")
+            steps.use_current_database_for_calculations(deploy_settings)
         log.info("Running calculations.")
         steps.run_calculations(deploy_settings)
         log.info("Saving databases.")
