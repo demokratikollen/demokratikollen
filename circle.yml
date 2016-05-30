@@ -8,5 +8,4 @@ dependencies:
 
 test:
   override:
-    - cd demokratikollen/www
-    - nosetests specs
+    - cd demokratikollen/www && nosetests specs
