@@ -1,0 +1,12 @@
+machine:
+  python:
+    version: 3.5.1
+
+dependencies:
+  pre:
+    - pip install -r demokratikollen/requirements/dev.txt
+
+test:
+  override:
+    - cd demokratikollen/www
+    - nosetests specs
