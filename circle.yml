@@ -4,6 +4,7 @@ machine:
   environment:
     DATABASE_URL: "postgres://ubuntu:@127.0.0.1:5432/"
     MONGO_DATABASE_URL: "mongodb://localhost:27017/"
+    PYTHONPATH: /home/ubuntu/demokratikollen
 
 database:
   post:
@@ -17,6 +18,4 @@ dependencies:
 
 test:
   override:
-    - export
-    - nosetests demokratikollen/www/specs
-
+    - pytest --junitxml=$CIRCLE_TEST_REPORTS/junit/test_results.xml demokratikollen/www/specs
