@@ -2,6 +2,12 @@ machine:
   python:
     version: 3.5.1
 
+database:
+  post:
+    - gunzip -c demokratikollen/data/dumps/postgres_dump.sql.gz | psql -U ubuntu
+    - tar -xvf demokratikollen/data/dumps/mongodb_dump.tar.gz
+    - mongorestore --host localhost  mongodb_dump
+
 dependencies:
   pre:
     - pip install -r demokratikollen/requirements/dev.txt
