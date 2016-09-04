@@ -14,4 +14,4 @@ dependencies:
 
 test:
   override:
-    - cd demokratikollen/www && nosetests specs
+    - nosetests demokratikollen/www/specs
