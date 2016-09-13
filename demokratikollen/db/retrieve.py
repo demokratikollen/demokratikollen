@@ -107,6 +107,8 @@ def get_members(since):
         all_members.extend(get(iid=mid))
 
     found_ids = {m['intressent_id'] for m in all_members}
+
+    assert member_ids.issuperset(found_ids), str(found_ids - member_ids)
     remaining_ids = member_ids - found_ids
 
     # Anyone who is still missing now must be in the list of potentially
