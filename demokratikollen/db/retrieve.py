@@ -36,38 +36,6 @@ def _get_member_ids():
 
     return member_ids
 
-_ELECTION_AREAS = [
-    "Blekinge län",
-    "Dalarnas län",
-    "Gotlands län",
-    "Gävleborgs län",
-    "Göteborgs kommun",
-    "Hallands län",
-    "Jämtlands län",
-    "Jönköpings län",
-    "Kalmar län",
-    "Kronobergs län",
-    "Malmö kommun",
-    "Norrbottens län",
-    "Skåne läns norra och östra",
-    "Skåne läns södra",
-    "Skåne läns västra",
-    "Stockholms kommun",
-    "Stockholms län",
-    "Södermanlands län",
-    "Uppsala län",
-    "Värmlands län",
-    "Västerbottens län",
-    "Västernorrlands län",
-    "Västmanlands län",
-    "Västra Götalands läns norra",
-    "Västra Götalands läns södra",
-    "Västra Götalands läns västra",
-    "Västra Götalands läns östra",
-    "Örebro län",
-    "Östergötlands län",
-]
-
 _MISSING_PEOPLE = [
     '0818762925009',
     '0631064113607',
@@ -127,12 +95,8 @@ def get_members(since):
 
     # Now try to get all of these members in a not-too-inefficient way
     all_members = []
-    # Look through all election areas ("valkrets").
-    # However, not all records have a "valkrets", but it seems like space (" ")
-    # matches all those which are returned with "valkrets": null.
-    for area in _ELECTION_AREAS + [' ']:
-        all_members.extend(get(valkrets=area))
-        logger.debug('Found {}/{}'.format(len(all_members), len(member_ids)))
+    all_members.extend(get())
+    logger.debug('Found {}/{}'.format(len(all_members), len(member_ids)))
 
     found_ids = {m['intressent_id'] for m in all_members}
     remaining_ids = member_ids - found_ids
@@ -158,8 +122,6 @@ def get_members(since):
 
     return [_transform_member(raw) for raw in all_members]
 
-# print(len(get_members(None)))
-# print(Counter(['a','a ']))
 
 logging.getLogger("requests").setLevel(logging.WARNING)
 logging.basicConfig(level=logging.DEBUG)
