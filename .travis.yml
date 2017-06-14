@@ -7,6 +7,8 @@ services:
   - postgresql
   - mongodb
 
+cache: pip
+
 env:
   global:
     - DATABASE_URL="postgresql://postgres:@localhost/"
@@ -19,6 +21,7 @@ before_script:
   - tar -xf demokratikollen/data/dumps/mongodb_dump.tar.gz
   - mongorestore mongodb_dump
 
-script: nosetests demokratikollen/www/specs
-
+script:
+  - nosetests demokratikollen/www/specs
+  - behave demokratikollen/www/features
 
