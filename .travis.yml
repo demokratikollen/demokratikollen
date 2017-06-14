@@ -17,7 +17,7 @@ env:
 install: pip install -r demokratikollen/requirements/dev.txt
 
 before_script:
-  - gunzip demokratikollen/data/dumps/postgres_dump.sql.gz | psql -U postgres
+  - gunzip -c demokratikollen/data/dumps/postgres_dump.sql.gz | psql -U postgres
   - tar -xf demokratikollen/data/dumps/mongodb_dump.tar.gz
   - mongorestore mongodb_dump
 
