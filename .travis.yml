@@ -3,9 +3,12 @@ language: python
 python:
   - "3.6"
 
+sudo: required
+
 services:
   - postgresql
   - mongodb
+  - docker
 
 cache: pip
 
@@ -21,7 +24,14 @@ before_script:
   - tar -xf demokratikollen/data/dumps/mongodb_dump.tar.gz
   - mongorestore mongodb_dump
 
-script:
-  - nosetests demokratikollen/www/specs
-  - behave demokratikollen/www/features
-
+jobs:
+  include:
+    - script: nosetests demokratikollen/www/specs
+    - script: behave demokratikollen/www/features
+    - stage: docker
+      install: skip
+      before_script: skip
+      script:
+        - docker login -u="$DOCKER_USERNAME" -p="$DOCKER_PASSWORD"
+        - docker build -t demokratikollen/web:${TRAVIS_BRANCH} -f docker/prod/web-dockerfile .
+        - docker push demokratikollen/web:${TRAVIS_BRANCH}
