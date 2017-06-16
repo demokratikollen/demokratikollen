@@ -32,6 +32,4 @@ jobs:
       install: skip
       before_script: skip
       script:
-        - docker login -u="$DOCKER_USERNAME" -p="$DOCKER_PASSWORD"
-        - docker build -t demokratikollen/web:${TRAVIS_BRANCH} -f docker/prod/web-dockerfile .
-        - docker push demokratikollen/web:${TRAVIS_BRANCH}
+        - 'if [ "$TRAVIS_PULL_REQUEST" = "false" ]; then bash ./ci/build_docker_image.sh; fi'
