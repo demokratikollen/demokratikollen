@@ -1,0 +1,35 @@
+language: python
+
+python:
+  - "3.6"
+
+sudo: required
+
+services:
+  - postgresql
+  - mongodb
+  - docker
+
+cache: pip
+
+env:
+  global:
+    - DATABASE_URL="postgresql://postgres:@localhost/"
+    - MONGO_DATABASE_URL="localhost"
+
+install: pip install -r demokratikollen/requirements/dev.txt
+
+before_script:
+  - gunzip -c demokratikollen/data/dumps/postgres_dump.sql.gz | psql -U postgres
+  - tar -xf demokratikollen/data/dumps/mongodb_dump.tar.gz
+  - mongorestore mongodb_dump
+
+jobs:
+  include:
+    - script: nosetests demokratikollen/www/specs
+    - script: behave demokratikollen/www/features
+    - stage: docker
+      install: skip
+      before_script: skip
+      script:
+        - 'if [ "$TRAVIS_PULL_REQUEST" = "false" ]; then bash ./ci/build_docker_image.sh; fi'

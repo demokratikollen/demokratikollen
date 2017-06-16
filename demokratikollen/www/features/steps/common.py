@@ -11,7 +11,7 @@ def step_impl(context, page):
         uri = 'riksdagen'
     elif page == 'parties':
         uri = 'partierna'
-    context.driver.get("http://127.0.0.1:5000/" + uri)
+    context.driver.get("http://127.0.0.1:8000/" + uri)
 
 @then('The response should contain an element "{css_selector}"')
 def step_impl(context, css_selector):
@@ -23,11 +23,11 @@ def step_impl(context, css_selector):
 
 @given('You browse to the index page')
 def step_impl(context):
-    context.driver.get("http://127.0.0.1:5000/")
+    context.driver.get("http://127.0.0.1:8000/")
 
 @given('You browse to the about page')
 def step_impl(context):
-    context.driver.get("http://127.0.0.1:5000/om")
+    context.driver.get("http://127.0.0.1:8000/om")
 
 @then('The page title should be "{title}"')
 def step_impl(context, title):
