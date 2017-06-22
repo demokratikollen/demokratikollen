@@ -1,5 +1,6 @@
 -r common.txt
 behave==1.2.4
+sceptre==1.1.2
 selenium==2.43.0
 Flask-Testing==0.4.2
 blinker==1.3
