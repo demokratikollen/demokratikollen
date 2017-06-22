@@ -1,0 +1,51 @@
+AWSTemplateFormatVersion: 2010-09-09
+
+Resources:
+  VPC:
+    Type: 'AWS::EC2::VPC'
+    Properties:
+      CidrBlock: '10.0.0.0/16'
+      EnableDnsHostnames: True
+
+  PublicSubnet:
+    Type: 'AWS::EC2::Subnet'
+    Properties:
+      CidrBlock: '10.0.1.0/24'
+      MapPublicIpOnLaunch: True
+      VpcId: !Ref VPC
+
+  # Public Routing
+  InternetGateway:
+    Type: "AWS::EC2::InternetGateway"
+
+  InternetGatewayVPCAttachement:
+    Type: "AWS::EC2::VPCGatewayAttachment"
+    Properties: 
+      InternetGatewayId: !Ref InternetGateway
+      VpcId: !Ref VPC
+
+  PublicRouteTable:
+    Type: "AWS::EC2::RouteTable"
+    Properties: 
+      VpcId: !Ref VPC
+
+  PublicInternetRoute:
+    Type: "AWS::EC2::Route"
+    Properties: 
+      DestinationCidrBlock: '0.0.0.0/0'
+      RouteTableId: !Ref PublicRouteTable
+      GatewayId: !Ref InternetGateway
+
+  PublicRouteSubnetAssoc:
+    Type: "AWS::EC2::SubnetRouteTableAssociation"
+    Properties: 
+      RouteTableId: !Ref PublicRouteTable
+      SubnetId: !Ref PublicSubnet
+
+Outputs:
+  VpcId:
+    Value: !Ref VPC
+  PublicSubnet:
+    Value: !Ref PublicSubnet
+  PublicSubnetCidrBlock:
+    Value: '10.0.1.0/24'
