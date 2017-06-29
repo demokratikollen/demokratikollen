@@ -1,0 +1,31 @@
+version: "3.3"
+
+volumes:
+  mongodb:
+  postgres:
+
+services:
+  mongodb:
+    image: mongo
+    volumes:
+      - mongodb:/data/db
+
+  postgres:
+    image: postgres
+    volumes:
+      - postgres:/var/lib/postgresql/data
+
+  web:
+    build:
+      context: ../..
+      dockerfile: docker/dev/web-dockerfile 
+    depends_on:
+      - postgres
+      - mongodb
+    volumes:
+      - ../../:/src
+    environment:
+      - MONGO_DATABASE_URL=mongodb
+      - DATABASE_URL=postgresql://postgres:@postgres/
+    ports:
+      - "8000:8000"

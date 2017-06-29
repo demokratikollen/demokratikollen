@@ -1,0 +1,23 @@
+FROM python:3.6
+
+RUN apt-get update
+
+# Install useful packages
+RUN apt-get install -y \
+    git \
+    mongodb-clients \
+    postgresql-client
+
+# Upgrade node/npm
+RUN curl -sL https://deb.nodesource.com/setup_6.x | bash - && apt-get install -y nodejs
+
+# Install phantom JS
+RUN npm install -g phantomjs-prebuilt
+
+ADD demokratikollen/requirements /req
+
+RUN pip install -r req/dev.txt
+
+EXPOSE 8000
+
+WORKDIR /src
