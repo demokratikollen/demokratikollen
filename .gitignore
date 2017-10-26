@@ -54,3 +54,6 @@ demokratikollen/www/design/**/*.log
 
 # inventory files.
 inventory
+
+# idea
+.idea
