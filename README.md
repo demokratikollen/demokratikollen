@@ -26,6 +26,11 @@ Refresh the provisioning: `vagrant provision`
 Graceful shutdown of the vm: `vagrant halt`
 Remove the vm: `vagrant destroy`
 
+## Run dev setup using docker
+Navigate to docker/dev and run
+   $ docker-compose -p demokratikollen build
+   $ docker-compose -p demokratikollen run --rm web
+
 ## Import data into the database
 
 The data is first imported into the ``riksdagen`` database using cleaned up SQL files from data.riksdagen.se. Then it is transformed into SQLAlchemy. All necessary steps to import the data are contained in ~/demokratikollen/do_import.sh.
