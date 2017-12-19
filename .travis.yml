@@ -41,6 +41,7 @@ jobs:
       install: skip
       before_script: skip
       deploy:
+        skip_cleanup: true
         provider: script
         script: ci/deploy.sh
         on:
