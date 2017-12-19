@@ -36,9 +36,10 @@ jobs:
       before_script: skip
       script:
         - 'if [ "$TRAVIS_PULL_REQUEST" = "false" ]; then bash ./ci/build_docker_image.sh; fi'
-
-deploy:
-  provider: script
-  script: ci/deploy.sh
-  on:
-    branch: develop
+    - stage: deploy
+      script: skip
+      deploy:
+        provider: script
+        script: ci/deploy.sh
+        on:
+          branch: develop
