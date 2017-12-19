@@ -16,6 +16,8 @@ CHAINS['test.sql'] = (
     str
     )
 
+CHAINS['votering-201516.sql'] = \
+CHAINS['votering-201415.sql'] = \
 CHAINS['votering-201314.sql'] = \
 CHAINS['votering-201213.sql'] = \
 CHAINS['votering-201112.sql'] = \
@@ -28,9 +30,11 @@ CHAINS['votering-200506.sql'] = \
 CHAINS['votering-200405.sql'] = \
 CHAINS['votering-200304.sql'] = \
 CHAINS['votering-200203.sql'] = \
+CHAINS['bet-2014-2017.sql'] = \
 CHAINS['bet-2010-2013.sql'] = \
 CHAINS['bet-2006-2009.sql'] = \
 CHAINS['bet-2002-2005.sql'] = \
+CHAINS['mot-2014-2017.sql'] = \
 CHAINS['mot-2010-2013.sql'] = \
 CHAINS['mot-2006-2009.sql'] = \
 CHAINS['mot-2002-2005.sql'] = \
