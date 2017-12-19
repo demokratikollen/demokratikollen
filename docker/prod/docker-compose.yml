@@ -1,0 +1,25 @@
+version: "3"
+
+services:
+  web:
+    image: demokratikollen/web:${BRANCH}
+    ports:
+      - 8000:8000
+    environment:
+      - DATABASE_URL=postgresql://${DB_USER}:${DB_PASS}@postgres:5432/demokratikollen
+      - DATABASE_RIKSDAGEN_URL=postgresql://${DB_USER}:${DB_PASS}@postgres:5432/riksdagen
+      - MONGO_DATABASE_URL=mongodb://mongo:27017/local
+    depends_on:
+      - postgres
+      - mongo
+
+  postgres:
+    image: sameersbn/postgresql:9.6-2
+    environment:
+      - DB_USER=${DB_USER}
+      - DB_PASS=${DB_PASS}
+      - DB_NAME=riksdagen,demokratikollen
+
+  mongo:
+    image: mongo:latest
+
