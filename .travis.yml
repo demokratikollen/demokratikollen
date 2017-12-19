@@ -39,7 +39,6 @@ jobs:
 
 deploy:
   provider: script
-  script:
-    - 'ci/deploy.sh
+  script: ci/deploy.sh
   on:
     branch: develop
