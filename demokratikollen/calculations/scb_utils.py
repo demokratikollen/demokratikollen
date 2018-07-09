@@ -28,7 +28,7 @@ codes = {
         "codes": {
             "m":"m",
             "c":"c",
-            "fp":"fp",
+            "l":"l",
             "kd":"kd",
             "nyd":"nyd",
             "mp":"mp",

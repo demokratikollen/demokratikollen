@@ -55,17 +55,21 @@ def main():
 
     except psycopg2.ProgrammingError as e:
         logger.error('Terminated because database query failed: {0}'.format(str(e).rstrip()))
+        exit(1)
 
     except data_import.CannotCleanException as e:
         logger.error('Terminated because no cleaning action is defined for {0}. '
             'Enable skip option on clean command to ignore this.'.format(e.filename))
+        exit(1)
 
     except KeyboardInterrupt as e:
         logger.info('Terminated because of user interrupt.')
+        exit(1)
 
     except Exception as e:
         logger.error('Terminated because of an unhandled exception.')
         logger.debug(e, exc_info=sys.exc_info())
+        exit(1)
 
 
 def auto(urls_file=None, outdir=None, wipe=None):

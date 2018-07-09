@@ -24,6 +24,18 @@ def remove_funky_characters(s):
 
     return s
 
+def replace_empty_string_with_NULL(s):
+    if "VALUES" in s:
+        return s.replace("''", "NULL")
+    else:
+        return s
+
+def fix_empty_values_bet(s):
+    return re.sub(",,,'','',''", ",0,0,NULL,NULL,NULL", s)
+
+def fix_empty_times_person(s):
+    return re.sub("('[0-9]{4}-[0-9]{2}-[0-9]{2}'),'',(.+,.+\);)", r"\1,NULL,\2", s)
+
 def parse_stmt(text):
     return sqlparse.parse(text)[0]
 

@@ -1,4 +1,5 @@
 http://data.riksdagen.se/dataset/person/person.sql.zip
+http://data.riksdagen.se/dataset/votering/votering-201718.sql.zip
 http://data.riksdagen.se/dataset/votering/votering-201617.sql.zip
 http://data.riksdagen.se/dataset/votering/votering-201415.sql.zip
 http://data.riksdagen.se/dataset/votering/votering-201314.sql.zip
@@ -17,6 +18,7 @@ http://data.riksdagen.se/dataset/dokument/bet-2014-2017.sql.zip
 http://data.riksdagen.se/dataset/dokument/bet-2010-2013.sql.zip
 http://data.riksdagen.se/dataset/dokument/bet-2006-2009.sql.zip
 http://data.riksdagen.se/dataset/dokument/bet-2002-2005.sql.zip
+http://data.riksdagen.se/dataset/dokument/mot-2014-2017.sql.zip
 http://data.riksdagen.se/dataset/dokument/mot-2010-2013.sql.zip
 http://data.riksdagen.se/dataset/dokument/mot-2006-2009.sql.zip
 http://data.riksdagen.se/dataset/dokument/mot-2002-2005.sql.zip

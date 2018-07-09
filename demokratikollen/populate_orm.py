@@ -26,6 +26,8 @@ parties = [
             "Sverigedemokraterna",
             "Centerpartiet",
             "Folkpartiet liberalerna",
+            "Liberalerna",
+            "Feministiskt initiativ",
             "Kristdemokraterna",
             "Moderaterna"
         ]
@@ -35,6 +37,7 @@ parties = [
 c = source_conn.cursor()
 
 members = {}
+# members = {m.intressent_id: m for m in s.query(Member).all()}
 
 
 # Select all unique combinations of 'organ_kod' and 'uppgift', but exclude 'kam' since these are replacements
@@ -57,6 +60,8 @@ for abbr,name in c:
 groups['-'] = Party(name="Partiobunden",abbr="-")
 groups['PP'] = Party(name="Piratpartiet",abbr="PP")
 groups['NYD'] = Party(name="Ny demokrati",abbr="NYD")
+groups['FI'] = Party(name="Feministiskt initiativ",abbr="FI")
+groups['JL'] = Party(name="Junilistan",abbr="JL")
 for g in groups.values():
     s.add(g)
 # s.commit()
@@ -126,17 +131,24 @@ for url_name in (x for (x,) in s.query(distinct(Member.url_name)) ):
 print("Adding committee reports.")
 c.execute("""SELECT dok_id,rm,beteckning,organ,publicerad,titel,dokument_url_text,hangar_id FROM dokument WHERE doktyp='bet' AND relaterat_id=''""")
 reports = {}
+skipped = 0
+total = c.rowcount
 for dok_id,rm,bet,organ,publ,titel,dok_url,hangar_id in c:
     if organ.lower()=='fou':
         organ = 'föu'
-    if organ.lower()=='xu':
-        continue
-    if organ.lower()=='er':
-        continue
-    if organ.lower()=='eun':
+    if (
+            organ.lower() in ['xu', 'er', 'eun', 'föu11', 'föu7', 'föu4'] or
+            organ.lower().endswith('uy')
+    ):
+        skipped += 1
         continue
 
-    committee = s.query(Committee).filter(func.lower(Committee.abbr)==organ.lower()).one()
+    try:
+        committee = s.query(Committee).filter(func.lower(Committee.abbr)==organ.lower()).one()
+    except Exception:
+        print("Did not find committee {}".format(organ.lower()))
+        exit(1)
+
     s.add(CommitteeReport(
             dok_id=dok_id,
             published=publ,
@@ -145,7 +157,8 @@ for dok_id,rm,bet,organ,publ,titel,dok_url,hangar_id in c:
             title=titel,
             text_url=dok_url,
             committee=committee))
-# s.commit()
+print("Skipped {} of {} committee reports.".format(skipped, total))
+s.commit()
 
 pbar = InitBar(title="Adding votes")
 pbar(0)
@@ -157,6 +170,9 @@ c_named.itersize = 50000
 c_named.execute("SELECT votering_id,intressent_id,beteckning,rm,punkt,rost,datum FROM votering WHERE avser='sakfrågan' ORDER BY votering_id")
 for i,(votering_id,intressent_id,beteckning,rm,punkt,rost,datum) in enumerate(c_named):
     if votering_id not in polls:
+        if datum is None:
+            print("Warning: skipping vote {} because it doesn't have a date".format(votering_id))
+            continue
         date = datum.date()
         polls[votering_id] = PolledPoint(poll_date=date,r_votering_id=votering_id,number=punkt)
         s.add(polls[votering_id])
@@ -213,6 +229,9 @@ print("Adding other group appointments.")
 c.execute("""SELECT intressent_id,"from",tom,roll_kod,organ_kod,uppgift FROM personuppdrag
                 WHERE NOT uppgift  LIKE '%utskott%' AND NOT uppgift LIKE '%epartement%' AND organ_kod != 'kam'""")
 for intressent_id,fr,to,roll,abbr,g_name in c:
+    if fr is None or to is None:
+        print("Warning: skipping appointment {} because it doesn't have a fr or to date".format(intressent_id))
+        continue
     s.add(GroupAppointment(
                 member=members[intressent_id],
                 start_date=fr.date(),
@@ -249,7 +268,10 @@ c.execute("""SELECT d.hangar_id,i.intressent_id FROM dokument AS d
                 JOIN dokintressent AS i ON i.hangar_id=d.hangar_id
                 WHERE d.doktyp='mot' ORDER BY d.hangar_id""")
 for hangar_id,intressent_id in c:
-    m_props[hangar_id].signatories.append(members[intressent_id])
+    try:
+        m_props[hangar_id].signatories.append(members[intressent_id])
+    except KeyError as e:
+        print("Could not find intressent_id {}. Skipping".format(intressent_id))
 
 
 print("Adding points of member proposals.")

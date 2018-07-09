@@ -23,7 +23,10 @@ services:
       - DB_USER=demo
       - DB_PASS=demo
       - DB_NAME=riksdagen,demokratikollen
+    ports:
+      - 5432
 
   mongo:
     image: mongo:latest
-
+    ports:
+      - 27017

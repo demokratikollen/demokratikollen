@@ -16,8 +16,10 @@ CHAINS['test.sql'] = (
     str
     )
 
-CHAINS['votering-201516.sql'] = \
+CHAINS['votering-201718.sql'] = \
+CHAINS['votering-201617.sql'] = \
 CHAINS['votering-201415.sql'] = \
+CHAINS['votering-201516.sql'] = \
 CHAINS['votering-201314.sql'] = \
 CHAINS['votering-201213.sql'] = \
 CHAINS['votering-201112.sql'] = \
@@ -30,7 +32,6 @@ CHAINS['votering-200506.sql'] = \
 CHAINS['votering-200405.sql'] = \
 CHAINS['votering-200304.sql'] = \
 CHAINS['votering-200203.sql'] = \
-CHAINS['bet-2014-2017.sql'] = \
 CHAINS['bet-2010-2013.sql'] = \
 CHAINS['bet-2006-2009.sql'] = \
 CHAINS['bet-2002-2005.sql'] = \
@@ -40,17 +41,31 @@ CHAINS['mot-2006-2009.sql'] = \
 CHAINS['mot-2002-2005.sql'] = \
 CHAINS['prop-2010-2013.sql'] = (
     tr.correct_line_endings,
-    tr.remove_funky_characters
+    tr.remove_funky_characters,
+    tr.replace_empty_string_with_NULL
+)
+
+# There exists statements with duplicated column names.
+CHAINS['bet-2014-2017.sql'] = (
+    tr.correct_line_endings,
+    tr.remove_funky_characters,
+    tr.fix_empty_values_bet,
+    tr.ifmatch(
+        r'INSERT INTO debatt \(hangar_id,video_id,video_url,startpos,tumnagel,tumnagel',
+        partial(tr.remove_col_in_insert, 5)
     )
+)
 
 CHAINS['person.sql'] = (
     tr.correct_line_endings,
     tr.remove_funky_characters,
+    tr.fix_empty_times_person,
     tr.parse_stmt,
     tr.fix_names,
     str
     )
 
+CHAINS['prop-2014-2017.sql'] = \
 CHAINS['prop-2010-2013.sql'] = \
 CHAINS['prop-2006-2009.sql'] = \
 CHAINS['prop-2002-2005.sql'] = (

@@ -5,6 +5,8 @@ import logging
 import urllib.request
 import urllib.parse
 
+from psycopg2 import DataError
+
 from demokratikollen.data_import.chains import CHAINS
 
 root_logger = logging.getLogger()
@@ -124,7 +126,11 @@ def execute_statements(statements, conn):
     with conn.cursor() as cur:
         count = 0
         for stmt in statements:
-            cur.execute(stmt)
+            try:
+                cur.execute(stmt)
+            except DataError:
+                logger.error("Statement {} failed".format(stmt))
+                exit(1)
             count += 1
 
         logger.info('Executed {0} statement(s).'.format(count))

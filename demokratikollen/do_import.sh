@@ -1,3 +1,7 @@
+#!/usr/bin/env bash
+set -e
+
+
 START=$(date +%s.%N)
 python import_data.py download data/urls.txt dl_data/
 python import_data.py unpack dl_data/ dl_data/ --remove

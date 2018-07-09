@@ -21,7 +21,10 @@ party_ordering = {p: i for (i, p) in enumerate([
     "-",
     "C",
     "M",
+    "FI",
+    "JL",
     "FP",
+    "L",
     "KD"
 ])}
 

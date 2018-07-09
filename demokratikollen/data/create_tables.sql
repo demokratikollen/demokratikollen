@@ -7,6 +7,9 @@ beteckning varchar(255),
 doktyp varchar(255),
 typ varchar(255),
 subtyp varchar(255),
+typrubrik varchar(255),
+dokumentnamn varchar(255),
+debattnamn varchar(255),
 tempbeteckning varchar(255),
 organ varchar(255),
 mottagare varchar(255),
@@ -26,7 +29,11 @@ dokument_url_text varchar(255),
 dokument_url_html varchar(255),
 dokumentstatus_url_xml varchar(255),
 utskottsforslag_url_xml varchar(255),
-html text
+html text,
+pretext text,
+rubriker varchar(255),
+images text,
+text text
 );
 
  
@@ -46,6 +53,7 @@ motforslag_partier varchar(255),
 votering_id varchar(255),
 votering_sammanfattning_html text,
 votering_ledamot_url_xml varchar(255),
+votering_url_xml varchar(255),
 vinnare varchar(255)
 );
 
@@ -92,6 +100,11 @@ lydelse2 text,
 utskottet varchar(255),
 kammaren varchar(255),
 behandlas_i varchar(255),
+behandlas_i_punkt varchar(255),
+intressent varchar(255),
+avsnitt varchar(255),
+grundforfattning varchar(255),
+andringsforfattning varchar(255),
 kammarbeslutstyp varchar(255)
 );
  
@@ -99,9 +112,11 @@ kammarbeslutstyp varchar(255)
  
 CREATE TABLE dokuppgift (
 hangar_id integer,
+dok_id varchar(255),
 kod varchar(255),
 namn varchar(255),
-text text
+text text,
+systemdatum timestamp
 );
 
  
@@ -122,11 +137,13 @@ hangar_id integer,
 referenstyp varchar(255),
 uppgift varchar(255),
 ref_dok_id varchar(255),
+ref_dok_subtyp varchar(255),
 ref_dok_typ varchar(255),
 ref_dok_rm varchar(255),
 ref_dok_bet varchar(255),
 ref_dok_titel varchar(255),
-ref_dok_subtitel varchar(255)
+ref_dok_subtitel varchar(255),
+ref_dok_dokumentnamn varchar(255)
 );
 
  
@@ -134,7 +151,9 @@ CREATE TABLE debatt (
 hangar_id integer,
 video_id varchar(255),
 video_url varchar(255),
+startpos varchar(255),
 tumnagel varchar(255),
+tumnagel_stor varchar(255),
 anf_video_id varchar(255),
 anf_hangar_id integer,
 anf_sekunder integer,
