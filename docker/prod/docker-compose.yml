@@ -2,24 +2,21 @@ version: "3"
 
 services:
   web:
-    image: demokratikollen/web:${BRANCH}
+    image: dev_web
+    command: gunicorn -c demokratikollen/www/gunicorn_production_config.py demokratikollen.www.gunicorn_production:app
     ports:
       - 8000:8000
     environment:
-      - DATABASE_URL=postgresql://${DB_USER}:${DB_PASS}@postgres:5432/demokratikollen
-      - DATABASE_RIKSDAGEN_URL=postgresql://${DB_USER}:${DB_PASS}@postgres:5432/riksdagen
+      - DATABASE_URL=postgresql://demo:demo@postgres:5432/demokratikollen
+      - DATABASE_RIKSDAGEN_URL=postgresql://demo:demo@postgres:5432/riksdagen
       - MONGO_DATABASE_URL=mongodb://mongo:27017/local
     depends_on:
       - postgres
       - mongo
 
   postgres:
-    image: sameersbn/postgresql:9.6-2
-    environment:
-      - DB_USER=${DB_USER}
-      - DB_PASS=${DB_PASS}
-      - DB_NAME=riksdagen,demokratikollen
+    image: demokratikollen/postgres:${postgres_md5}
 
   mongo:
-    image: mongo:latest
+    image: demokratikollen/mongodb:${mongodb_md5}
 

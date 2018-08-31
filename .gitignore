@@ -39,8 +39,8 @@ demokratikollen/data/other/*
 
 !demokratikollen/data/dumps
 demokratikollen/data/dumps/*
-!demokratikollen/data/dumps/postgres_dump.sql.gz
-!demokratikollen/data/dumps/mongodb_dump.tar.gz
+!demokratikollen/data/dumps/postgres.tar.gz
+!demokratikollen/data/dumps/mongodb.tar.gz
 
 *.sql
 
