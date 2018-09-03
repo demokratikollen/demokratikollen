@@ -282,9 +282,18 @@ c.execute("""SELECT d.hangar_id,f.utskottet,f.nummer,f.kammaren,f.behandlas_i
 m_missing_crs = 0
 m_props_tot = 0
 for hangar_id,utskottet,nummer,kammaren,behandlas_i in c:
+    if kammaren is None:
+        print("Kammaren is None. Skipping")
+        continue
+
+    if hangar_id not in m_props:
+        print("hangar_id: {} not found in m_props.".format(hangar_id))
+        continue
+
     decision_options = ['Avslag','Bifall','Delvis bifall']
     utskottet = utskottet.strip()
     kammaren = kammaren.strip()
+
 
     if kammaren in decision_options:
         ch_decision = kammaren

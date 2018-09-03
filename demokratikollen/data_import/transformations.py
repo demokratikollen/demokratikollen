@@ -26,7 +26,7 @@ def remove_funky_characters(s):
 
 def replace_empty_string_with_NULL(s):
     if "VALUES" in s:
-        return s.replace("''", "NULL")
+        return re.sub("''\s*([),])", r"NULL\1", s)
     else:
         return s
 
