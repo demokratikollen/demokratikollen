@@ -3,9 +3,8 @@ from demokratikollen.www.app.helpers.db import db
 from demokratikollen.www.app.helpers.cache import cache
 from demokratikollen.core.db_structure import Member, Appointment, \
         CommitteeAppointment, ChamberAppointment, GroupAppointment, Group, Party
-from sqlalchemy import and_
 from sqlalchemy.orm import joinedload
-from datetime import datetime
+import datetime
 from demokratikollen.www.app.models.parties import party_comparator
 
 @cache.memoize(3600*24)
@@ -15,7 +14,12 @@ def parliament(date):
 
     response = {'statistics': {'n_members': 0}, 'data': [], }
     for member in members.all():
-        response['data'].append(dict(member_id=member[0],party=member[1], url_name=member[2], image_url=member[3], name=(member[4] + " " + member[5])))
+        if date < datetime.date(2016, 1, 1):
+            party = 'FP' if member[1] == 'L' else member[1]
+        else:
+            party = member[1]
+
+        response['data'].append(dict(member_id=member[0],party=party, url_name=member[2], image_url=member[3], name=(member[4] + " " + member[5])))
         response['statistics']['n_members'] += 1
 
     # sort the data on party.

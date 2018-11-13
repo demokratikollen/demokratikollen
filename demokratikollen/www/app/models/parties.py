@@ -25,6 +25,7 @@ def party_comparator(p1):
         'nyd': 5,
         'c': 6,
         'fp': 7,
+        'l': 7,
         'kd': 8,
         'm': 9
     }
@@ -33,6 +34,7 @@ def party_comparator(p1):
 db_name = {
         'c':'Centerpartiet',
         'fp':'Folkpartiet',
+        'l':'Liberalerna',
         'kd':'Kristdemokraterna',
         'mp':'Miljöpartiet',
         'm':'Moderaterna',

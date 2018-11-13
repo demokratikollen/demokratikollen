@@ -12,6 +12,7 @@ utils.parties = d3.map([
   { key: "c", color: "#009933" },
   { key: "m", color: "#1b49dd" },
   { key: "fp", color: "#6bb7ec" },
+  { key: "l", color: "#006ab3" },
   { key: "kd", color: "#231977" }
   ],
   function(d) { return d.key; });

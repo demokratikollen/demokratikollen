@@ -12,8 +12,8 @@ var gulp = require('gulp'),
     plumber = require('gulp-plumber'),
     gulpOrder = require('gulp-order');
 
-var work_dir = '/home/vagrant/demokratikollen/www/design/',
-    dist_dir = '/home/vagrant/demokratikollen/www/app/static/';
+var work_dir = '/src/demokratikollen/www/design/',
+    dist_dir = '/src/demokratikollen/www/app/static/';
 
 /* ========================================================================
  * Dependencies
