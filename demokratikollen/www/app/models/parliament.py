@@ -7,6 +7,14 @@ from sqlalchemy.orm import joinedload
 import datetime
 from demokratikollen.www.app.models.parties import party_comparator
 
+
+@cache.memoize(3600*24)
+def latest_chamber_appointment():
+    date = db.session.query(ChamberAppointment.end_date). \
+        filter(ChamberAppointment.role == 'Riksdagsledamot'). \
+        order_by(ChamberAppointment.end_date.desc()).first()[0]
+    return date
+
 @cache.memoize(3600*24)
 def parliament(date):
 

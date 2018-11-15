@@ -11,6 +11,7 @@ from demokratikollen.www.app.helpers.cache import cache, http_expires
 from demokratikollen.www.app.helpers.db import db
 from demokratikollen.core.db_structure import Member, ChamberAppointment, Party
 from demokratikollen.www.app.models.proposals import proposals_main
+from demokratikollen.www.app.models.parliament import latest_chamber_appointment
 from demokratikollen.www.app.models.sitemap import sitemap_pages
 from flask import Blueprint, request, jsonify, Markup
 from sqlalchemy.orm.exc import NoResultFound
@@ -21,7 +22,7 @@ from demokratikollen.core.utils.mongodb import MongoDBDatastore
 blueprint = Blueprint('pages', __name__)
 
 def render_parliament():
-    return render_template("/parliament/index.html")
+    return render_template("/parliament/index.html", latest_chamber_apointment_date=latest_chamber_appointment())
 
 # Set the route and accepted methods
 @blueprint.route('/', methods=['GET'])

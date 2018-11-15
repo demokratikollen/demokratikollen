@@ -40,6 +40,6 @@
 {% block scripts %}
     {{ super() }}
     <script>
-      parliamentChairs.Setup();
+      parliamentChairs.Setup("{{ latest_chamber_apointment_date }}");
     </script>
 {%- endblock %}

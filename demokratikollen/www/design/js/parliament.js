@@ -10,14 +10,10 @@ demokratikollen.graphics.dateMemberCollectionFigure = {
         d3.select("div.member-node-tooltip").style("display", 'none');
     });
 
-    // Setup the slider.
-    var date = new Date();
-    var s_today = date.getTime();
-
     var date_slider = $(dateSliderDiv).slider({
-      value: s_today,
+      value: callbackObject.maxDate,
       min: callbackObject.minDate,
-      max: s_today,
+      max: callbackObject.maxDate,
       step: callbackObject.dateTick,
       change: function(event, ui) {
         var self = callbackObject;
@@ -159,7 +155,8 @@ demokratikollen.graphics.dateMemberCollectionFigure = {
 }
 
 parliamentChairs = {
-  Setup: function() {
+  Setup: function(maxDate) {
+    this.maxDate = new Date(maxDate);
     this.canvas = demokratikollen.graphics.dateMemberCollectionFigure.Setup("div#parliament-figure figure.canvas", "div#parliament-date-slider div.date_slider", 940, 470, this);
     this.UpdateFromDateSlider(this);
   },
