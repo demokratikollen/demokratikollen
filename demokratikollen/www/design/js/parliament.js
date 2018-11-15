@@ -64,6 +64,12 @@ demokratikollen.graphics.dateMemberCollectionFigure = {
       return d.member_id
     });
 
+    //Update the color of existing nodes.
+    anchors.select("circle").transition().duration(1000)
+      .style("fill", function(d) {
+        return demokratikollen.utils.getPartyColor(d.party).toString()
+      });
+
     //remove elements
     anchors.exit().remove();
 
@@ -141,7 +147,7 @@ demokratikollen.graphics.dateMemberCollectionFigure = {
       //move the circles to correct positions and crossfade.
       anchors.attr("transform", function(d) {
         return "translate(" + d.x + "," + d.y + ")";
-      })
+      });
       new_anchors.style("opacity",0);
       var anchors_transition = !self.slowBrowser ? anchors.transition().duration(1000) : anchors;
       anchors_transition.style("opacity",1);
