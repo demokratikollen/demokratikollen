@@ -27,6 +27,7 @@ install: pip install -r demokratikollen/requirements/dev.txt
 before_script:
   - pushd docker/compose/test
   - docker-compose up -d
+  - docker ps -a
   - popd
 
 jobs:
