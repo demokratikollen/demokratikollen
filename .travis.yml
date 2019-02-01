@@ -12,19 +12,20 @@ cache: pip
 
 env:
   global:
-    - DATABASE_URL="postgresql://postgres:@localhost/"
-    - MONGO_DATABASE_URL="localhost"
+    - DATABASE_URL=postgresql://demo:demo@localhost:5432/demokratikollen
+    - DATABASE_RIKSDAGEN_URL=postgresql://demo:demo@localhost:5432/riksdagen
+    - MONGO_DATABASE_URL=mongodb://mongo:27017/local
 
 before_install:
   - openssl aes-256-cbc -K $encrypted_dac1b8060600_key -iv $encrypted_dac1b8060600_iv -in ci/deploy_key.enc -out ci/deploy_key -d
 
 before_script:
-  - cd docker/compose/
+  - cd docker/compose/test
+  - docker-compose build
 
 jobs:
   include:
-    - script: docker-compose build
-    - script: docker-compose run --rm py.test demokratikollen
+    - script: py.test demokratikollen
 # Skip for now as it's not really working
 #    - script: behave demokratikollen/www/features
     - stage: docker
