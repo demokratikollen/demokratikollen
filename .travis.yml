@@ -18,7 +18,7 @@ env:
 
 before_install:
   - openssl aes-256-cbc -K $encrypted_dac1b8060600_key -iv $encrypted_dac1b8060600_iv -in ci/deploy_key.enc -out ci/deploy_key -d
-  - "sudo service postgres stop || :"
+  - "sudo service postgresql stop || :"
   - "sudo service mongod stop || :"
 
 install: pip install -r demokratikollen/requirements/dev.txt
