@@ -6,8 +6,6 @@ python:
 sudo: required
 
 services:
-  - postgresql
-  - mongodb
   - docker
 
 cache: pip
@@ -20,17 +18,15 @@ env:
 before_install:
   - openssl aes-256-cbc -K $encrypted_dac1b8060600_key -iv $encrypted_dac1b8060600_iv -in ci/deploy_key.enc -out ci/deploy_key -d
 
-install: pip install -r demokratikollen/requirements/dev.txt
-
 before_script:
-  - gunzip -c demokratikollen/data/dumps/postgresql.sql.gz | psql -U postgres
-  - tar -xf demokratikollen/data/dumps/db.tar.gz
-  - mongorestore db
+  - cd docker/compose/
 
 jobs:
   include:
-    - script: nosetests demokratikollen/www/specs
-    - script: behave demokratikollen/www/features
+    - script: docker-compose build
+    - script: docker-compose run --rm py.test demokratikollen
+# Skip for now as it's not really working
+#    - script: behave demokratikollen/www/features
     - stage: docker
       install: skip
       before_script: skip
