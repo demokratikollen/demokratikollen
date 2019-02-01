@@ -6,11 +6,12 @@ services:
       context: ../../..
       dockerfile: docker/postgres/Dockerfile
     ports:
-      - localhost:5432:5432
+      - 127.0.0.1:5432:5432
 
   mongo:
     build:
       context: ../../..
       dockerfile: docker/mongodb/Dockerfile
     ports:
-      - localhost:27017:27017
+      - 127.0.0.1:27017:27017
+
