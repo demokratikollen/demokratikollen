@@ -15,12 +15,12 @@ RUN apt-get install -y \
 RUN pip install --no-cache-dir -U pip setuptools
 
 # Copy the source.
-COPY . /src
-WORKDIR /src
+COPY demokratikollen/requirements /tmp/
 
 # Install python deps
-RUN pip install --no-cache-dir -r demokratikollen/requirements.txt
+RUN pip install --no-cache-dir -r /tmp/dev.txt
 
+WORKDIR /src
 # Install nodejs tools.
 RUN npm install -g gulp bower
 
