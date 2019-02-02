@@ -29,6 +29,7 @@ before_script:
   - docker-compose up -d
   - docker ps -a
   - popd
+  - sleep 30
 
 jobs:
   include:
