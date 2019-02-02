@@ -1,6 +1,6 @@
 #!/usr/bin/env bash
 
-source environment.sh
+source ci/environment.sh
 
 docker build -t demokratikollen/postgres:${POSTGRES_DATA_HASH} -f docker/postgres/Dockerfile .
 docker build -t demokratikollen/mongodb:${MONGO_DATA_HASH} -f docker/mongodb/Dockerfile .
