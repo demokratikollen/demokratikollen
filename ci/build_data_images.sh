@@ -2,8 +2,8 @@
 
 source environment.sh
 
-docker build -t demokratikollen/postgres:${POSTGRES_DATA_HASH} -f docker/postgres .
-docker build -t demokratikollen/mongodb:${MONGO_DATA_HASH} -f docker/mongodb .
+docker build -t demokratikollen/postgres:${POSTGRES_DATA_HASH} -f docker/postgres/Dockerfile .
+docker build -t demokratikollen/mongodb:${MONGO_DATA_HASH} -f docker/mongodb/Dockerfile .
 
 docker login -u="$DOCKER_USERNAME" -p="$DOCKER_PASSWORD"
 
