@@ -9,6 +9,7 @@ ENVIRONMENT=${1:-staging}
 
 source ci/environment.sh
 
+chmod 600 ci/deploy_key
 ssh_command="ssh -o StrictHostKeyChecking=no -o BatchMode=yes -i ci/deploy_key -l demokratikollen $SERVER_TO_DEPLOY_TO"
 
 ${ssh_command} mkdir -p ${ENVIRONMENT}
