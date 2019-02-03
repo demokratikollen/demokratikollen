@@ -2,7 +2,7 @@ version: "3"
 
 services:
   web:
-    image: dev_web
+    image: demokratikollen/web:${git_sha}
     command: gunicorn -c demokratikollen/www/gunicorn_production_config.py demokratikollen.www.gunicorn_production:app
     ports:
       - 8000:8000
