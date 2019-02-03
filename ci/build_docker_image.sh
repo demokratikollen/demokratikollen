@@ -1,4 +1,6 @@
-#!/usr/bin/env bash -e
+#!/usr/bin/env bash
+
+set -e
 
 docker login -u="$DOCKER_USERNAME" -p="$DOCKER_PASSWORD"
 docker build -t demokratikollen/web:${TRAVIS_COMMIT} -f docker/web-prod/Dockerfile .

@@ -1,4 +1,6 @@
-#!/usr/bin/env bash -e
+#!/usr/bin/env bash
+
+set -e
 
 declare SERVER_TO_DEPLOY_TO
 declare TRAVIS_COMMIT
